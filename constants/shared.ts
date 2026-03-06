@@ -22,8 +22,8 @@ export const COMMON_LABELS = {
 } as const;
 
 export const STORAGE_KEYS = {
-  TOKEN: 'pastor_tracking_token',
-  USER: 'pastor_tracking_user',
+  AUTH_TOKEN: 'pastor_tracking_token',
+  AUTH_USER: 'pastor_tracking_user',
 } as const;
 
 export const MONTHS_ES = [
