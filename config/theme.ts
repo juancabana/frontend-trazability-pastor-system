@@ -57,6 +57,23 @@ export const layout = {
   section: 'space-y-4',
 } as const;
 
+// ── Overlay / Modal ──────────────────────────────────────────────────
+export const overlay = {
+  backdrop:
+    'fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4',
+  panel:
+    'w-full bg-white rounded-2xl shadow-xl overflow-hidden',
+} as const;
+
+// ── IconBox ─────────────────────────────────────────────────────────
+export const iconBox = {
+  sm: 'w-8 h-8 rounded-lg flex items-center justify-center',
+  md: 'w-10 h-10 rounded-xl flex items-center justify-center',
+  lg: 'w-12 h-12 rounded-xl flex items-center justify-center',
+  xl: 'w-16 h-16 rounded-2xl flex items-center justify-center',
+  primary: 'bg-teal-100',
+} as const;
+
 // ── Typography ───────────────────────────────────────────────────────
 export const text = {
   pageTitle: 'text-2xl font-bold text-gray-900',
