@@ -1,0 +1,253 @@
+import React, { useState, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router';
+import { useAuth } from '@/context/AuthContext';
+import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
+import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
+import { formatMonthYear } from '@/lib/format-date';
+import { DAYS_ES } from '@/constants/shared';
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Activity,
+  Clock,
+  FileText,
+} from 'lucide-react';
+import { motion } from 'motion/react';
+
+export default function AdminPastorReportsPage() {
+  const { pastorId } = useParams<{ pastorId: string }>();
+  const navigate = useNavigate();
+  const { token, currentUser } = useAuth();
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = new Date(year, month, 1).getDay();
+
+  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId);
+  const { data: reports = [] } = useReportsByPastorMonth(
+    token ?? '',
+    pastorId ?? '',
+    month + 1,
+    year,
+  );
+
+  const pastor = users.find((u) => u.id === pastorId);
+  const today = new Date();
+
+  const calendarDays: (number | null)[] = useMemo(() => {
+    const days: (number | null)[] = [];
+    for (let i = 0; i < firstDay; i++) days.push(null);
+    for (let d = 1; d <= daysInMonth; d++) days.push(d);
+    return days;
+  }, [firstDay, daysInMonth]);
+
+  const totalActivities = reports.reduce(
+    (s, r) => s + (r.activities?.length || 0),
+    0,
+  );
+  const totalHours = reports.reduce(
+    (s, r) =>
+      s + (r.activities || []).reduce((h, a) => h + (a.hours || 0), 0),
+    0,
+  );
+  const cumplimiento = Math.round((reports.length / daysInMonth) * 100);
+
+  const formatDateStr = (day: number) =>
+    `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+  const getInitials = (name: string) =>
+    name
+      .split(' ')
+      .filter((w) => w.length > 2)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase();
+
+  const stats = [
+    { icon: Calendar, label: 'Dias', value: reports.length, sub: `de ${daysInMonth}`, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { icon: Activity, label: 'Actividades', value: totalActivities, sub: 'registradas', color: 'text-violet-600', bg: 'bg-violet-50' },
+    { icon: Clock, label: 'Horas', value: `${totalHours.toFixed(0)}h`, sub: 'dedicadas', color: 'text-orange-600', bg: 'bg-orange-50' },
+  ];
+
+  return (
+    <div className="max-w-[1000px] mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-5">
+        <button
+          onClick={() => navigate('/admin/pastores')}
+          className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 text-gray-400" />
+        </button>
+        {pastor && (
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center text-xs font-semibold text-indigo-600 shrink-0">
+              {getInitials(pastor.name)}
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {pastor.name}
+              </h2>
+              <p className="text-xs text-gray-400">{pastor.email}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Month nav */}
+      <div className="flex items-center gap-3 mb-5">
+        <button
+          onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          className="p-2 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4 text-gray-500" />
+        </button>
+        <span className="text-sm font-medium text-gray-900 px-4 py-2 border border-gray-200 rounded-xl bg-white">
+          {formatMonthYear(currentMonth)}
+        </span>
+        <button
+          onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
+          className="p-2 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors"
+        >
+          <ChevronRight className="w-4 h-4 text-gray-500" />
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.04 }}
+            className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-all"
+          >
+            <div className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center mb-2`}>
+              <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+            </div>
+            <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
+            <p className="text-[10px] text-gray-400">{s.sub}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Calendar */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-5">
+        <div className="grid grid-cols-7">
+          {DAYS_ES.map((d) => (
+            <div
+              key={d}
+              className="text-center py-2.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider"
+            >
+              {d}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-px bg-gray-100 border-t border-gray-100">
+          {calendarDays.map((day, i) => {
+            if (day === null) {
+              return (
+                <div key={`empty-${i}`} className="min-h-[56px] sm:min-h-[80px] bg-gray-50" />
+              );
+            }
+
+            const dateStr = formatDateStr(day);
+            const report = reports.find((r) => r.date === dateStr);
+            const date = new Date(year, month, day);
+            const isFuture = date > today;
+            const isToday =
+              date.getDate() === today.getDate() &&
+              date.getMonth() === today.getMonth() &&
+              date.getFullYear() === today.getFullYear();
+            const actCount = report?.activities?.length || 0;
+
+            return (
+              <div
+                key={day}
+                onClick={() =>
+                  report &&
+                  navigate(`/admin/pastor/${pastorId}/report/${dateStr}`)
+                }
+                className={`min-h-[56px] sm:min-h-[80px] bg-white p-1.5 sm:p-2 transition-all relative
+                  ${isToday ? 'bg-indigo-50/60' : ''}
+                  ${isFuture ? 'opacity-30' : ''}
+                  ${report ? 'cursor-pointer hover:bg-gray-50' : 'cursor-default'}
+                `}
+              >
+                <span
+                  className={`text-xs sm:text-sm font-medium inline-flex items-center justify-center ${
+                    isToday
+                      ? 'w-6 h-6 sm:w-7 sm:h-7 bg-indigo-600 text-white rounded-full text-[11px] sm:text-xs'
+                      : report
+                        ? 'text-gray-900'
+                        : 'text-gray-400'
+                  }`}
+                >
+                  {day}
+                </span>
+                {report && (
+                  <>
+                    <div className="hidden sm:block mt-1">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 font-medium bg-indigo-50 text-indigo-700">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                        {actCount} act.
+                      </span>
+                    </div>
+                    <div className="sm:hidden flex justify-center mt-1">
+                      <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Reports list */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100">
+          <h3 className="text-sm font-semibold text-gray-900">
+            Informes del mes ({reports.length})
+          </h3>
+        </div>
+        <div className="divide-y divide-gray-50">
+          {reports.map((r) => (
+            <button
+              key={r.id}
+              onClick={() =>
+                navigate(`/admin/pastor/${pastorId}/report/${r.date}`)
+              }
+              className="w-full px-5 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left group"
+            >
+              <div className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
+                <FileText className="w-4 h-4 text-gray-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900">{r.date}</p>
+                <p className="text-[11px] text-gray-400">
+                  {r.activities?.length || 0} actividades
+                  {r.observations ? ' · con observaciones' : ''}
+                </p>
+              </div>
+            </button>
+          ))}
+          {reports.length === 0 && (
+            <div className="px-5 py-8 text-center text-sm text-gray-400">
+              Sin informes para este mes
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
