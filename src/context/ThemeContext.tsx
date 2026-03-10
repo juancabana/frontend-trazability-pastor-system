@@ -19,7 +19,7 @@ const ThemeContext = createContext<ThemeContextType>({
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     try {
-      return (localStorage.getItem('pastoral-theme') as Theme) || 'system';
+      return (localStorage.getItem('pastoral-theme') as Theme) || 'light';
     } catch {
       return 'system';
     }
