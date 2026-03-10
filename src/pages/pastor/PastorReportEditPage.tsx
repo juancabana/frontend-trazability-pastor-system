@@ -24,7 +24,7 @@ export default function PastorReportEditPage() {
   const { date } = useParams<{ date: string }>();
   const navigate = useNavigate();
   const { token, currentUser } = useAuth();
-  const deadlineDay = 19;
+  const deadlineDay = currentUser?.reportDeadlineDay ?? 19;
 
   const reportDate = date ? new Date(date + 'T12:00:00') : new Date();
   const editable = isDateEditable(reportDate, deadlineDay);
@@ -45,21 +45,24 @@ export default function PastorReportEditPage() {
   const [observations, setObservations] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
-  const [initialized, setInitialized] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const initialSnapshot = useRef<string>('');
+  const lastSyncedAt = useRef<string>('');
 
   useEffect(() => {
-    if (existingReport && !initialized) {
-      setActivities(existingReport.activities || []);
-      setObservations(existingReport.observations || '');
-      initialSnapshot.current = JSON.stringify({
-        activities: existingReport.activities || [],
-        observations: existingReport.observations || '',
-      });
-      setInitialized(true);
+    if (existingReport) {
+      const updatedAt = existingReport.updatedAt ?? existingReport.createdAt ?? '';
+      if (updatedAt !== lastSyncedAt.current) {
+        setActivities(existingReport.activities || []);
+        setObservations(existingReport.observations || '');
+        initialSnapshot.current = JSON.stringify({
+          activities: existingReport.activities || [],
+          observations: existingReport.observations || '',
+        });
+        lastSyncedAt.current = updatedAt;
+      }
     }
-  }, [existingReport, initialized]);
+  }, [existingReport]);
 
   const hasChanges = useMemo(() => {
     const current = JSON.stringify({ activities, observations });

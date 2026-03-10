@@ -11,7 +11,7 @@ export default function PastorReportDetailPage() {
   const { date } = useParams<{ date: string }>();
   const navigate = useNavigate();
   const { token, currentUser } = useAuth();
-  const deadlineDay = 19;
+  const deadlineDay = currentUser?.reportDeadlineDay ?? 19;
 
   const reportDate = date ? new Date(date + 'T12:00:00') : new Date();
   const editable = isDateEditable(reportDate, deadlineDay);

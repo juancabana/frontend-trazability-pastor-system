@@ -13,6 +13,7 @@ interface AuthUser {
   unionId: string | null;
   associationName: string | null;
   unionName: string | null;
+  reportDeadlineDay: number;
 }
 
 interface AuthContextType {
@@ -90,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           unionId: res.unionId,
           associationName: res.associationName ?? null,
           unionName: res.unionName ?? null,
+          reportDeadlineDay: res.reportDeadlineDay ?? 19,
         });
         return res.role;
       } catch {

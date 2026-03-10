@@ -25,7 +25,7 @@ export default function PastorCalendarPage() {
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  const deadlineDay = 19;
+  const deadlineDay = currentUser?.reportDeadlineDay ?? 19;
 
   const { data: monthReports = [] } = useReportsByPastorMonth(
     token ?? '',

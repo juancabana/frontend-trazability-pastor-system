@@ -10,4 +10,5 @@ export interface AuthToken {
   unionId: string | null;
   associationName?: string;
   unionName?: string;
+  reportDeadlineDay?: number;
 }
