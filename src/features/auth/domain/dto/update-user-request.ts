@@ -5,4 +5,6 @@ export interface UpdateUserRequest {
   password?: string;
   role?: UserRole;
   districtId?: string;
+  position?: string;
+  phone?: string;
 }

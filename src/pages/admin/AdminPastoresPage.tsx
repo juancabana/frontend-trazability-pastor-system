@@ -117,9 +117,20 @@ export default function AdminPastoresPage() {
                   {getInitials(pastor.name)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {pastor.name}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {pastor.name}
+                    </p>
+                    {pastor.position && (
+                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md ${
+                        pastor.position === 'Pastor'
+                          ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
+                          : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                      }`}>
+                        {pastor.position}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[11px] text-gray-400 dark:text-slate-500">
                     {pastor.email}
                   </p>

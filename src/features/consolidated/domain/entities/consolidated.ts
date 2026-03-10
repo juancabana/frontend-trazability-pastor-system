@@ -34,6 +34,7 @@ export interface PastorSummary {
   pastorId: string;
   pastorName: string;
   districtName?: string;
+  position?: string | null;
   totalReports: number;
   totalActivities: number;
   totalHours: number;

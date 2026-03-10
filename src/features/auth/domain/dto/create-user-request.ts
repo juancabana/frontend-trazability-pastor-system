@@ -7,4 +7,6 @@ export interface CreateUserRequest {
   role: UserRole;
   associationId: string;
   districtId?: string;
+  position?: string;
+  phone?: string;
 }

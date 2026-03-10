@@ -275,7 +275,18 @@ export default function AdminConsolidatedPage() {
                   {getInitials(ps.pastorName)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{ps.pastorName}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{ps.pastorName}</p>
+                    {ps.position && (
+                      <span className={`text-[9px] font-medium px-1 py-0.5 rounded shrink-0 ${
+                        ps.position === 'Pastor'
+                          ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
+                          : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                      }`}>
+                        {ps.position}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[11px] text-gray-400 dark:text-slate-500">{ps.districtName || 'Sin distrito'}</p>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
