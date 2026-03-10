@@ -18,8 +18,8 @@ import { toast } from 'sonner';
 
 export default function AdminUsuariosPage() {
   const { token, currentUser } = useAuth();
-  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId);
-  const { data: districts = [] } = useDistricts(currentUser?.associationId);
+  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
+  const { data: districts = [] } = useDistricts(currentUser?.associationId ?? undefined);
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
@@ -84,7 +84,7 @@ export default function AdminUsuariosPage() {
             email: formEmail,
             password: formPassword,
             role: formRole,
-            associationId: currentUser.associationId,
+            associationId: currentUser.associationId ?? '',
             districtId: formDistrictId || undefined,
           },
         });
@@ -123,10 +123,10 @@ export default function AdminUsuariosPage() {
     <div className="max-w-[900px] mx-auto">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <UserCog className="w-5 h-5 text-indigo-600" /> Usuarios
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <UserCog className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> Usuarios
           </h2>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
             Gestionar pastores y administradores
           </p>
         </div>
@@ -143,8 +143,8 @@ export default function AdminUsuariosPage() {
         />
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div className="divide-y divide-gray-50">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+        <div className="divide-y divide-gray-50 dark:divide-slate-800">
           {filteredUsers.map((user) => {
             const rc = ROLE_CONFIG[user.role];
             return (
@@ -155,15 +155,15 @@ export default function AdminUsuariosPage() {
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-semibold shrink-0 ${
                     user.role === 'admin'
-                      ? 'bg-indigo-50 text-indigo-600'
-                      : 'bg-teal-50 text-teal-600'
+                      ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
+                      : 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
                   }`}
                 >
                   {getInitials(user.name)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                       {user.name}
                     </p>
                     <Badge
@@ -172,18 +172,18 @@ export default function AdminUsuariosPage() {
                       {rc.label}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-gray-400">{user.email}</p>
+                  <p className="text-[11px] text-gray-400 dark:text-slate-500">{user.email}</p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={() => openEdit(user)}
-                    className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                    className="p-2 text-gray-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(user)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                    className="p-2 text-gray-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -192,7 +192,7 @@ export default function AdminUsuariosPage() {
             );
           })}
           {filteredUsers.length === 0 && (
-            <div className="px-5 py-12 text-center text-sm text-gray-400">
+            <div className="px-5 py-12 text-center text-sm text-gray-400 dark:text-slate-500">
               No se encontraron usuarios
             </div>
           )}
@@ -207,48 +207,48 @@ export default function AdminUsuariosPage() {
       >
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-1 block">
+            <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
               Nombre
             </label>
             <input
               type="text"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none dark:text-white"
             />
           </div>
           {!editingUser && (
             <div>
-              <label className="text-xs font-medium text-gray-500 mb-1 block">
+              <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
                 Email
               </label>
               <input
                 type="email"
                 value={formEmail}
                 onChange={(e) => setFormEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none"
+                className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none dark:text-white"
               />
             </div>
           )}
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-1 block">
+            <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
               {editingUser ? 'Nueva contrasena (dejar vacio para no cambiar)' : 'Contrasena'}
             </label>
             <input
               type="password"
               value={formPassword}
               onChange={(e) => setFormPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none dark:text-white"
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-1 block">
+            <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
               Rol
             </label>
             <select
               value={formRole}
               onChange={(e) => setFormRole(e.target.value as UserRole)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none appearance-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none appearance-none dark:text-white"
             >
               <option value="pastor">Pastor</option>
               <option value="admin">Administrador</option>
@@ -256,13 +256,13 @@ export default function AdminUsuariosPage() {
           </div>
           {formRole === 'pastor' && (
             <div>
-              <label className="text-xs font-medium text-gray-500 mb-1 block">
+              <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
                 Distrito
               </label>
               <select
                 value={formDistrictId}
                 onChange={(e) => setFormDistrictId(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none appearance-none"
+                className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none appearance-none dark:text-white"
               >
                 <option value="">Sin distrito</option>
                 {districts.map((d) => (

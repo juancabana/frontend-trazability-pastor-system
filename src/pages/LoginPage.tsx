@@ -10,14 +10,22 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuth } from '@/context/AuthContext';
-import { useAssociations } from '@/features/association/presentation/hooks/use-association-queries';
+
+function getRoleRedirect(role: string): string {
+  switch (role) {
+    case 'super_admin':
+      return '/super-admin';
+    case 'admin':
+      return '/admin';
+    default:
+      return '/pastor';
+  }
+}
 
 export default function LoginPage() {
   const { login, isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
-  const { data: associations = [] } = useAssociations();
 
-  const [associationId, setAssociationId] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -25,38 +33,34 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated && role) {
-      navigate(role === 'admin' ? '/admin' : '/pastor', { replace: true });
+      navigate(getRoleRedirect(role), { replace: true });
     }
   }, [isAuthenticated, role, navigate]);
-
-  useEffect(() => {
-    if (associations.length > 0 && !associationId) {
-      setAssociationId(associations[0].id);
-    }
-  }, [associations, associationId]);
-
-  const selectedAssoc = associations.find((a) => a.id === associationId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
-    const result = await login(email, password, associationId);
+    const result = await login(email, password);
     if (result) {
-      navigate(result === 'admin' ? '/admin' : '/pastor');
+      navigate(getRoleRedirect(result));
     } else {
-      setError('Credenciales invalidas. Use las credenciales demo o el acceso rapido.');
+      setError('Credenciales invalidas. Verifique su correo y contrasena.');
     }
     setSubmitting(false);
   };
 
-  const handleQuickAccess = async (demoRole: 'pastor' | 'admin') => {
+  const handleQuickAccess = async (demoRole: 'pastor' | 'admin' | 'super_admin') => {
     setError('');
     setSubmitting(true);
-    const demoEmail = demoRole === 'admin' ? 'admin@demo.com' : 'pastor@demo.com';
-    const result = await login(demoEmail, 'demo1234', associationId);
+    const emailMap = {
+      pastor: 'pastor@demo.com',
+      admin: 'admin@demo.com',
+      super_admin: 'superadmin.norte@demo.com',
+    };
+    const result = await login(emailMap[demoRole], 'demo1234');
     if (result) {
-      navigate(result === 'admin' ? '/admin' : '/pastor');
+      navigate(getRoleRedirect(result));
     } else {
       setError('Error en acceso rapido. Verifique que el backend esta corriendo.');
     }
@@ -64,7 +68,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950">
       {/* Left panel - desktop only */}
       <div className="hidden lg:flex lg:w-[48%] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex-col justify-between p-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl" />
@@ -121,20 +125,20 @@ export default function LoginPage() {
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-teal-400" />
               <span className="text-sm font-medium">
-                Plataforma Multi-Asociacion
+                Plataforma Multi-Union
               </span>
             </div>
             <p className="text-xs text-white/40 leading-relaxed">
-              Cada asociacion tiene su propio espacio con datos independientes,
-              pastores y administradores.
+              Cada union, asociacion y distrito tiene su propio espacio con datos
+              independientes, pastores y administradores.
             </p>
           </div>
 
           <div className="flex gap-10">
             {[
-              { value: associations.length || 3, label: 'Asociaciones' },
               { value: 7, label: 'Rubros' },
               { value: 42, label: 'Subcategorias' },
+              { value: 3, label: 'Roles' },
             ].map((stat, i) => (
               <div key={i}>
                 <div className="text-2xl font-semibold">{stat.value}</div>
@@ -179,40 +183,17 @@ export default function LoginPage() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="w-full max-w-[420px]"
         >
-          <h2 className="text-2xl font-semibold text-gray-900 mb-1">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1">
             Iniciar Sesion
           </h2>
-          <p className="text-sm text-gray-400 mb-7">
+          <p className="text-sm text-gray-400 dark:text-slate-500 mb-7">
             Ingrese sus credenciales para acceder al sistema
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Association */}
-            <div>
-              <label className="text-xs font-medium text-gray-500 mb-1.5 flex items-center gap-1.5">
-                <BookOpen className="w-3.5 h-3.5" /> Asociacion
-              </label>
-              <select
-                value={associationId}
-                onChange={(e) => setAssociationId(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-100 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none appearance-none cursor-pointer text-gray-900 transition-colors"
-              >
-                {associations.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
-              {selectedAssoc && (
-                <p className="text-[11px] text-gray-400 mt-1.5 ml-1">
-                  {selectedAssoc.union} — {selectedAssoc.country}
-                </p>
-              )}
-            </div>
-
             {/* Email */}
             <div>
-              <label className="text-xs font-medium text-gray-500 mb-1.5 flex items-center gap-1.5">
+              <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5" /> Correo electronico
               </label>
               <input
@@ -220,14 +201,14 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="correo@ejemplo.com"
-                className="w-full px-4 py-3 bg-gray-100 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 placeholder:text-gray-400 transition-colors"
+                className="w-full px-4 py-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
                 disabled={submitting}
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="text-xs font-medium text-gray-500 mb-1.5 flex items-center gap-1.5">
+              <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" /> Contrasena
               </label>
               <input
@@ -235,7 +216,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-gray-100 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 placeholder:text-gray-400 transition-colors"
+                className="w-full px-4 py-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
                 disabled={submitting}
               />
             </div>
@@ -244,7 +225,7 @@ export default function LoginPage() {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-red-500 text-sm bg-red-50 px-4 py-2.5 rounded-xl"
+                className="text-red-500 dark:text-red-400 text-sm bg-red-50 dark:bg-red-900/30 px-4 py-2.5 rounded-xl"
               >
                 {error}
               </motion.p>
@@ -271,9 +252,9 @@ export default function LoginPage() {
           <div className="mt-8">
             <div className="relative flex items-center justify-center mb-5">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-gray-200 dark:border-slate-700" />
               </div>
-              <span className="relative bg-gray-50 px-3 text-xs text-gray-400">
+              <span className="relative bg-gray-50 dark:bg-slate-950 px-3 text-xs text-gray-400 dark:text-slate-500">
                 Acceso rapido demo
               </span>
             </div>
@@ -281,7 +262,7 @@ export default function LoginPage() {
               <button
                 onClick={() => handleQuickAccess('pastor')}
                 disabled={submitting}
-                className="flex-1 py-3.5 border border-gray-200 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white transition-all bg-white/50 disabled:opacity-50 active:scale-[0.98]"
+                className="flex-1 py-3.5 border border-gray-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white/50 dark:bg-slate-900/50 disabled:opacity-50 active:scale-[0.98]"
               >
                 {submitting ? (
                   <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
@@ -290,7 +271,7 @@ export default function LoginPage() {
                     <span className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-xl flex items-center justify-center text-xs font-semibold shadow-sm">
                       CM
                     </span>
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
                       Pastor
                     </span>
                   </>
@@ -299,7 +280,7 @@ export default function LoginPage() {
               <button
                 onClick={() => handleQuickAccess('admin')}
                 disabled={submitting}
-                className="flex-1 py-3.5 border border-gray-200 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white transition-all bg-white/50 disabled:opacity-50 active:scale-[0.98]"
+                className="flex-1 py-3.5 border border-gray-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white/50 dark:bg-slate-900/50 disabled:opacity-50 active:scale-[0.98]"
               >
                 {submitting ? (
                   <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
@@ -308,15 +289,33 @@ export default function LoginPage() {
                     <span className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-xl flex items-center justify-center text-xs font-semibold shadow-sm">
                       AD
                     </span>
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
                       Admin
                     </span>
                   </>
                 )}
               </button>
+              <button
+                onClick={() => handleQuickAccess('super_admin')}
+                disabled={submitting}
+                className="flex-1 py-3.5 border border-gray-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white/50 dark:bg-slate-900/50 disabled:opacity-50 active:scale-[0.98]"
+              >
+                {submitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                ) : (
+                  <>
+                    <span className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl flex items-center justify-center text-xs font-semibold shadow-sm">
+                      SA
+                    </span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                      Super
+                    </span>
+                  </>
+                )}
+              </button>
             </div>
-            <p className="text-[11px] text-gray-400 text-center mt-4 leading-relaxed">
-              pastor@demo.com / admin@demo.com — clave: demo1234
+            <p className="text-[11px] text-gray-400 dark:text-slate-500 text-center mt-4 leading-relaxed">
+              pastor@demo.com / admin@demo.com / superadmin.norte@demo.com — clave: demo1234
             </p>
           </div>
         </motion.div>

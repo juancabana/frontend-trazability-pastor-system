@@ -40,7 +40,7 @@ export default function PastorReportDetailPage() {
   if (isLoading) {
     return (
       <div className="max-w-[700px] mx-auto flex items-center justify-center min-h-[50vh]">
-        <p className="text-gray-400 text-sm">Cargando...</p>
+        <p className="text-gray-400 dark:text-slate-500 text-sm">Cargando...</p>
       </div>
     );
   }
@@ -51,15 +51,15 @@ export default function PastorReportDetailPage() {
       <div className="flex items-center gap-3 mb-5">
         <button
           onClick={() => navigate('/pastor')}
-          className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-400" />
+          <ArrowLeft className="w-5 h-5 text-gray-400 dark:text-slate-500" />
         </button>
         <div className="flex-1">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Detalle del Informe
           </h2>
-          <p className="text-xs text-gray-400">{formatDate(reportDate)}</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">{formatDate(reportDate)}</p>
         </div>
         {editable && report && (
           <button
@@ -75,13 +75,13 @@ export default function PastorReportDetailPage() {
       {!report ? (
         <div className="min-h-[40vh] flex items-center justify-center">
           <div className="text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-8 h-8 text-gray-300" />
+            <div className="w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-gray-300 dark:text-slate-600" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
               Sin informe
             </h3>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-gray-400 dark:text-slate-500 mb-4">
               No hay informe registrado para esta fecha.
             </p>
             {editable && (
@@ -104,21 +104,21 @@ export default function PastorReportDetailPage() {
                 key={catId}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-4 bg-white rounded-2xl border border-gray-100 overflow-hidden"
+                className="mb-4 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden"
               >
-                <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-gray-100">
+                <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-gray-100 dark:border-slate-800">
                   <div
                     className="w-1.5 h-6 rounded-full"
                     style={{ backgroundColor: cat.color }}
                   />
-                  <h3 className="text-sm font-semibold text-gray-900">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                     {cat.name}
                   </h3>
-                  <span className="text-[11px] font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-lg">
+                  <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg">
                     {acts.length}
                   </span>
                 </div>
-                <div className="divide-y divide-gray-50">
+                <div className="divide-y divide-gray-50 dark:divide-slate-800">
                   {acts.map((act) => {
                     const sub = cat.subcategories.find(
                       (s) => s.id === act.subcategoryId,
@@ -127,27 +127,27 @@ export default function PastorReportDetailPage() {
                     const isTransport = act.categoryId === 'transporte';
                     return (
                       <div key={act.subcategoryId} className="px-5 py-4">
-                        <p className="text-sm font-medium text-gray-900 mb-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
                           {sub.name}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {act.description && (
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-500 dark:text-slate-400">
                               {act.description}
                             </span>
                           )}
-                          <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded-lg">
+                          <span className="text-xs font-medium bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-2 py-1 rounded-lg">
                             {act.quantity} {sub.unit}
                           </span>
                           {act.hours != null && act.hours > 0 && (
-                            <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded-lg">
+                            <span className="text-xs font-medium bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-2 py-1 rounded-lg">
                               {act.hours}h
                             </span>
                           )}
                           {isTransport &&
                             act.amount != null &&
                             act.amount > 0 && (
-                              <span className="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg">
+                              <span className="text-xs font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-lg">
                                 ${act.amount.toLocaleString('es-CO')}
                               </span>
                             )}
@@ -162,19 +162,19 @@ export default function PastorReportDetailPage() {
 
           {/* Observations */}
           {report.observations && (
-            <div className="bg-white rounded-2xl border border-gray-100 mb-5">
-              <div className="px-5 py-3.5 border-b border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-900">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 mb-5">
+              <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                   Observaciones
                 </h3>
               </div>
               <div className="p-5">
-                <p className="text-sm text-gray-500">{report.observations}</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400">{report.observations}</p>
               </div>
             </div>
           )}
 
-          <p className="text-[11px] text-gray-400 text-center mb-8">
+          <p className="text-[11px] text-gray-400 dark:text-slate-500 text-center mb-8">
             Registrado:{' '}
             {new Date(report.createdAt).toLocaleDateString('es-CO', {
               day: '2-digit',

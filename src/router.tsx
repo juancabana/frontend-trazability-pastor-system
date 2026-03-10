@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AdminLayout } from '@/components/AdminLayout';
 import { PastorLayout } from '@/components/PastorLayout';
+import { SuperAdminLayout } from '@/components/SuperAdminLayout';
 
 import LoginPage from '@/pages/LoginPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
@@ -10,10 +11,16 @@ import AdminConsolidatedPage from '@/pages/admin/AdminConsolidatedPage';
 import AdminUsuariosPage from '@/pages/admin/AdminUsuariosPage';
 import AdminPastorReportsPage from '@/pages/admin/AdminPastorReportsPage';
 import AdminReportDetailPage from '@/pages/admin/AdminReportDetailPage';
+import AdminDistritosPage from '@/pages/admin/AdminDistritosPage';
 import PastorCalendarPage from '@/pages/pastor/PastorCalendarPage';
 import PastorConsolidatedPage from '@/pages/pastor/PastorConsolidatedPage';
 import PastorReportDetailPage from '@/pages/pastor/PastorReportDetailPage';
 import PastorReportEditPage from '@/pages/pastor/PastorReportEditPage';
+import SuperAdminDashboardPage from '@/pages/super-admin/SuperAdminDashboardPage';
+import SuperAdminAssociationsPage from '@/pages/super-admin/SuperAdminAssociationsPage';
+import SuperAdminAssociationDetailPage from '@/pages/super-admin/SuperAdminAssociationDetailPage';
+import SuperAdminConsolidatedPage from '@/pages/super-admin/SuperAdminConsolidatedPage';
+import SuperAdminPastorReportsPage from '@/pages/super-admin/SuperAdminPastorReportsPage';
 
 export function AppRoutes() {
   return (
@@ -31,6 +38,7 @@ export function AppRoutes() {
       >
         <Route index element={<AdminDashboardPage />} />
         <Route path="pastores" element={<AdminPastoresPage />} />
+        <Route path="distritos" element={<AdminDistritosPage />} />
         <Route path="consolidated" element={<AdminConsolidatedPage />} />
         <Route path="usuarios" element={<AdminUsuariosPage />} />
         <Route path="pastor/:pastorId" element={<AdminPastorReportsPage />} />
@@ -52,6 +60,22 @@ export function AppRoutes() {
         <Route path="consolidated" element={<PastorConsolidatedPage />} />
         <Route path="report/:date" element={<PastorReportDetailPage />} />
         <Route path="report/:date/edit" element={<PastorReportEditPage />} />
+      </Route>
+
+      <Route
+        path="/super-admin"
+        element={
+          <ProtectedRoute role="super_admin">
+            <SuperAdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<SuperAdminDashboardPage />} />
+        <Route path="associations" element={<SuperAdminAssociationsPage />} />
+        <Route path="association/:associationId" element={<SuperAdminAssociationDetailPage />} />
+        <Route path="consolidated" element={<SuperAdminConsolidatedPage />} />
+        <Route path="pastor/:pastorId" element={<SuperAdminPastorReportsPage />} />
+        <Route path="pastor/:pastorId/report/:date" element={<AdminReportDetailPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />

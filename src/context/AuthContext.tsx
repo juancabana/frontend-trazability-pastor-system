@@ -9,8 +9,10 @@ interface AuthUser {
   email: string;
   displayName: string;
   role: UserRole;
-  associationId: string;
-  associationName?: string;
+  associationId: string | null;
+  unionId: string | null;
+  associationName: string | null;
+  unionName: string | null;
 }
 
 interface AuthContextType {
@@ -18,7 +20,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   currentUser: AuthUser | null;
   role: UserRole | null;
-  login: (email: string, password: string, associationId: string) => Promise<UserRole | null>;
+  login: (email: string, password: string) => Promise<UserRole | null>;
   logout: () => void;
   hasAccess: (section: string) => boolean;
 }
@@ -58,9 +60,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [currentUser]);
 
   const login = useCallback(
-    async (email: string, password: string, associationId: string): Promise<UserRole | null> => {
+    async (email: string, password: string): Promise<UserRole | null> => {
       try {
-        const res = await loginMutation.mutateAsync({ email, password, associationId });
+        const res = await loginMutation.mutateAsync({ email, password });
         setToken(res.access_token);
         setCurrentUser({
           id: res.userId,
@@ -68,6 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           displayName: res.displayName,
           role: res.role,
           associationId: res.associationId,
+          unionId: res.unionId,
+          associationName: res.associationName ?? null,
+          unionName: res.unionName ?? null,
         });
         return res.role;
       } catch {

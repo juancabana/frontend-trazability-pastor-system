@@ -30,7 +30,7 @@ export default function AdminPastorReportsPage() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = new Date(year, month, 1).getDay();
 
-  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId);
+  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
   const { data: reports = [] } = useReportsByPastorMonth(
     token ?? '',
     pastorId ?? '',
@@ -72,9 +72,9 @@ export default function AdminPastorReportsPage() {
       .toUpperCase();
 
   const stats = [
-    { icon: Calendar, label: 'Dias', value: reports.length, sub: `de ${daysInMonth}`, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { icon: Activity, label: 'Actividades', value: totalActivities, sub: 'registradas', color: 'text-violet-600', bg: 'bg-violet-50' },
-    { icon: Clock, label: 'Horas', value: `${totalHours.toFixed(0)}h`, sub: 'dedicadas', color: 'text-orange-600', bg: 'bg-orange-50' },
+    { icon: Calendar, label: 'Dias', value: reports.length, sub: `de ${daysInMonth}`, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/30' },
+    { icon: Activity, label: 'Actividades', value: totalActivities, sub: 'registradas', color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-50 dark:bg-violet-900/30' },
+    { icon: Clock, label: 'Horas', value: `${totalHours.toFixed(0)}h`, sub: 'dedicadas', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30' },
   ];
 
   return (
@@ -83,20 +83,20 @@ export default function AdminPastorReportsPage() {
       <div className="flex items-center gap-3 mb-5">
         <button
           onClick={() => navigate('/admin/pastores')}
-          className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-400" />
+          <ArrowLeft className="w-5 h-5 text-gray-400 dark:text-slate-500" />
         </button>
         {pastor && (
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center text-xs font-semibold text-indigo-600 shrink-0">
+            <div className="w-11 h-11 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 shrink-0">
               {getInitials(pastor.name)}
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {pastor.name}
               </h2>
-              <p className="text-xs text-gray-400">{pastor.email}</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500">{pastor.email}</p>
             </div>
           </div>
         )}
@@ -106,18 +106,18 @@ export default function AdminPastorReportsPage() {
       <div className="flex items-center gap-3 mb-5">
         <button
           onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
-          className="p-2 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
-          <ChevronLeft className="w-4 h-4 text-gray-500" />
+          <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 px-4 py-2 border border-gray-200 rounded-xl bg-white">
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
           {formatMonthYear(currentMonth)}
         </span>
         <button
           onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
-          <ChevronRight className="w-4 h-4 text-gray-500" />
+          <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
       </div>
 
@@ -129,34 +129,34 @@ export default function AdminPastorReportsPage() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
-            className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-all"
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all"
           >
             <div className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center mb-2`}>
               <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
             </div>
             <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[10px] text-gray-400">{s.sub}</p>
+            <p className="text-[10px] text-gray-400 dark:text-slate-500">{s.sub}</p>
           </motion.div>
         ))}
       </div>
 
       {/* Calendar */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-5">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden mb-5">
         <div className="grid grid-cols-7">
           {DAYS_ES.map((d) => (
             <div
               key={d}
-              className="text-center py-2.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider"
+              className="text-center py-2.5 text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider"
             >
               {d}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-px bg-gray-100 border-t border-gray-100">
+        <div className="grid grid-cols-7 gap-px bg-gray-100 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800">
           {calendarDays.map((day, i) => {
             if (day === null) {
               return (
-                <div key={`empty-${i}`} className="min-h-[56px] sm:min-h-[80px] bg-gray-50" />
+                <div key={`empty-${i}`} className="min-h-[56px] sm:min-h-[80px] bg-gray-50 dark:bg-slate-950" />
               );
             }
 
@@ -177,10 +177,10 @@ export default function AdminPastorReportsPage() {
                   report &&
                   navigate(`/admin/pastor/${pastorId}/report/${dateStr}`)
                 }
-                className={`min-h-[56px] sm:min-h-[80px] bg-white p-1.5 sm:p-2 transition-all relative
-                  ${isToday ? 'bg-indigo-50/60' : ''}
+                className={`min-h-[56px] sm:min-h-[80px] bg-white dark:bg-slate-900 p-1.5 sm:p-2 transition-all relative
+                  ${isToday ? 'bg-indigo-50/60 dark:bg-indigo-900/20' : ''}
                   ${isFuture ? 'opacity-30' : ''}
-                  ${report ? 'cursor-pointer hover:bg-gray-50' : 'cursor-default'}
+                  ${report ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800' : 'cursor-default'}
                 `}
               >
                 <span
@@ -188,8 +188,8 @@ export default function AdminPastorReportsPage() {
                     isToday
                       ? 'w-6 h-6 sm:w-7 sm:h-7 bg-indigo-600 text-white rounded-full text-[11px] sm:text-xs'
                       : report
-                        ? 'text-gray-900'
-                        : 'text-gray-400'
+                        ? 'text-gray-900 dark:text-white'
+                        : 'text-gray-400 dark:text-slate-500'
                   }`}
                 >
                   {day}
@@ -197,7 +197,7 @@ export default function AdminPastorReportsPage() {
                 {report && (
                   <>
                     <div className="hidden sm:block mt-1">
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 font-medium bg-indigo-50 text-indigo-700">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
                         <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                         {actCount} act.
                       </span>
@@ -214,27 +214,27 @@ export default function AdminPastorReportsPage() {
       </div>
 
       {/* Reports list */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-900">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
             Informes del mes ({reports.length})
           </h3>
         </div>
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-gray-50 dark:divide-slate-800">
           {reports.map((r) => (
             <button
               key={r.id}
               onClick={() =>
                 navigate(`/admin/pastor/${pastorId}/report/${r.date}`)
               }
-              className="w-full px-5 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left group"
+              className="w-full px-5 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left group"
             >
-              <div className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
-                <FileText className="w-4 h-4 text-gray-400" />
+              <div className="w-9 h-9 bg-gray-100 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0">
+                <FileText className="w-4 h-4 text-gray-400 dark:text-slate-500" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">{r.date}</p>
-                <p className="text-[11px] text-gray-400">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{r.date}</p>
+                <p className="text-[11px] text-gray-400 dark:text-slate-500">
                   {r.activities?.length || 0} actividades
                   {r.observations ? ' · con observaciones' : ''}
                 </p>
@@ -242,7 +242,7 @@ export default function AdminPastorReportsPage() {
             </button>
           ))}
           {reports.length === 0 && (
-            <div className="px-5 py-8 text-center text-sm text-gray-400">
+            <div className="px-5 py-8 text-center text-sm text-gray-400 dark:text-slate-500">
               Sin informes para este mes
             </div>
           )}

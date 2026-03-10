@@ -96,32 +96,32 @@ export default function PastorCalendarPage() {
       label: 'Dias',
       value: monthReports.length,
       sub: `de ${daysInMonth}`,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      color: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-blue-50 dark:bg-blue-900/30',
     },
     {
       icon: TrendingUp,
       label: 'Cumplimiento',
       value: `${cumplimiento}%`,
       sub: 'del mes',
-      color: cumplimiento >= 70 ? 'text-emerald-600' : 'text-amber-600',
-      bg: cumplimiento >= 70 ? 'bg-emerald-50' : 'bg-amber-50',
+      color: cumplimiento >= 70 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
+      bg: cumplimiento >= 70 ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
     },
     {
       icon: Activity,
       label: 'Actividades',
       value: totalActivities,
       sub: 'registradas',
-      color: 'text-violet-600',
-      bg: 'bg-violet-50',
+      color: 'text-violet-600 dark:text-violet-400',
+      bg: 'bg-violet-50 dark:bg-violet-900/30',
     },
     {
       icon: DollarSign,
       label: 'Transporte',
       value: `$${totalTransporte.toLocaleString('es-CO')}`,
       sub: 'gastados',
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
+      color: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-emerald-50 dark:bg-emerald-900/30',
     },
   ];
 
@@ -131,16 +131,16 @@ export default function PastorCalendarPage() {
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 mb-5 flex items-start gap-3"
+        className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-100 dark:border-blue-800 rounded-2xl p-4 mb-5 flex items-start gap-3"
       >
-        <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
-          <Info className="w-4 h-4 text-blue-600" />
+        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
+          <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-900">
+          <p className="text-sm font-medium text-gray-900 dark:text-white">
             Periodo actual: {periodStart} del mes anterior — {periodEnd} del mes actual
           </p>
-          <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 hidden sm:block">
             Solo puede editar informes dentro del periodo activo. Los anteriores son de
             solo lectura.
           </p>
@@ -155,7 +155,7 @@ export default function PastorCalendarPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-all duration-200"
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
           >
             <div className="flex items-center gap-2 mb-2">
               <div
@@ -163,12 +163,12 @@ export default function PastorCalendarPage() {
               >
                 <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
               </div>
-              <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+              <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
                 {s.label}
               </span>
             </div>
             <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-gray-400">{s.sub}</p>
+            <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
           </motion.div>
         ))}
       </div>
@@ -178,24 +178,24 @@ export default function PastorCalendarPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
-        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
+        className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden"
       >
         {/* Month nav */}
-        <div className="flex items-center justify-center gap-3 py-4 px-4 border-b border-gray-100">
+        <div className="flex items-center justify-center gap-3 py-4 px-4 border-b border-gray-100 dark:border-slate-800">
           <button
             onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
           >
-            <ChevronLeft className="w-4 h-4 text-gray-400" />
+            <ChevronLeft className="w-4 h-4 text-gray-400 dark:text-slate-500" />
           </button>
-          <h3 className="text-sm font-semibold text-gray-900 min-w-[150px] text-center">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white min-w-[150px] text-center">
             {formatMonthYear(currentMonth)}
           </h3>
           <button
             onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
           >
-            <ChevronRight className="w-4 h-4 text-gray-400" />
+            <ChevronRight className="w-4 h-4 text-gray-400 dark:text-slate-500" />
           </button>
         </div>
 
@@ -204,7 +204,7 @@ export default function PastorCalendarPage() {
           {DAYS_ES.map((d) => (
             <div
               key={d}
-              className="text-center py-2.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider"
+              className="text-center py-2.5 text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider"
             >
               {d}
             </div>
@@ -212,13 +212,13 @@ export default function PastorCalendarPage() {
         </div>
 
         {/* Days grid */}
-        <div className="grid grid-cols-7 gap-px bg-gray-100 border-t border-gray-100">
+        <div className="grid grid-cols-7 gap-px bg-gray-100 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800">
           {calendarDays.map((day, i) => {
             if (day === null) {
               return (
                 <div
                   key={`empty-${i}`}
-                  className="min-h-[56px] sm:min-h-[90px] bg-gray-50"
+                  className="min-h-[56px] sm:min-h-[90px] bg-gray-50 dark:bg-slate-950"
                 />
               );
             }
@@ -230,10 +230,10 @@ export default function PastorCalendarPage() {
               <div
                 key={day}
                 onClick={() => handleDayClick(day)}
-                className={`min-h-[56px] sm:min-h-[90px] bg-white p-1.5 sm:p-2 transition-all duration-150 relative group
-                  ${isToday ? 'bg-teal-50/60' : ''}
-                  ${isFuture ? 'opacity-30 cursor-default' : 'cursor-pointer hover:bg-gray-50'}
-                  ${!inPeriod && !isFuture ? 'bg-gray-50/80' : ''}
+                className={`min-h-[56px] sm:min-h-[90px] bg-white dark:bg-slate-900 p-1.5 sm:p-2 transition-all duration-150 relative group
+                  ${isToday ? 'bg-teal-50/60 dark:bg-teal-900/20' : ''}
+                  ${isFuture ? 'opacity-30 cursor-default' : 'cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800'}
+                  ${!inPeriod && !isFuture ? 'bg-gray-50/80 dark:bg-slate-950/80' : ''}
                 `}
               >
                 <div className="flex items-center justify-between mb-0.5 sm:mb-1">
@@ -242,8 +242,8 @@ export default function PastorCalendarPage() {
                       isToday
                         ? 'w-6 h-6 sm:w-7 sm:h-7 bg-teal-600 text-white rounded-full text-[11px] sm:text-xs shadow-sm shadow-teal-600/30'
                         : report
-                          ? 'text-gray-900'
-                          : 'text-gray-400'
+                          ? 'text-gray-900 dark:text-white'
+                          : 'text-gray-400 dark:text-slate-500'
                     }`}
                   >
                     {day}
@@ -255,8 +255,8 @@ export default function PastorCalendarPage() {
                       <span
                         className={`text-[10px] px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 font-medium ${
                           !inPeriod
-                            ? 'bg-gray-100 text-gray-500'
-                            : 'bg-teal-50 text-teal-700'
+                            ? 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'
+                            : 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400'
                         }`}
                       >
                         <span
@@ -282,7 +282,7 @@ export default function PastorCalendarPage() {
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 border-t border-gray-100 text-[11px] text-gray-400">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 border-t border-gray-100 dark:border-slate-800 text-[11px] text-gray-400 dark:text-slate-500">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-teal-500" /> Completado
           </span>

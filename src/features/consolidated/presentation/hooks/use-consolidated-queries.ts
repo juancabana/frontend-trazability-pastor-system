@@ -28,3 +28,15 @@ export const useAssociationConsolidated = (
     queryFn: () => repo.getByAssociation(token, assocId, month, year),
     enabled: !!token && !!assocId,
   });
+
+export const useUnionConsolidated = (
+  token: string,
+  unionId: string,
+  month: number,
+  year: number,
+) =>
+  useQuery({
+    queryKey: consolidatedKeys.byUnion(unionId, month, year),
+    queryFn: () => repo.getByUnion(token, unionId, month, year),
+    enabled: !!token && !!unionId,
+  });

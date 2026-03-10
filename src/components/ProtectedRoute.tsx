@@ -7,6 +7,19 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+function getRoleRedirect(role: UserRole | null): string {
+  switch (role) {
+    case 'super_admin':
+      return '/super-admin';
+    case 'admin':
+      return '/admin';
+    case 'pastor':
+      return '/pastor';
+    default:
+      return '/login';
+  }
+}
+
 export function ProtectedRoute({ role, children }: ProtectedRouteProps) {
   const { isAuthenticated, role: userRole } = useAuth();
 
@@ -15,8 +28,7 @@ export function ProtectedRoute({ role, children }: ProtectedRouteProps) {
   }
 
   if (userRole !== role) {
-    const redirect = userRole === 'admin' ? '/admin' : '/pastor';
-    return <Navigate to={redirect} replace />;
+    return <Navigate to={getRoleRedirect(userRole)} replace />;
   }
 
   return <>{children}</>;

@@ -10,3 +10,10 @@ export const useAssociations = () =>
     queryKey: associationKeys.list(),
     queryFn: () => repo.getAll(),
   });
+
+export const useAssociationsByUnion = (unionId?: string) =>
+  useQuery({
+    queryKey: associationKeys.byUnion(unionId),
+    queryFn: () => repo.getByUnion(unionId!),
+    enabled: !!unionId,
+  });

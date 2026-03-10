@@ -12,4 +12,16 @@ export class DistrictRepositoryApiImpl implements DistrictRepository {
       : API_ENDPOINTS.DISTRICTS.LIST;
     return this.http.get<District[]>(url);
   }
+
+  create(token: string, data: { name: string; associationId: string }): Promise<District> {
+    return this.http.post<District>(API_ENDPOINTS.DISTRICTS.LIST, data, token);
+  }
+
+  update(token: string, id: string, data: { name: string }): Promise<District> {
+    return this.http.patch<District>(`${API_ENDPOINTS.DISTRICTS.LIST}/${id}`, data, token);
+  }
+
+  delete(token: string, id: string): Promise<void> {
+    return this.http.delete(`${API_ENDPOINTS.DISTRICTS.LIST}/${id}`, token);
+  }
 }

@@ -1,4 +1,4 @@
-import type { AssociationConsolidatedResponse } from '@/features/consolidated/domain/entities/consolidated';
+import type { AssociationConsolidatedResponse, UnionConsolidatedResponse } from '@/features/consolidated/domain/entities/consolidated';
 
 export async function exportConsolidatedPDF(
   data: AssociationConsolidatedResponse,
@@ -109,4 +109,79 @@ export async function exportConsolidatedExcel(
   XLSX.utils.book_append_sheet(wb, ws2, 'Categorias');
 
   XLSX.writeFile(wb, `consolidado_${monthLabel.replace(/\s/g, '_')}.xlsx`);
+}
+
+export async function exportUnionConsolidatedPDF(
+  data: UnionConsolidatedResponse,
+  monthLabel: string,
+  unionName: string,
+) {
+  const { jsPDF } = await import('jspdf');
+  const autoTable = (await import('jspdf-autotable')).default;
+
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text(`Consolidado - ${unionName}`, 14, 20);
+  doc.setFontSize(10);
+  doc.text(monthLabel, 14, 28);
+
+  doc.setFontSize(9);
+  doc.text(
+    `Asociaciones: ${data.totalAssociations} | Pastores: ${data.totalPastors} | Actividades: ${data.totalActivities} | Horas: ${data.totalHours.toFixed(0)}`,
+    14,
+    36,
+  );
+
+  const rows = data.associationSummaries.map((a) => [
+    a.associationName,
+    String(a.totalPastors),
+    String(a.totalActivities),
+    a.totalHours.toFixed(0),
+    `${Math.round(a.avgCompliance * 100)}%`,
+  ]);
+
+  autoTable(doc, {
+    startY: 44,
+    head: [['Asociacion', 'Pastores', 'Actividades', 'Horas', 'Cumplimiento']],
+    body: rows,
+    theme: 'striped',
+    headStyles: { fillColor: [124, 58, 237] },
+    styles: { fontSize: 8 },
+  });
+
+  doc.save(`consolidado_union_${monthLabel.replace(/\s/g, '_')}.pdf`);
+}
+
+export async function exportUnionConsolidatedExcel(
+  data: UnionConsolidatedResponse,
+  monthLabel: string,
+  unionName: string,
+) {
+  const XLSX = await import('xlsx');
+
+  const wb = XLSX.utils.book_new();
+
+  const summaryData = [
+    { Metrica: 'Union', Valor: unionName },
+    { Metrica: 'Periodo', Valor: monthLabel },
+    { Metrica: 'Asociaciones', Valor: data.totalAssociations },
+    { Metrica: 'Pastores', Valor: data.totalPastors },
+    { Metrica: 'Actividades', Valor: data.totalActivities },
+    { Metrica: 'Horas', Valor: data.totalHours },
+    { Metrica: 'Cumplimiento Promedio', Valor: `${Math.round(data.avgCompliance * 100)}%` },
+  ];
+  const ws0 = XLSX.utils.json_to_sheet(summaryData);
+  XLSX.utils.book_append_sheet(wb, ws0, 'Resumen');
+
+  const assocData = data.associationSummaries.map((a) => ({
+    Asociacion: a.associationName,
+    Pastores: a.totalPastors,
+    Actividades: a.totalActivities,
+    Horas: a.totalHours,
+    'Cumplimiento (%)': Math.round(a.avgCompliance * 100),
+  }));
+  const ws1 = XLSX.utils.json_to_sheet(assocData);
+  XLSX.utils.book_append_sheet(wb, ws1, 'Asociaciones');
+
+  XLSX.writeFile(wb, `consolidado_union_${monthLabel.replace(/\s/g, '_')}.xlsx`);
 }

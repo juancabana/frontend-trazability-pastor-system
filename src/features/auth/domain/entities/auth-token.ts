@@ -6,5 +6,8 @@ export interface AuthToken {
   displayName: string;
   email: string;
   userId: string;
-  associationId: string;
+  associationId: string | null;
+  unionId: string | null;
+  associationName?: string;
+  unionName?: string;
 }

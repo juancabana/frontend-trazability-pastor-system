@@ -27,7 +27,7 @@ export default function AdminPastoresPage() {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
 
-  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId);
+  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
   const { data: consolidated } = useAssociationConsolidated(
     token ?? '',
     currentUser?.associationId ?? '',
@@ -65,8 +65,8 @@ export default function AdminPastoresPage() {
   return (
     <div className="max-w-[900px] mx-auto">
       <div className="mb-5">
-        <h2 className="text-lg font-semibold text-gray-900">Pastores</h2>
-        <p className="text-xs text-gray-400 mt-0.5">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Pastores</h2>
+        <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
           Lista de pastores de la asociacion
         </p>
       </div>
@@ -82,24 +82,24 @@ export default function AdminPastoresPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
-            className="p-2 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
           >
-            <ChevronLeft className="w-4 h-4 text-gray-500" />
+            <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
-          <span className="text-sm font-medium text-gray-900 px-3 py-2 border border-gray-200 rounded-xl bg-white whitespace-nowrap">
+          <span className="text-sm font-medium text-gray-900 dark:text-white px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 whitespace-nowrap">
             {formatMonthYear(currentMonth)}
           </span>
           <button
             onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-            className="p-2 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
           >
-            <ChevronRight className="w-4 h-4 text-gray-500" />
+            <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div className="divide-y divide-gray-50">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+        <div className="divide-y divide-gray-50 dark:divide-slate-800">
           {filteredPastors.map((pastor, i) => {
             const summary = getSummary(pastor.id);
             return (
@@ -109,21 +109,21 @@ export default function AdminPastoresPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
                 onClick={() => navigate(`/admin/pastor/${pastor.id}`)}
-                className="w-full px-5 py-4 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left group"
+                className="w-full px-5 py-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left group"
               >
-                <div className="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center text-xs font-semibold text-indigo-600 shrink-0">
+                <div className="w-11 h-11 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 shrink-0">
                   {getInitials(pastor.name)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                     {pastor.name}
                   </p>
-                  <p className="text-[11px] text-gray-400">
+                  <p className="text-[11px] text-gray-400 dark:text-slate-500">
                     {pastor.email}
                   </p>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
-                  <div className="flex items-center gap-1 text-gray-400">
+                  <div className="flex items-center gap-1 text-gray-400 dark:text-slate-500">
                     <Calendar className="w-3.5 h-3.5" />
                     <span className="text-xs font-medium">
                       {summary
@@ -131,25 +131,25 @@ export default function AdminPastoresPage() {
                         : '—'}
                     </span>
                   </div>
-                  <div className="hidden sm:flex items-center gap-1 text-gray-400">
+                  <div className="hidden sm:flex items-center gap-1 text-gray-400 dark:text-slate-500">
                     <Activity className="w-3.5 h-3.5" />
                     <span className="text-xs font-medium">
                       {summary?.totalActivities || 0}
                     </span>
                   </div>
-                  <div className="hidden md:flex items-center gap-1 text-gray-400">
+                  <div className="hidden md:flex items-center gap-1 text-gray-400 dark:text-slate-500">
                     <Clock className="w-3.5 h-3.5" />
                     <span className="text-xs font-medium">
                       {summary?.totalHours?.toFixed(0) || 0}h
                     </span>
                   </div>
-                  <GoIcon className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
+                  <GoIcon className="w-4 h-4 text-gray-300 dark:text-slate-600 group-hover:text-gray-500 dark:group-hover:text-slate-400 transition-colors" />
                 </div>
               </motion.button>
             );
           })}
           {filteredPastors.length === 0 && (
-            <div className="px-5 py-12 text-center text-sm text-gray-400">
+            <div className="px-5 py-12 text-center text-sm text-gray-400 dark:text-slate-500">
               No se encontraron pastores
             </div>
           )}

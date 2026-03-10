@@ -9,4 +9,8 @@ export class AssociationRepositoryApiImpl implements AssociationRepository {
   getAll(): Promise<Association[]> {
     return this.http.get<Association[]>(API_ENDPOINTS.ASSOCIATIONS.LIST);
   }
+
+  getByUnion(unionId: string): Promise<Association[]> {
+    return this.http.get<Association[]>(`${API_ENDPOINTS.ASSOCIATIONS.LIST}?unionId=${unionId}`);
+  }
 }

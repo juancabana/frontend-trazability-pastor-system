@@ -136,20 +136,20 @@ export default function PastorReportEditPage() {
       <div className="flex items-center gap-3 mb-5">
         <button
           onClick={() => navigate('/pastor')}
-          className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-400" />
+          <ArrowLeft className="w-5 h-5 text-gray-400 dark:text-slate-500" />
         </button>
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             {existingReport ? 'Editar Informe' : 'Nuevo Informe'}
           </h2>
-          <p className="text-xs text-gray-400">{formatDate(reportDate)}</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">{formatDate(reportDate)}</p>
         </div>
         {existingReport && editable && (
           <button
             onClick={handleDelete}
-            className="ml-auto p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+            className="ml-auto p-2 text-gray-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all"
             title="Eliminar informe"
           >
             <Trash2 className="w-4 h-4" />
@@ -158,13 +158,13 @@ export default function PastorReportEditPage() {
       </div>
 
       {!editable && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 flex items-center gap-3">
-          <div className="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
-            <Lock className="w-4 h-4 text-amber-600" />
+        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 mb-5 flex items-center gap-3">
+          <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center shrink-0">
+            <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <p className="text-sm font-medium text-amber-800">Solo lectura</p>
-            <p className="text-xs text-amber-600">Periodo cerrado.</p>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Solo lectura</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">Periodo cerrado.</p>
           </div>
         </div>
       )}
@@ -181,20 +181,20 @@ export default function PastorReportEditPage() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="mb-4 bg-white rounded-2xl border border-gray-100 overflow-hidden"
+              className="mb-4 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden"
             >
-              <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-gray-100">
+              <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-gray-100 dark:border-slate-800">
                 <div
                   className="w-1.5 h-6 rounded-full"
                   style={{ backgroundColor: cat.color }}
                 />
-                <h3 className="text-sm font-semibold text-gray-900">{cat.name}</h3>
-                <span className="text-[11px] font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-lg">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{cat.name}</h3>
+                <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg">
                   {acts.length}
                 </span>
               </div>
 
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-gray-50 dark:divide-slate-800">
                 {acts.map((act) => {
                   const sub = cat.subcategories.find(
                     (s) => s.id === act.subcategoryId,
@@ -206,11 +206,11 @@ export default function PastorReportEditPage() {
                     <div key={act.subcategoryId} className="px-5 py-4">
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
                             {sub.name}
                           </p>
                           {sub.description && (
-                            <p className="text-[11px] text-gray-400">
+                            <p className="text-[11px] text-gray-400 dark:text-slate-500">
                               {sub.description}
                             </p>
                           )}
@@ -218,7 +218,7 @@ export default function PastorReportEditPage() {
                         {editable && (
                           <button
                             onClick={() => removeActivity(act.subcategoryId)}
-                            className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                            className="p-1.5 text-gray-300 dark:text-slate-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -238,11 +238,11 @@ export default function PastorReportEditPage() {
                               )
                             }
                             placeholder="Descripcion (opcional)..."
-                            className="w-full px-3.5 py-2.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 placeholder:text-gray-400 transition-colors"
+                            className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
                           />
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="text-[11px] font-medium text-gray-400 mb-1 block uppercase tracking-wide">
+                              <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
                                 {UNIT_LABELS[sub.unit] || 'Cantidad'}
                               </label>
                               <input
@@ -257,12 +257,12 @@ export default function PastorReportEditPage() {
                                     parseFloat(e.target.value) || 0,
                                   )
                                 }
-                                className="w-full px-3.5 py-2.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 transition-colors"
+                                className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white transition-colors"
                               />
                             </div>
                             {sub.hasHours && (
                               <div>
-                                <label className="text-[11px] font-medium text-gray-400 mb-1 block uppercase tracking-wide">
+                                <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
                                   Horas
                                 </label>
                                 <input
@@ -277,7 +277,7 @@ export default function PastorReportEditPage() {
                                       parseFloat(e.target.value) || 0,
                                     )
                                   }
-                                  className="w-full px-3.5 py-2.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 transition-colors"
+                                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white transition-colors"
                                 />
                               </div>
                             )}
@@ -285,11 +285,11 @@ export default function PastorReportEditPage() {
 
                           {isTransport && (
                             <div>
-                              <label className="text-[11px] font-medium text-gray-400 mb-1 block uppercase tracking-wide">
+                              <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
                                 Gasto COP
                               </label>
                               <div className="relative">
-                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">
+                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-slate-500 font-medium">
                                   $
                                 </span>
                                 <input
@@ -304,7 +304,7 @@ export default function PastorReportEditPage() {
                                       parseFloat(e.target.value) || 0,
                                     )
                                   }
-                                  className="w-full pl-8 pr-3.5 py-2.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-emerald-500 outline-none text-gray-900 transition-colors"
+                                  className="w-full pl-8 pr-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-emerald-500 outline-none text-gray-900 dark:text-white transition-colors"
                                 />
                               </div>
                             </div>
@@ -313,20 +313,20 @@ export default function PastorReportEditPage() {
                       ) : (
                         <div className="flex flex-wrap gap-2">
                           {act.description && (
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-500 dark:text-slate-400">
                               {act.description}
                             </span>
                           )}
-                          <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded-lg">
+                          <span className="text-xs font-medium bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-2 py-1 rounded-lg">
                             {act.quantity} {sub.unit}
                           </span>
                           {act.hours != null && act.hours > 0 && (
-                            <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded-lg">
+                            <span className="text-xs font-medium bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-2 py-1 rounded-lg">
                               {act.hours}h
                             </span>
                           )}
                           {isTransport && act.amount != null && act.amount > 0 && (
-                            <span className="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg">
+                            <span className="text-xs font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-lg">
                               ${act.amount.toLocaleString('es-CO')}
                             </span>
                           )}
@@ -343,40 +343,40 @@ export default function PastorReportEditPage() {
 
       {/* Add activity accordion */}
       {editable && (
-        <div className="bg-white rounded-2xl border border-gray-100 mb-4">
-          <div className="px-5 py-3.5 border-b border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-              <div className="w-6 h-6 bg-teal-50 rounded-lg flex items-center justify-center">
-                <Plus className="w-3.5 h-3.5 text-teal-600" />
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 mb-4">
+          <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <div className="w-6 h-6 bg-teal-50 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
+                <Plus className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
               </div>
               Agregar Actividad
             </h3>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-gray-50 dark:divide-slate-800">
             {categories.map((cat) => {
               const isExpanded = expandedCategories[cat.id];
               return (
                 <div key={cat.id}>
                   <button
                     onClick={() => toggleCategory(cat.id)}
-                    className="w-full px-5 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                    className="w-full px-5 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
                       <span
                         className="w-2.5 h-2.5 rounded-full"
                         style={{ backgroundColor: cat.color }}
                       />
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
                         {cat.name}
                       </span>
-                      <span className="text-[11px] text-gray-400">
+                      <span className="text-[11px] text-gray-400 dark:text-slate-500">
                         ({cat.subcategories.length})
                       </span>
                     </div>
                     {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-gray-400" />
+                      <ChevronUp className="w-4 h-4 text-gray-400 dark:text-slate-500" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                      <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-500" />
                     )}
                   </button>
                   <AnimatePresence>
@@ -402,8 +402,8 @@ export default function PastorReportEditPage() {
                                 disabled={isAdded}
                                 className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm flex items-center justify-between transition-all ${
                                   isAdded
-                                    ? 'bg-teal-50 text-teal-700 cursor-default'
-                                    : 'hover:bg-gray-50 text-gray-600'
+                                    ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 cursor-default'
+                                    : 'hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-600 dark:text-slate-400'
                                 }`}
                               >
                                 <span>{sub.name}</span>
@@ -412,7 +412,7 @@ export default function PastorReportEditPage() {
                                     Agregado
                                   </span>
                                 ) : (
-                                  <Plus className="w-4 h-4 text-gray-300" />
+                                  <Plus className="w-4 h-4 text-gray-300 dark:text-slate-600" />
                                 )}
                               </button>
                             );
@@ -429,9 +429,9 @@ export default function PastorReportEditPage() {
       )}
 
       {/* Observations */}
-      <div className="bg-white rounded-2xl border border-gray-100 mb-5">
-        <div className="px-5 py-3.5 border-b border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-900">Observaciones</h3>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 mb-5">
+        <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Observaciones</h3>
         </div>
         <div className="p-5">
           {editable ? (
@@ -440,10 +440,10 @@ export default function PastorReportEditPage() {
               onChange={(e) => setObservations(e.target.value)}
               placeholder="Observaciones adicionales del dia (opcional)..."
               rows={3}
-              className="w-full px-3.5 py-2.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none resize-none text-gray-900 placeholder:text-gray-400 transition-colors"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none resize-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
             />
           ) : (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-slate-400">
               {observations || 'Sin observaciones'}
             </p>
           )}
@@ -455,7 +455,7 @@ export default function PastorReportEditPage() {
         <div className="flex items-center justify-between mb-8 gap-4">
           <button
             onClick={() => navigate('/pastor')}
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 transition-colors"
           >
             Cancelar
           </button>

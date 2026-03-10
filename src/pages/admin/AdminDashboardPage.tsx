@@ -31,7 +31,7 @@ export default function AdminDashboardPage() {
   const month = currentMonth.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId);
+  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
   const { data: consolidated } = useAssociationConsolidated(
     token ?? '',
     currentUser?.associationId ?? '',
@@ -49,8 +49,6 @@ export default function AdminDashboardPage() {
   const totalHours = consolidated?.totals?.totalHours || 0;
   const pastorSummaries = consolidated?.pastorSummaries || [];
 
-  const totalTransporte = 0; // Would need separate calculation
-
   const getInitials = (name: string) =>
     name
       .split(' ')
@@ -66,32 +64,32 @@ export default function AdminDashboardPage() {
       label: 'Pastores',
       value: pastors.length,
       sub: 'registrados',
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50',
+      color: 'text-indigo-600 dark:text-indigo-400',
+      bg: 'bg-indigo-50 dark:bg-indigo-900/30',
     },
     {
       icon: FileText,
       label: 'Informes',
       value: pastorSummaries.reduce((s, p) => s + Math.round(p.compliance * daysInMonth), 0),
       sub: 'este mes',
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      color: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-blue-50 dark:bg-blue-900/30',
     },
     {
       icon: Activity,
       label: 'Actividades',
       value: totalActivities,
       sub: 'registradas',
-      color: 'text-violet-600',
-      bg: 'bg-violet-50',
+      color: 'text-violet-600 dark:text-violet-400',
+      bg: 'bg-violet-50 dark:bg-violet-900/30',
     },
     {
       icon: Clock,
       label: 'Horas',
       value: `${totalHours.toFixed(0)}h`,
       sub: 'dedicadas',
-      color: 'text-orange-600',
-      bg: 'bg-orange-50',
+      color: 'text-orange-600 dark:text-orange-400',
+      bg: 'bg-orange-50 dark:bg-orange-900/30',
     },
   ];
 
@@ -102,7 +100,7 @@ export default function AdminDashboardPage() {
       id: c.categoryId,
       name: c.categoryName,
       color: c.color,
-      value: c.subcategories.reduce((s, sub) => s + sub.totalQuantity, 0),
+      value: (Array.isArray(c.subcategories) ? c.subcategories : []).reduce((s, sub) => s + sub.totalQuantity, 0),
     }));
   }, [consolidated]);
   const maxVal = Math.max(...categoryBreakdown.map((c) => c.value), 1);
@@ -110,10 +108,10 @@ export default function AdminDashboardPage() {
   return (
     <div className="max-w-[1100px] mx-auto">
       <div className="mb-5">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           Panel de Administracion
         </h2>
-        <p className="text-xs text-gray-400 mt-0.5">
+        <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
           Vista general de la asociacion
         </p>
       </div>
@@ -121,18 +119,18 @@ export default function AdminDashboardPage() {
       <div className="flex items-center gap-3 mb-5">
         <button
           onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
-          className="p-2 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
-          <ChevronLeft className="w-4 h-4 text-gray-500" />
+          <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 px-4 py-2 border border-gray-200 rounded-xl bg-white">
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
           {formatMonthYear(currentMonth)}
         </span>
         <button
           onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
-          <ChevronRight className="w-4 h-4 text-gray-500" />
+          <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
       </div>
 
@@ -144,7 +142,7 @@ export default function AdminDashboardPage() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
-            className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-all"
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all"
           >
             <div
               className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center mb-2`}
@@ -152,20 +150,20 @@ export default function AdminDashboardPage() {
               <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
             </div>
             <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[10px] text-gray-400">{s.sub}</p>
+            <p className="text-[10px] text-gray-400 dark:text-slate-500">{s.sub}</p>
           </motion.div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Pastors list */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-900">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
               Pastores — {formatMonthYear(currentMonth)}
             </h3>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-gray-50 dark:divide-slate-800">
             {pastorSummaries.map((ps) => {
               const cumplimiento = Math.round(ps.compliance * 100);
               return (
@@ -174,38 +172,38 @@ export default function AdminDashboardPage() {
                   onClick={() =>
                     navigate(`/admin/pastor/${ps.pastorId}`)
                   }
-                  className="w-full px-5 py-3.5 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left group"
+                  className="w-full px-5 py-3.5 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left group"
                 >
-                  <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-xs font-semibold text-indigo-600 shrink-0">
+                  <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 shrink-0">
                     {getInitials(ps.pastorName)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                       {ps.pastorName}
                     </p>
-                    <p className="text-[11px] text-gray-400">
+                    <p className="text-[11px] text-gray-400 dark:text-slate-500">
                       {ps.districtName || 'Sin distrito'}
                     </p>
                   </div>
                   <div className="flex items-center gap-4 shrink-0">
                     <div className="text-center hidden sm:block">
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
                         {ps.totalActivities}
                       </p>
-                      <p className="text-[10px] text-gray-400">act.</p>
+                      <p className="text-[10px] text-gray-400 dark:text-slate-500">act.</p>
                     </div>
                     {cumplimiento >= 70 ? (
                       <CheckCircle className="w-5 h-5 text-emerald-500" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-amber-500" />
                     )}
-                    <GoIcon className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
+                    <GoIcon className="w-4 h-4 text-gray-300 dark:text-slate-600 group-hover:text-gray-500 dark:group-hover:text-slate-400 transition-colors" />
                   </div>
                 </button>
               );
             })}
             {pastorSummaries.length === 0 && (
-              <div className="px-5 py-8 text-center text-sm text-gray-400">
+              <div className="px-5 py-8 text-center text-sm text-gray-400 dark:text-slate-500">
                 No hay datos para este periodo
               </div>
             )}
@@ -213,9 +211,9 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Category breakdown */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-900">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
               Rubros del Mes
             </h3>
           </div>
@@ -230,15 +228,15 @@ export default function AdminDashboardPage() {
                         className="w-2.5 h-2.5 rounded-full"
                         style={{ backgroundColor: cat.color }}
                       />
-                      <span className="text-xs font-medium text-gray-600">
+                      <span className="text-xs font-medium text-gray-600 dark:text-slate-400">
                         {cat.name}
                       </span>
                     </div>
-                    <span className="text-xs font-semibold text-gray-900">
+                    <span className="text-xs font-semibold text-gray-900 dark:text-white">
                       {cat.value}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
+                  <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${pct}%` }}
@@ -251,7 +249,7 @@ export default function AdminDashboardPage() {
               );
             })}
             {categoryBreakdown.length === 0 && (
-              <p className="text-sm text-gray-400 text-center py-4">
+              <p className="text-sm text-gray-400 dark:text-slate-500 text-center py-4">
                 Sin datos
               </p>
             )}

@@ -28,9 +28,9 @@ export function EmptyState({
             <Icon size={40} className="text-teal-500" />
           </div>
         )}
-        <h2 className="text-gray-900 text-2xl font-bold mb-2">{title}</h2>
+        <h2 className="text-gray-900 dark:text-white text-2xl font-bold mb-2">{title}</h2>
         {description && (
-          <p className="text-gray-500 mb-6">{description}</p>
+          <p className="text-gray-500 dark:text-slate-400 mb-6">{description}</p>
         )}
         {actionLabel && actionHref && (
           <Link
