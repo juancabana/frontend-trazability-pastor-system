@@ -21,6 +21,7 @@ import SuperAdminAssociationsPage from '@/pages/super-admin/SuperAdminAssociatio
 import SuperAdminAssociationDetailPage from '@/pages/super-admin/SuperAdminAssociationDetailPage';
 import SuperAdminConsolidatedPage from '@/pages/super-admin/SuperAdminConsolidatedPage';
 import SuperAdminPastorReportsPage from '@/pages/super-admin/SuperAdminPastorReportsPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 
 export function AppRoutes() {
   return (
@@ -78,7 +79,7 @@ export function AppRoutes() {
         <Route path="pastor/:pastorId/report/:date" element={<AdminReportDetailPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
