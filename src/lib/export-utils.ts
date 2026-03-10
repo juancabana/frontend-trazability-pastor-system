@@ -4,8 +4,14 @@ export async function exportConsolidatedPDF(
   data: AssociationConsolidatedResponse,
   monthLabel: string,
 ) {
-  const { jsPDF } = await import('jspdf');
-  const autoTable = (await import('jspdf-autotable')).default;
+  let jsPDF: typeof import('jspdf')['jsPDF'];
+  let autoTable: typeof import('jspdf-autotable')['default'];
+  try {
+    jsPDF = (await import('jspdf')).jsPDF;
+    autoTable = (await import('jspdf-autotable')).default;
+  } catch {
+    throw new Error('No se pudieron cargar las librerias de exportacion PDF');
+  }
 
   const doc = new jsPDF();
   doc.setFontSize(16);
@@ -75,7 +81,12 @@ export async function exportConsolidatedExcel(
   data: AssociationConsolidatedResponse,
   monthLabel: string,
 ) {
-  const XLSX = await import('xlsx');
+  let XLSX: typeof import('xlsx');
+  try {
+    XLSX = await import('xlsx');
+  } catch {
+    throw new Error('No se pudo cargar la libreria de exportacion Excel');
+  }
 
   const wb = XLSX.utils.book_new();
 
@@ -116,8 +127,14 @@ export async function exportUnionConsolidatedPDF(
   monthLabel: string,
   unionName: string,
 ) {
-  const { jsPDF } = await import('jspdf');
-  const autoTable = (await import('jspdf-autotable')).default;
+  let jsPDF: typeof import('jspdf')['jsPDF'];
+  let autoTable: typeof import('jspdf-autotable')['default'];
+  try {
+    jsPDF = (await import('jspdf')).jsPDF;
+    autoTable = (await import('jspdf-autotable')).default;
+  } catch {
+    throw new Error('No se pudieron cargar las librerias de exportacion PDF');
+  }
 
   const doc = new jsPDF();
   doc.setFontSize(16);
@@ -157,7 +174,12 @@ export async function exportUnionConsolidatedExcel(
   monthLabel: string,
   unionName: string,
 ) {
-  const XLSX = await import('xlsx');
+  let XLSX: typeof import('xlsx');
+  try {
+    XLSX = await import('xlsx');
+  } catch {
+    throw new Error('No se pudo cargar la libreria de exportacion Excel');
+  }
 
   const wb = XLSX.utils.book_new();
 
