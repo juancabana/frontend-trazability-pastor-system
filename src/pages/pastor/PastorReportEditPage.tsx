@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/atoms/ConfirmDialog';
 
 export default function PastorReportEditPage() {
   const { date } = useParams<{ date: string }>();
@@ -45,6 +46,7 @@ export default function PastorReportEditPage() {
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const initialSnapshot = useRef<string>('');
 
   useEffect(() => {
@@ -133,6 +135,7 @@ export default function PastorReportEditPage() {
     } catch {
       toast.error('Error al eliminar el informe');
     }
+    setShowDeleteConfirm(false);
   };
 
   const activitiesByCategory: Record<string, ActivityEntry[]> = {};
@@ -161,7 +164,7 @@ export default function PastorReportEditPage() {
         </div>
         {existingReport && editable && (
           <button
-            onClick={handleDelete}
+            onClick={() => setShowDeleteConfirm(true)}
             className="ml-auto p-2 text-gray-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all"
             title="Eliminar informe"
           >
@@ -482,6 +485,15 @@ export default function PastorReportEditPage() {
           </button>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Eliminar informe"
+        message="¿Esta seguro de eliminar este informe? Se perderan todas las actividades registradas."
+        confirmLabel="Eliminar"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

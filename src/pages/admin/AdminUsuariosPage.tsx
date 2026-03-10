@@ -11,6 +11,7 @@ import { ROLE_CONFIG, type UserRole } from '@/features/auth/domain/entities/user
 import type { UserAccount } from '@/features/auth/domain/entities/user-account';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { Modal } from '@/components/atoms/Modal';
+import { ConfirmDialog } from '@/components/atoms/ConfirmDialog';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
 import { Plus, Edit3, Trash2, UserCog } from 'lucide-react';
@@ -27,6 +28,7 @@ export default function AdminUsuariosPage() {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserAccount | null>(null);
 
   // Form state
   const [formName, setFormName] = useState('');
@@ -63,6 +65,18 @@ export default function AdminUsuariosPage() {
 
   const handleSubmit = async () => {
     if (!token || !currentUser) return;
+    if (!formName.trim()) {
+      toast.error('El nombre es requerido');
+      return;
+    }
+    if (!editingUser && !formEmail.trim()) {
+      toast.error('El email es requerido');
+      return;
+    }
+    if (!editingUser && !formPassword) {
+      toast.error('La contrasena es requerida');
+      return;
+    }
     try {
       if (editingUser) {
         await updateUser.mutateAsync({
@@ -96,18 +110,23 @@ export default function AdminUsuariosPage() {
     }
   };
 
-  const handleDelete = async (user: UserAccount) => {
-    if (!token) return;
-    if (user.id === currentUser?.id) {
-      toast.error('No puede eliminar su propio usuario');
-      return;
-    }
+  const confirmDelete = async () => {
+    if (!token || !userToDelete) return;
     try {
-      await deleteUser.mutateAsync({ token, id: user.id });
+      await deleteUser.mutateAsync({ token, id: userToDelete.id });
       toast.success('Usuario eliminado');
     } catch {
       toast.error('Error al eliminar usuario');
     }
+    setUserToDelete(null);
+  };
+
+  const handleDelete = (user: UserAccount) => {
+    if (user.id === currentUser?.id) {
+      toast.error('No puede eliminar su propio usuario');
+      return;
+    }
+    setUserToDelete(user);
   };
 
   const getInitials = (name: string) =>
@@ -277,12 +296,21 @@ export default function AdminUsuariosPage() {
             <Button variant="ghost" onClick={() => setShowModal(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSubmit}>
-              {editingUser ? 'Actualizar' : 'Crear'}
+            <Button onClick={handleSubmit} disabled={createUser.isPending || updateUser.isPending}>
+              {(createUser.isPending || updateUser.isPending) ? 'Guardando...' : editingUser ? 'Actualizar' : 'Crear'}
             </Button>
           </div>
         </div>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={!!userToDelete}
+        title="Eliminar usuario"
+        message={`¿Esta seguro de eliminar a ${userToDelete?.name}? Esta accion no se puede deshacer.`}
+        confirmLabel="Eliminar"
+        onConfirm={confirmDelete}
+        onCancel={() => setUserToDelete(null)}
+      />
     </div>
   );
 }

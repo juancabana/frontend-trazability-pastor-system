@@ -6,6 +6,7 @@ import { useChurches, useCreateChurch, useUpdateChurch, useMoveChurch, useDelete
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useUpdateUser } from '@/features/auth/presentation/hooks/use-auth-mutations';
 import { SearchInput } from '@/components/atoms/SearchInput';
+import { ConfirmDialog } from '@/components/atoms/ConfirmDialog';
 import {
   MapPin,
   ChevronDown,
@@ -52,6 +53,7 @@ export default function AdminDistritosPage() {
   const [formName, setFormName] = useState('');
   const [formAddress, setFormAddress] = useState('');
   const [formTargetDistrict, setFormTargetDistrict] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'district' | 'church'; item: District | ChurchEntity } | null>(null);
 
   const pastors = useMemo(() => users.filter((u) => u.role === 'pastor'), [users]);
 
@@ -152,30 +154,34 @@ export default function AdminDistritosPage() {
     }
   };
 
-  const handleDeleteDistrict = async (d: District) => {
+  const handleDeleteDistrict = (d: District) => {
     const dChurches = churchesByDistrict.get(d.id) || [];
     const dPastors = pastorsByDistrict.get(d.id) || [];
     if (dChurches.length > 0 || dPastors.length > 0) {
       toast.error('No se puede eliminar: el distrito tiene iglesias o pastores');
       return;
     }
-    if (!token) return;
-    try {
-      await deleteDistrict.mutateAsync({ token, id: d.id });
-      toast.success('Distrito eliminado');
-    } catch {
-      toast.error('Error al eliminar distrito');
-    }
+    setDeleteTarget({ type: 'district', item: d });
   };
 
-  const handleDeleteChurch = async (c: ChurchEntity) => {
-    if (!token) return;
+  const handleDeleteChurch = (c: ChurchEntity) => {
+    setDeleteTarget({ type: 'church', item: c });
+  };
+
+  const confirmDeleteTarget = async () => {
+    if (!token || !deleteTarget) return;
     try {
-      await deleteChurch.mutateAsync({ token, id: c.id });
-      toast.success('Iglesia eliminada');
+      if (deleteTarget.type === 'district') {
+        await deleteDistrict.mutateAsync({ token, id: deleteTarget.item.id });
+        toast.success('Distrito eliminado');
+      } else {
+        await deleteChurch.mutateAsync({ token, id: deleteTarget.item.id });
+        toast.success('Iglesia eliminada');
+      }
     } catch {
-      toast.error('Error al eliminar iglesia');
+      toast.error(`Error al eliminar ${deleteTarget.type === 'district' ? 'distrito' : 'iglesia'}`);
     }
+    setDeleteTarget(null);
   };
 
   const toggleExpand = (id: string) =>
@@ -517,6 +523,15 @@ export default function AdminDistritosPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title={`Eliminar ${deleteTarget?.type === 'district' ? 'distrito' : 'iglesia'}`}
+        message={`¿Esta seguro de eliminar "${deleteTarget?.item.name}"? Esta accion no se puede deshacer.`}
+        confirmLabel="Eliminar"
+        onConfirm={confirmDeleteTarget}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
