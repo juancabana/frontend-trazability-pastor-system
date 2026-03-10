@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useReportByDate } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
@@ -27,7 +27,9 @@ export default function PastorReportEditPage() {
 
   const reportDate = date ? new Date(date + 'T12:00:00') : new Date();
   const editable = isDateEditable(reportDate, deadlineDay);
-  const isFuture = reportDate > new Date();
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+  const isFuture = reportDate > today;
 
   const { data: existingReport } = useReportByDate(
     token ?? '',
@@ -43,14 +45,24 @@ export default function PastorReportEditPage() {
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const initialSnapshot = useRef<string>('');
 
   useEffect(() => {
     if (existingReport && !initialized) {
       setActivities(existingReport.activities || []);
       setObservations(existingReport.observations || '');
+      initialSnapshot.current = JSON.stringify({
+        activities: existingReport.activities || [],
+        observations: existingReport.observations || '',
+      });
       setInitialized(true);
     }
   }, [existingReport, initialized]);
+
+  const hasChanges = useMemo(() => {
+    const current = JSON.stringify({ activities, observations });
+    return current !== initialSnapshot.current;
+  }, [activities, observations]);
 
   useEffect(() => {
     if (isFuture) navigate('/pastor', { replace: true });
@@ -103,6 +115,7 @@ export default function PastorReportEditPage() {
         token,
         data: { date, activities, observations: observations || undefined },
       });
+      initialSnapshot.current = JSON.stringify({ activities, observations });
       toast.success('Informe guardado correctamente');
       navigate('/pastor');
     } catch {
@@ -461,11 +474,11 @@ export default function PastorReportEditPage() {
           </button>
           <button
             onClick={handleSave}
-            disabled={saving || activities.length === 0}
-            className="px-6 py-3 bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:shadow-lg hover:shadow-teal-600/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+            disabled={saving || !hasChanges}
+            className="px-6 py-3 bg-linear-to-r from-teal-600 to-teal-700 text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:shadow-lg hover:shadow-teal-600/20 transition-all disabled:opacity-50 active:scale-[0.98]"
           >
             <Save className="w-4 h-4" />
-            {saving ? 'Guardando...' : 'Guardar Informe'}
+            {saving ? 'Guardando...' : 'Guardar Cambios'}
           </button>
         </div>
       )}

@@ -55,6 +55,7 @@ export function isDateEditable(date: Date, deadlineDay: number): boolean {
   today.setHours(0, 0, 0, 0);
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   if (d > today) return false;
+  if (d.getTime() === today.getTime()) return true;
 
   const period = getCurrentPeriod(deadlineDay);
   return d >= period.start && d <= period.end;

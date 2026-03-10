@@ -4,7 +4,6 @@ import {
   LogOut,
   Menu,
   X,
-  BookOpen,
   Sun,
   Moon,
   Monitor,
@@ -73,6 +72,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
     .toUpperCase() || 'U';
 
   const accent = ROLE_ACCENT[currentUser?.role ?? 'pastor'];
+  const logoSrc = resolvedTheme === 'dark' ? '/iasd-logo-dark.png' : '/iasd-logo-ligth.png';
 
   const isActive = (href: string) => {
     if (href === '/pastor' || href === '/admin' || href === '/super-admin') return pathname === href;
@@ -88,7 +88,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
       {/* Mobile top bar */}
       <header className="lg:hidden h-14 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between px-4 shrink-0 z-40 transition-colors duration-300">
         <div className="flex items-center gap-2.5">
-          <BookOpen className="w-7 h-7 text-teal-600" />
+          <img src={logoSrc} alt="IASD" className="w-7 h-7 rounded-full" />
           <div>
             <div className="text-xs font-semibold text-gray-900 dark:text-white leading-tight">
               Trazabilidad Pastoral
@@ -181,7 +181,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
         {/* Brand */}
         <div className="p-5 pb-4">
           <div className="flex items-center gap-3 mb-4">
-            <BookOpen className="w-10 h-10 text-teal-600" />
+            <img src={logoSrc} alt="IASD" className="w-10 h-10 rounded-full" />
             <div>
               <div className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
                 Trazabilidad

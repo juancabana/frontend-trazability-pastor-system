@@ -11,7 +11,7 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
-  BarChart3,
+  Clock,
   FileText,
   Users,
   Activity,
@@ -59,7 +59,7 @@ export default function AdminConsolidatedPage() {
     { icon: FileText, label: 'Informes', value: pastorSummaries.reduce((s, p) => s + Math.round(p.compliance * daysInMonth), 0), sub: 'recibidos', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
     { icon: Users, label: 'Pastores', value: `${activePastors}/${pastors.length}`, sub: 'activos', color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/30' },
     { icon: Activity, label: 'Actividades', value: totalActivities, sub: 'registradas', color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-900/30' },
-    { icon: BarChart3, label: 'Horas', value: `${totalHours.toFixed(0)}h`, sub: 'totales', color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/30' },
+    { icon: Clock, label: 'Horas', value: `${totalHours.toFixed(0)}h`, sub: 'dedicadas', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30' },
   ];
 
   const handleExportPDF = async () => {
@@ -141,13 +141,18 @@ export default function AdminConsolidatedPage() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-3.5 hover:shadow-md transition-all"
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
           >
-            <div className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center mb-2`}>
-              <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}>
+                <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+              </div>
+              <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
+                {s.label}
+              </span>
             </div>
-            <p className={`text-lg font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[10px] text-gray-400 dark:text-slate-500">{s.sub}</p>
+            <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
+            <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
           </motion.div>
         ))}
       </div>

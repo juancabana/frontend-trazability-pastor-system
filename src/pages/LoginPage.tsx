@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import {
-  BookOpen,
   ChevronRight,
   Mail,
   Lock,
@@ -81,7 +80,7 @@ export default function LoginPage() {
             transition={{ duration: 0.6 }}
             className="flex items-center gap-3 mb-16"
           >
-            <BookOpen className="w-12 h-12 text-teal-400" />
+            <img src="/iasd-logo-dark.png" alt="IASD" className="w-12 h-12 rounded-full" />
             <div>
               <span className="text-sm font-semibold tracking-wide">IASD</span>
               <p className="text-[10px] text-white/40 font-medium tracking-wider uppercase">
@@ -160,7 +159,7 @@ export default function LoginPage() {
         <div className="absolute top-0 right-0 w-40 h-40 bg-teal-500/15 rounded-full blur-2xl" />
         <div className="relative z-10">
           <div className="flex items-center gap-2.5 mb-4">
-            <BookOpen className="w-10 h-10 text-teal-400" />
+            <img src="/iasd-logo-dark.png" alt="IASD" className="w-10 h-10 rounded-full" />
             <span className="text-xs font-semibold tracking-wide opacity-80">
               IASD
             </span>
