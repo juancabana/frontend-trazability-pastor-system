@@ -372,7 +372,18 @@ export default function AdminDistritosPage() {
                             .toUpperCase()}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 dark:text-white truncate">{pastor.name}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm text-gray-900 dark:text-white truncate">{pastor.name}</p>
+                            {pastor.position && (
+                              <span className={`text-[9px] font-medium px-1 py-0.5 rounded ${
+                                pastor.position === 'Pastor'
+                                  ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400'
+                                  : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400'
+                              }`}>
+                                {pastor.position}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[10px] text-gray-400 dark:text-slate-500 truncate">{pastor.email}</p>
                         </div>
                         <button

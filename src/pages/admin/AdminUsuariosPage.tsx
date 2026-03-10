@@ -14,7 +14,7 @@ import { Modal } from '@/components/atoms/Modal';
 import { ConfirmDialog } from '@/components/atoms/ConfirmDialog';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
-import { Plus, Edit3, Trash2, UserCog } from 'lucide-react';
+import { Plus, Edit3, Trash2, UserCog, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminUsuariosPage() {
@@ -36,6 +36,8 @@ export default function AdminUsuariosPage() {
   const [formPassword, setFormPassword] = useState('');
   const [formRole, setFormRole] = useState<UserRole>('pastor');
   const [formDistrictId, setFormDistrictId] = useState('');
+  const [formPosition, setFormPosition] = useState('');
+  const [formPhone, setFormPhone] = useState('');
 
   const filteredUsers = users.filter(
     (u) =>
@@ -50,6 +52,8 @@ export default function AdminUsuariosPage() {
     setFormPassword('');
     setFormRole('pastor');
     setFormDistrictId('');
+    setFormPosition('Pastor');
+    setFormPhone('');
     setShowModal(true);
   };
 
@@ -60,6 +64,8 @@ export default function AdminUsuariosPage() {
     setFormPassword('');
     setFormRole(user.role);
     setFormDistrictId(user.districtId || '');
+    setFormPosition(user.position || '');
+    setFormPhone(user.phone || '');
     setShowModal(true);
   };
 
@@ -87,6 +93,8 @@ export default function AdminUsuariosPage() {
             password: formPassword || undefined,
             role: formRole,
             districtId: formDistrictId || undefined,
+            position: formPosition || undefined,
+            phone: formPhone || undefined,
           },
         });
         toast.success('Usuario actualizado');
@@ -100,6 +108,8 @@ export default function AdminUsuariosPage() {
             role: formRole,
             associationId: currentUser.associationId ?? '',
             districtId: formDistrictId || undefined,
+            position: formPosition || undefined,
+            phone: formPhone || undefined,
           },
         });
         toast.success('Usuario creado');
@@ -188,10 +198,18 @@ export default function AdminUsuariosPage() {
                     <Badge
                       variant={user.role === 'admin' ? 'info' : 'primary'}
                     >
-                      {rc.label}
+                      {user.position || rc.label}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-gray-400 dark:text-slate-500">{user.email}</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-[11px] text-gray-400 dark:text-slate-500 truncate">{user.email}</p>
+                    {user.phone && (
+                      <span className="text-[11px] text-gray-400 dark:text-slate-500 flex items-center gap-1 shrink-0">
+                        <Phone className="w-3 h-3" />
+                        {user.phone}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <button
@@ -272,6 +290,33 @@ export default function AdminUsuariosPage() {
               <option value="pastor">Pastor</option>
               <option value="admin">Administrador</option>
             </select>
+          </div>
+          {formRole === 'pastor' && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
+                Posicion
+              </label>
+              <select
+                value={formPosition}
+                onChange={(e) => setFormPosition(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none appearance-none dark:text-white"
+              >
+                <option value="Pastor">Pastor</option>
+                <option value="Ministro">Ministro</option>
+              </select>
+            </div>
+          )}
+          <div>
+            <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
+              Celular
+            </label>
+            <input
+              type="tel"
+              value={formPhone}
+              onChange={(e) => setFormPhone(e.target.value)}
+              placeholder="Ej: 311 660 0185"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none dark:text-white"
+            />
           </div>
           {formRole === 'pastor' && (
             <div>

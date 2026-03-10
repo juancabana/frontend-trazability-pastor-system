@@ -7,5 +7,7 @@ export interface UserAccount {
   role: UserRole;
   associationId: string;
   districtId?: string;
+  position?: string | null;
+  phone?: string | null;
   createdAt: string;
 }
