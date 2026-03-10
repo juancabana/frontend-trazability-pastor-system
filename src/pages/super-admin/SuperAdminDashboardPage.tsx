@@ -58,7 +58,8 @@ export default function SuperAdminDashboardPage() {
       {/* Month nav */}
       <div className="flex items-center gap-3 mb-5">
         <button
-          onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          aria-label="Mes anterior"
+            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
@@ -67,7 +68,8 @@ export default function SuperAdminDashboardPage() {
           {formatMonthYear(currentMonth)}
         </span>
         <button
-          onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
+          aria-label="Mes siguiente"
+            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />

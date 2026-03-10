@@ -183,6 +183,7 @@ export default function PastorCalendarPage() {
         {/* Month nav */}
         <div className="flex items-center justify-center gap-3 py-4 px-4 border-b border-gray-100 dark:border-slate-800">
           <button
+            aria-label="Mes anterior"
             onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
           >
@@ -192,6 +193,7 @@ export default function PastorCalendarPage() {
             {formatMonthYear(currentMonth)}
           </h3>
           <button
+            aria-label="Mes siguiente"
             onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
           >

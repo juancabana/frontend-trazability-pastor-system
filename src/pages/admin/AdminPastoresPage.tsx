@@ -81,6 +81,7 @@ export default function AdminPastoresPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
+            aria-label="Mes anterior"
             onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
           >
@@ -90,6 +91,7 @@ export default function AdminPastoresPage() {
             {formatMonthYear(currentMonth)}
           </span>
           <button
+            aria-label="Mes siguiente"
             onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
           >
