@@ -18,6 +18,12 @@ class FetchHttpAdapter implements HttpGateway {
     response: Response,
     url: string,
   ): Promise<T> {
+    if (response.status === 401) {
+      localStorage.removeItem('pastor_tracking_token');
+      localStorage.removeItem('pastor_tracking_user');
+      window.location.href = '/login';
+      throw new Error('Sesion expirada');
+    }
     if (!response.ok) {
       const body = await response.text().catch(() => '');
       throw new Error(

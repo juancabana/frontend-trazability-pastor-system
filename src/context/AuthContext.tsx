@@ -45,6 +45,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+          setToken(null);
+          setCurrentUser(null);
+          return;
+        }
+      } catch {
+        setToken(null);
+        setCurrentUser(null);
+        return;
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token) {
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
     } else {
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);

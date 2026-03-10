@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
+  BarChart3,
   Clock,
   FileText,
   Users,
