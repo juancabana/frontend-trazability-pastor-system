@@ -6,7 +6,7 @@ import { useSaveReport, useDeleteReport } from '@/features/daily-report/presenta
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import type { ActivityEntry } from '@/features/daily-report/domain/entities/daily-report';
 import { formatDate, isDateEditable } from '@/lib/format-date';
-import { UNIT_LABELS } from '@/constants/shared';
+import { UNIT_LABELS, TRANSPORT_CATEGORY_ID } from '@/constants/shared';
 import {
   ArrowLeft,
   ChevronDown,
@@ -86,7 +86,7 @@ export default function PastorReportEditPage() {
     const cat = categoriesMap.get(categoryId);
     const sub = cat?.subcategories.find((s) => s.id === subcategoryId);
     if (!sub || activities.some((a) => a.subcategoryId === subcategoryId)) return;
-    const isTransport = categoryId === 'transporte';
+    const isTransport = categoryId === TRANSPORT_CATEGORY_ID;
     setActivities((prev) => [
       ...prev,
       {
@@ -219,7 +219,7 @@ export default function PastorReportEditPage() {
                     (s) => s.id === act.subcategoryId,
                   );
                   if (!sub) return null;
-                  const isTransport = act.categoryId === 'transporte';
+                  const isTransport = act.categoryId === TRANSPORT_CATEGORY_ID;
 
                   return (
                     <div key={act.subcategoryId} className="px-5 py-4">

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { formatMonthYear, isDateInCurrentPeriod, isDateEditable } from '@/lib/format-date';
-import { DAYS_ES } from '@/constants/shared';
+import { DAYS_ES, TRANSPORT_CATEGORY_ID } from '@/constants/shared';
 import {
   ChevronLeft,
   ChevronRight,
@@ -53,7 +53,7 @@ export default function PastorCalendarPage() {
     (sum, r) =>
       sum +
       (r.activities || [])
-        .filter((a) => a.categoryId === 'transporte')
+        .filter((a) => a.categoryId === TRANSPORT_CATEGORY_ID)
         .reduce((s, a) => s + (a.amount || 0), 0),
     0,
   );

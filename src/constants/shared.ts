@@ -1,3 +1,5 @@
+export const TRANSPORT_CATEGORY_ID = 'transporte';
+
 export const CURRENCY_CONFIG = {
   LOCALE: 'es-CO',
   CURRENCY: 'COP',

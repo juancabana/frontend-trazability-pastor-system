@@ -5,6 +5,7 @@ import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useReportByDate } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatDate } from '@/lib/format-date';
+import { TRANSPORT_CATEGORY_ID } from '@/constants/shared';
 import { ArrowLeft, Shield } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -93,7 +94,7 @@ export default function AdminReportDetailPage() {
                   {acts.map((act) => {
                     const sub = cat.subcategories.find((s) => s.id === act.subcategoryId);
                     if (!sub) return null;
-                    const isTransport = act.categoryId === 'transporte';
+                    const isTransport = act.categoryId === TRANSPORT_CATEGORY_ID;
                     return (
                       <div key={act.subcategoryId} className="px-5 py-4">
                         <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">{sub.name}</p>
