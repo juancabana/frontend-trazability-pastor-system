@@ -1,5 +1,6 @@
 import type { HttpGateway } from '@/shared/domain/gateways/http-gateway';
 import { env } from '@/config/env';
+import { STORAGE_KEYS } from '@/constants/shared';
 
 class FetchHttpAdapter implements HttpGateway {
   constructor(private readonly baseUrl: string) {}
@@ -19,8 +20,8 @@ class FetchHttpAdapter implements HttpGateway {
     url: string,
   ): Promise<T> {
     if (response.status === 401) {
-      localStorage.removeItem('pastor_tracking_token');
-      localStorage.removeItem('pastor_tracking_user');
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
       window.location.href = '/login';
       throw new Error('Sesion expirada');
     }

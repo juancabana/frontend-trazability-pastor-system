@@ -53,11 +53,12 @@ export default function LoginPage() {
     setError('');
     setSubmitting(true);
     const emailMap = {
-      pastor: 'pastor@demo.com',
-      admin: 'admin@demo.com',
-      super_admin: 'superadmin.norte@demo.com',
+      pastor: import.meta.env.VITE_DEMO_PASTOR_EMAIL || '',
+      admin: import.meta.env.VITE_DEMO_ADMIN_EMAIL || '',
+      super_admin: import.meta.env.VITE_DEMO_SUPERADMIN_EMAIL || '',
     };
-    const result = await login(emailMap[demoRole], 'demo1234');
+    const demoPassword = import.meta.env.VITE_DEMO_PASSWORD || '';
+    const result = await login(emailMap[demoRole], demoPassword);
     if (result) {
       navigate(getRoleRedirect(result));
     } else {
@@ -247,76 +248,80 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Quick access */}
-          <div className="mt-8">
-            <div className="relative flex items-center justify-center mb-5">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-slate-700" />
+          {/* Quick access - Development only */}
+          {!import.meta.env.PROD && (
+            <div className="mt-8">
+              <div className="relative flex items-center justify-center mb-5">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200 dark:border-slate-700" />
+                </div>
+                <span className="relative bg-gray-50 dark:bg-slate-950 px-3 text-xs text-gray-400 dark:text-slate-500">
+                  Acceso rapido demo
+                </span>
               </div>
-              <span className="relative bg-gray-50 dark:bg-slate-950 px-3 text-xs text-gray-400 dark:text-slate-500">
-                Acceso rapido demo
-              </span>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleQuickAccess('pastor')}
+                  disabled={submitting}
+                  className="flex-1 py-3.5 border border-gray-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white/50 dark:bg-slate-900/50 disabled:opacity-50 active:scale-[0.98]"
+                >
+                  {submitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  ) : (
+                    <>
+                      <span className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-xl flex items-center justify-center text-xs font-semibold shadow-sm">
+                        CM
+                      </span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                        Pastor
+                      </span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => handleQuickAccess('admin')}
+                  disabled={submitting}
+                  className="flex-1 py-3.5 border border-gray-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white/50 dark:bg-slate-900/50 disabled:opacity-50 active:scale-[0.98]"
+                >
+                  {submitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  ) : (
+                    <>
+                      <span className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-xl flex items-center justify-center text-xs font-semibold shadow-sm">
+                        AD
+                      </span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                        Admin
+                      </span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => handleQuickAccess('super_admin')}
+                  disabled={submitting}
+                  className="flex-1 py-3.5 border border-gray-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white/50 dark:bg-slate-900/50 disabled:opacity-50 active:scale-[0.98]"
+                >
+                  {submitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  ) : (
+                    <>
+                      <span className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl flex items-center justify-center text-xs font-semibold shadow-sm">
+                        SA
+                      </span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                        Super
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+              {import.meta.env.VITE_DEMO_PASTOR_EMAIL && (
+                <p className="text-[11px] text-gray-400 dark:text-slate-500 text-center mt-4 leading-relaxed">
+                  {import.meta.env.VITE_DEMO_PASTOR_EMAIL} / {import.meta.env.VITE_DEMO_ADMIN_EMAIL} / {import.meta.env.VITE_DEMO_SUPERADMIN_EMAIL}
+                </p>
+              )}
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleQuickAccess('pastor')}
-                disabled={submitting}
-                className="flex-1 py-3.5 border border-gray-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white/50 dark:bg-slate-900/50 disabled:opacity-50 active:scale-[0.98]"
-              >
-                {submitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                ) : (
-                  <>
-                    <span className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-xl flex items-center justify-center text-xs font-semibold shadow-sm">
-                      CM
-                    </span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
-                      Pastor
-                    </span>
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => handleQuickAccess('admin')}
-                disabled={submitting}
-                className="flex-1 py-3.5 border border-gray-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white/50 dark:bg-slate-900/50 disabled:opacity-50 active:scale-[0.98]"
-              >
-                {submitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                ) : (
-                  <>
-                    <span className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-xl flex items-center justify-center text-xs font-semibold shadow-sm">
-                      AD
-                    </span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
-                      Admin
-                    </span>
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => handleQuickAccess('super_admin')}
-                disabled={submitting}
-                className="flex-1 py-3.5 border border-gray-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-2.5 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white/50 dark:bg-slate-900/50 disabled:opacity-50 active:scale-[0.98]"
-              >
-                {submitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                ) : (
-                  <>
-                    <span className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl flex items-center justify-center text-xs font-semibold shadow-sm">
-                      SA
-                    </span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
-                      Super
-                    </span>
-                  </>
-                )}
-              </button>
-            </div>
-            <p className="text-[11px] text-gray-400 dark:text-slate-500 text-center mt-4 leading-relaxed">
-              pastor@demo.com / admin@demo.com / superadmin.norte@demo.com — clave: demo1234
-            </p>
-          </div>
+          )}
         </motion.div>
       </div>
     </div>
