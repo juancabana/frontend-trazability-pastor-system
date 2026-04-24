@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useUnionConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { formatMonthYear } from '@/lib/format-date';
 import { COMPLIANCE_THRESHOLD } from '@/constants/shared';
+import { Tooltip } from '@/components/atoms/Tooltip';
 import {
   ChevronLeft,
   ChevronRight,
@@ -77,20 +78,30 @@ export default function SuperAdminConsolidatedPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportPDF}
-            disabled={!unionData}
-            className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+          <Tooltip
+            content={!unionData ? 'Sin datos para exportar' : 'Exportar como PDF'}
+            side="bottom"
           >
-            <Download className="w-3.5 h-3.5" /> PDF
-          </button>
-          <button
-            onClick={handleExportExcel}
-            disabled={!unionData}
-            className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            <button
+              onClick={handleExportPDF}
+              disabled={!unionData}
+              className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-3.5 h-3.5" /> PDF
+            </button>
+          </Tooltip>
+          <Tooltip
+            content={!unionData ? 'Sin datos para exportar' : 'Exportar como Excel'}
+            side="bottom"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5" /> Excel
-          </button>
+            <button
+              onClick={handleExportExcel}
+              disabled={!unionData}
+              className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" /> Excel
+            </button>
+          </Tooltip>
         </div>
       </div>
 

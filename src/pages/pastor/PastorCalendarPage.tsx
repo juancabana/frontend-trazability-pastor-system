@@ -12,6 +12,9 @@ import {
   TrendingUp,
   Activity,
   DollarSign,
+  Lock,
+  PenLine,
+  Plus,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -225,17 +228,59 @@ export default function PastorCalendarPage() {
               );
             }
 
-            const { report, isToday, inPeriod, isFuture } = getDayStatus(day);
+            const { report, isToday, inPeriod, editable, isFuture } = getDayStatus(day);
             const actCount = report?.activities?.length || 0;
+
+            // Tooltip nativo (title) — explica el estado al usuario
+            const tooltipText = isFuture
+              ? 'Fecha futura'
+              : !editable && !report
+                ? 'Sin informe · Periodo cerrado'
+                : !editable && report
+                  ? 'Ver informe (solo lectura)'
+                  : editable && !report
+                    ? 'Crear informe'
+                    : 'Editar informe';
+
+            // Cursor e interactividad según estado
+            const interactiveClass =
+              isFuture || (!editable && !report)
+                ? 'cursor-default'
+                : 'cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800';
+
+            // Opacidad: días cerrados sin informe se difuminan más para
+            // indicar que no son accionables
+            const opacityClass = isFuture
+              ? 'opacity-30'
+              : !editable && !report
+                ? 'opacity-40'
+                : '';
+
+            // Icono de estado (solo desktop) en la esquina superior derecha
+            const StatusIcon =
+              isFuture || (!editable && !report)
+                ? null
+                : !editable && report
+                  ? Lock
+                  : editable && report
+                    ? PenLine
+                    : Plus;
+
+            const statusIconColor =
+              !editable && report
+                ? 'text-gray-400 dark:text-slate-500'
+                : 'text-teal-500 dark:text-teal-400';
 
             return (
               <div
                 key={day}
                 onClick={() => handleDayClick(day)}
+                title={tooltipText}
                 className={`min-h-[56px] sm:min-h-[90px] bg-white dark:bg-slate-900 p-1.5 sm:p-2 transition-all duration-150 relative group
                   ${isToday ? 'bg-teal-50/60 dark:bg-teal-900/20' : ''}
-                  ${isFuture ? 'opacity-30 cursor-default' : 'cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800'}
                   ${!inPeriod && !isFuture ? 'bg-gray-50/80 dark:bg-slate-950/80' : ''}
+                  ${interactiveClass}
+                  ${opacityClass}
                 `}
               >
                 <div className="flex items-center justify-between mb-0.5 sm:mb-1">
@@ -250,6 +295,12 @@ export default function PastorCalendarPage() {
                   >
                     {day}
                   </span>
+                  {/* Icono de estado — solo desktop, solo si no es futuro */}
+                  {StatusIcon && !isFuture && (
+                    <span className={`hidden sm:flex ${statusIconColor}`}>
+                      <StatusIcon className="w-3 h-3" />
+                    </span>
+                  )}
                 </div>
                 {report && (
                   <>
@@ -284,18 +335,27 @@ export default function PastorCalendarPage() {
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 border-t border-gray-100 dark:border-slate-800 text-[11px] text-gray-400 dark:text-slate-500">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 border-t border-gray-100 dark:border-slate-800 text-[11px] text-gray-400 dark:text-slate-500">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-teal-500" /> Completado
+            <span className="w-2 h-2 rounded-full bg-teal-500" /> Informe completado
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-gray-300" /> Cerrado
+            <span className="w-2 h-2 rounded-full bg-gray-300" /> Informe cerrado
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-5 h-5 bg-teal-600 text-white rounded-full flex items-center justify-center text-[9px] font-medium">
               {today.getDate()}
             </span>{' '}
             Hoy
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5">
+            <PenLine className="w-3 h-3 text-teal-500" /> Editable
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5">
+            <Plus className="w-3 h-3 text-teal-500" /> Crear informe
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5">
+            <Lock className="w-3 h-3 text-gray-400" /> Solo lectura
           </span>
         </div>
       </motion.div>
