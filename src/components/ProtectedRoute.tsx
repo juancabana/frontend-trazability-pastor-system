@@ -3,15 +3,16 @@ import { useAuth } from '@/context/AuthContext';
 import type { UserRole } from '@/features/auth/domain/entities/user-role';
 
 interface ProtectedRouteProps {
-  role: UserRole;
+  roles: UserRole[];
   children: React.ReactNode;
 }
 
-function getRoleRedirect(role: UserRole | null): string {
+export function getRoleRedirect(role: UserRole | null): string {
   switch (role) {
     case 'super_admin':
       return '/super-admin';
     case 'admin':
+    case 'admin_readonly':
       return '/admin';
     case 'pastor':
       return '/pastor';
@@ -20,14 +21,14 @@ function getRoleRedirect(role: UserRole | null): string {
   }
 }
 
-export function ProtectedRoute({ role, children }: ProtectedRouteProps) {
+export function ProtectedRoute({ roles, children }: ProtectedRouteProps) {
   const { isAuthenticated, role: userRole } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (userRole !== role) {
+  if (!userRole || !roles.includes(userRole)) {
     return <Navigate to={getRoleRedirect(userRole)} replace />;
   }
 

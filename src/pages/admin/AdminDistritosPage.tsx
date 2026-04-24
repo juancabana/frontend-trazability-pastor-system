@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useCanWrite } from '@/hooks/use-can-write';
 import { useDistricts } from '@/features/district/presentation/hooks/use-district-queries';
 import { useCreateDistrict, useUpdateDistrict, useDeleteDistrict } from '@/features/district/presentation/hooks/use-district-mutations';
 import { useChurches, useCreateChurch, useUpdateChurch, useMoveChurch, useDeleteChurch } from '@/features/church/presentation/hooks/use-church-queries';
@@ -26,6 +27,7 @@ import type { Church as ChurchEntity } from '@/features/church/domain/entities/c
 
 export default function AdminDistritosPage() {
   const { token, currentUser } = useAuth();
+  const canWrite = useCanWrite();
   const associationId = currentUser?.associationId ?? '';
 
   const { data: districts = [] } = useDistricts(associationId);
@@ -204,15 +206,17 @@ export default function AdminDistritosPage() {
             <MapPin className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> Distritos
           </h2>
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-            Gestionar distritos, iglesias y pastores
+            {canWrite ? 'Gestionar distritos, iglesias y pastores' : 'Vista de distritos, iglesias y pastores'}
           </p>
         </div>
-        <button
-          onClick={() => openModal('add-district')}
-          className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5"
-        >
-          <Plus className="w-3.5 h-3.5" /> Distrito
-        </button>
+        {canWrite && (
+          <button
+            onClick={() => openModal('add-district')}
+            className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" /> Distrito
+          </button>
+        )}
       </div>
 
       <div className="mb-5">
@@ -257,20 +261,24 @@ export default function AdminDistritosPage() {
                 </div>
               </button>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => openModal('edit-district', undefined, district)}
-                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                  title="Editar"
-                >
-                  <Pencil className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
-                </button>
-                <button
-                  onClick={() => handleDeleteDistrict(district)}
-                  className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                  title="Eliminar"
-                >
-                  <Trash2 className="w-3.5 h-3.5 text-gray-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400" />
-                </button>
+                {canWrite && (
+                  <>
+                    <button
+                      onClick={() => openModal('edit-district', undefined, district)}
+                      className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                      title="Editar"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDistrict(district)}
+                      className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-gray-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400" />
+                    </button>
+                  </>
+                )}
                 <button onClick={() => toggleExpand(district.id)} className="p-1.5">
                   {isExpanded ? (
                     <ChevronUp className="w-4 h-4 text-gray-400 dark:text-slate-500" />
@@ -296,12 +304,14 @@ export default function AdminDistritosPage() {
                       <span className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                         <Church className="w-3 h-3" /> Iglesias ({dChurches.length})
                       </span>
-                      <button
-                        onClick={() => openModal('add-church', district.id)}
-                        className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors flex items-center gap-1"
-                      >
-                        <Plus className="w-3 h-3" /> Agregar
-                      </button>
+                      {canWrite && (
+                        <button
+                          onClick={() => openModal('add-church', district.id)}
+                          className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors flex items-center gap-1"
+                        >
+                          <Plus className="w-3 h-3" /> Agregar
+                        </button>
+                      )}
                     </div>
 
                     {dChurches.map((church) => (
@@ -318,29 +328,31 @@ export default function AdminDistritosPage() {
                             <p className="text-[10px] text-gray-400 dark:text-slate-500 truncate">{church.address}</p>
                           )}
                         </div>
-                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => openModal('edit-church', district.id, church)}
-                            className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-colors"
-                            title="Editar"
-                          >
-                            <Pencil className="w-3 h-3 text-gray-400 dark:text-slate-500" />
-                          </button>
-                          <button
-                            onClick={() => openModal('move-church', district.id, church)}
-                            className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-colors"
-                            title="Mover de distrito"
-                          >
-                            <ArrowRightLeft className="w-3 h-3 text-gray-400 dark:text-slate-500" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteChurch(church)}
-                            className="p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400" />
-                          </button>
-                        </div>
+                        {canWrite && (
+                          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => openModal('edit-church', district.id, church)}
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-colors"
+                              title="Editar"
+                            >
+                              <Pencil className="w-3 h-3 text-gray-400 dark:text-slate-500" />
+                            </button>
+                            <button
+                              onClick={() => openModal('move-church', district.id, church)}
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-colors"
+                              title="Mover de distrito"
+                            >
+                              <ArrowRightLeft className="w-3 h-3 text-gray-400 dark:text-slate-500" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteChurch(church)}
+                              className="p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
 
@@ -386,13 +398,15 @@ export default function AdminDistritosPage() {
                           </div>
                           <p className="text-[10px] text-gray-400 dark:text-slate-500 truncate">{pastor.email}</p>
                         </div>
-                        <button
-                          onClick={() => openModal('move-pastor', district.id, pastor)}
-                          className="p-1 opacity-0 group-hover:opacity-100 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-all"
-                          title="Reasignar distrito"
-                        >
-                          <ArrowRightLeft className="w-3 h-3 text-gray-400 dark:text-slate-500" />
-                        </button>
+                        {canWrite && (
+                          <button
+                            onClick={() => openModal('move-pastor', district.id, pastor)}
+                            className="p-1 opacity-0 group-hover:opacity-100 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-all"
+                            title="Reasignar distrito"
+                          >
+                            <ArrowRightLeft className="w-3 h-3 text-gray-400 dark:text-slate-500" />
+                          </button>
+                        )}
                       </div>
                     ))}
 
@@ -409,9 +423,9 @@ export default function AdminDistritosPage() {
         );
       })}
 
-      {/* Modal */}
+      {/* Modal — solo visible para admin con escritura */}
       <AnimatePresence>
-        {modal && (
+        {canWrite && modal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -535,14 +549,16 @@ export default function AdminDistritosPage() {
         )}
       </AnimatePresence>
 
-      <ConfirmDialog
-        isOpen={!!deleteTarget}
-        title={`Eliminar ${deleteTarget?.type === 'district' ? 'distrito' : 'iglesia'}`}
-        message={`¿Esta seguro de eliminar "${deleteTarget?.item.name}"? Esta accion no se puede deshacer.`}
-        confirmLabel="Eliminar"
-        onConfirm={confirmDeleteTarget}
-        onCancel={() => setDeleteTarget(null)}
-      />
+      {canWrite && (
+        <ConfirmDialog
+          isOpen={!!deleteTarget}
+          title={`Eliminar ${deleteTarget?.type === 'district' ? 'distrito' : 'iglesia'}`}
+          message={`¿Esta seguro de eliminar "${deleteTarget?.item.name}"? Esta accion no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          onConfirm={confirmDeleteTarget}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }

@@ -37,6 +37,13 @@ const ROLE_ACCENT = {
     indicator: 'bg-indigo-600 dark:bg-indigo-400',
     label: 'Administrador',
   },
+  admin_readonly: {
+    active: 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',
+    badge: 'bg-sky-600',
+    text: 'text-sky-600 dark:text-sky-400',
+    indicator: 'bg-sky-600 dark:bg-sky-400',
+    label: 'Solo Lectura',
+  },
   pastor: {
     active: 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
     badge: 'bg-teal-600',

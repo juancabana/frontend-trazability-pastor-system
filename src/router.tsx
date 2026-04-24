@@ -32,7 +32,7 @@ export function AppRoutes() {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute role="admin">
+          <ProtectedRoute roles={['admin', 'admin_readonly']}>
             <AdminLayout />
           </ProtectedRoute>
         }
@@ -52,7 +52,7 @@ export function AppRoutes() {
       <Route
         path="/pastor"
         element={
-          <ProtectedRoute role="pastor">
+          <ProtectedRoute roles={['pastor']}>
             <PastorLayout />
           </ProtectedRoute>
         }
@@ -66,7 +66,7 @@ export function AppRoutes() {
       <Route
         path="/super-admin"
         element={
-          <ProtectedRoute role="super_admin">
+          <ProtectedRoute roles={['super_admin']}>
             <SuperAdminLayout />
           </ProtectedRoute>
         }

@@ -1,17 +1,12 @@
 import { Link } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
+import { getRoleRedirect } from '@/components/ProtectedRoute';
 import { Home } from 'lucide-react';
 
 export default function NotFoundPage() {
   const { role, isAuthenticated } = useAuth();
 
-  const homeLink = isAuthenticated
-    ? role === 'admin'
-      ? '/admin'
-      : role === 'super_admin'
-        ? '/super-admin'
-        : '/pastor'
-    : '/login';
+  const homeLink = isAuthenticated ? getRoleRedirect(role) : '/login';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 px-4">

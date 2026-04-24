@@ -9,17 +9,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuth } from '@/context/AuthContext';
-
-function getRoleRedirect(role: string): string {
-  switch (role) {
-    case 'super_admin':
-      return '/super-admin';
-    case 'admin':
-      return '/admin';
-    default:
-      return '/pastor';
-  }
-}
+import { getRoleRedirect } from '@/components/ProtectedRoute';
 
 export default function LoginPage() {
   const { login, isAuthenticated, role } = useAuth();
