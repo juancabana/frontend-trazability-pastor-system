@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { COMPLIANCE_THRESHOLD } from '@/constants/shared';
 
 export default function SuperAdminDashboardPage() {
   const { token, currentUser } = useAuth();
@@ -134,7 +135,7 @@ export default function SuperAdminDashboardPage() {
                   </div>
                   <span
                     className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                      compliance >= 70
+                      compliance >= COMPLIANCE_THRESHOLD
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                         : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
                     }`}

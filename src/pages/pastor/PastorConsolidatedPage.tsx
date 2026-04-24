@@ -3,7 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { usePastorConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatMonthYear } from '@/lib/format-date';
-import { UNIT_LABELS } from '@/constants/shared';
+import { UNIT_LABELS, COMPLIANCE_THRESHOLD } from '@/constants/shared';
 import {
   ChevronLeft,
   ChevronRight,
@@ -65,8 +65,8 @@ export default function PastorConsolidatedPage() {
       label: 'Cumplimiento',
       value: `${compliance}%`,
       sub: 'del mes',
-      color: compliance >= 70 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
-      bg: compliance >= 70 ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
+      color: compliance >= COMPLIANCE_THRESHOLD ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
+      bg: compliance >= COMPLIANCE_THRESHOLD ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
     },
     {
       icon: Activity,

@@ -6,7 +6,7 @@ import { useSaveReport, useDeleteReport } from '@/features/daily-report/presenta
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import type { ActivityEntry } from '@/features/daily-report/domain/entities/daily-report';
 import { formatDate, isDateEditable } from '@/lib/format-date';
-import { UNIT_LABELS, TRANSPORT_CATEGORY_ID } from '@/constants/shared';
+import { UNIT_LABELS, TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import {
   ArrowLeft,
   ChevronDown,
@@ -24,7 +24,7 @@ export default function PastorReportEditPage() {
   const { date } = useParams<{ date: string }>();
   const navigate = useNavigate();
   const { token, currentUser } = useAuth();
-  const deadlineDay = currentUser?.reportDeadlineDay ?? 19;
+  const deadlineDay = currentUser?.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY;
 
   const reportDate = date ? new Date(date + 'T12:00:00') : new Date();
   const editable = isDateEditable(reportDate, deadlineDay);

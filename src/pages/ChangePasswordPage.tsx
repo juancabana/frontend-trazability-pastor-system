@@ -139,7 +139,7 @@ export default function ChangePasswordPage() {
             </ul>
           </div>
           <div className="mt-10 text-[11px] text-white/20">
-            &copy; 2026 Iglesia Adventista del Septimo Dia
+            &copy; {new Date().getFullYear()} Iglesia Adventista del Septimo Dia
           </div>
         </div>
       </div>

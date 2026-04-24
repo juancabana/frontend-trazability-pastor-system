@@ -5,6 +5,7 @@ import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatMonthYear } from '@/lib/format-date';
+import { COMPLIANCE_THRESHOLD } from '@/constants/shared';
 import {
   Users,
   FileText,
@@ -199,7 +200,7 @@ export default function AdminDashboardPage() {
                       </p>
                       <p className="text-[10px] text-gray-400 dark:text-slate-500">act.</p>
                     </div>
-                    {cumplimiento >= 70 ? (
+                    {cumplimiento >= COMPLIANCE_THRESHOLD ? (
                       <CheckCircle className="w-5 h-5 text-emerald-500" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-amber-500" />

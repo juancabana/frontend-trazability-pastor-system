@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useLogin } from '@/features/auth/presentation/hooks/use-auth-mutations';
-import { STORAGE_KEYS } from '@/constants/shared';
+import { STORAGE_KEYS, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import type { UserRole } from '@/features/auth/domain/entities/user-role';
 import { ROLE_ACCESS } from '@/features/auth/domain/entities/user-role';
 
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           unionId: res.unionId,
           associationName: res.associationName ?? null,
           unionName: res.unionName ?? null,
-          reportDeadlineDay: res.reportDeadlineDay ?? 19,
+          reportDeadlineDay: res.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY,
           mustChangePassword: res.mustChangePassword,
         });
         return { role: res.role, mustChangePassword: res.mustChangePassword };

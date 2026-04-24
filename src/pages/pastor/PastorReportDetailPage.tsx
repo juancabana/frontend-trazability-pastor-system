@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useReportByDate } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatDate, isDateEditable } from '@/lib/format-date';
-import { TRANSPORT_CATEGORY_ID } from '@/constants/shared';
+import { TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import { ArrowLeft, Edit3, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -12,7 +12,7 @@ export default function PastorReportDetailPage() {
   const { date } = useParams<{ date: string }>();
   const navigate = useNavigate();
   const { token, currentUser } = useAuth();
-  const deadlineDay = currentUser?.reportDeadlineDay ?? 19;
+  const deadlineDay = currentUser?.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY;
 
   const reportDate = date ? new Date(date + 'T12:00:00') : new Date();
   const editable = isDateEditable(reportDate, deadlineDay);

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useUnionConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { formatMonthYear } from '@/lib/format-date';
+import { COMPLIANCE_THRESHOLD } from '@/constants/shared';
 import {
   ChevronLeft,
   ChevronRight,
@@ -169,7 +170,7 @@ export default function SuperAdminConsolidatedPage() {
                   <p className="text-sm text-right text-gray-400 dark:text-slate-500">{assoc.totalHours.toFixed(0)}h</p>
                   <div className="flex justify-end">
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                      compliance >= 70
+                      compliance >= COMPLIANCE_THRESHOLD
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                         : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
                     }`}>{compliance}%</span>
@@ -182,7 +183,7 @@ export default function SuperAdminConsolidatedPage() {
                     <span className="text-xs bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white font-medium px-2 py-0.5 rounded-md">{assoc.totalPastors} pastores</span>
                     <span className="text-xs bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white px-2 py-0.5 rounded-md">{assoc.totalActivities} act.</span>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${
-                      compliance >= 70
+                      compliance >= COMPLIANCE_THRESHOLD
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                         : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
                     }`}>{compliance}%</span>

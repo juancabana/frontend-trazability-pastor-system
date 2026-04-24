@@ -5,7 +5,7 @@ import { useAssociationConsolidated } from '@/features/consolidated/presentation
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatMonthYear } from '@/lib/format-date';
 import { exportConsolidatedPDF, exportConsolidatedExcel } from '@/lib/export-utils';
-import { UNIT_LABELS } from '@/constants/shared';
+import { UNIT_LABELS, COMPLIANCE_THRESHOLD, PASTOR_POSITION_LABEL } from '@/constants/shared';
 import {
   ChevronLeft,
   ChevronRight,
@@ -279,7 +279,7 @@ export default function AdminConsolidatedPage() {
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{ps.pastorName}</p>
                     {ps.position && (
                       <span className={`text-[9px] font-medium px-1 py-0.5 rounded shrink-0 ${
-                        ps.position === 'Pastor'
+                        ps.position === PASTOR_POSITION_LABEL
                           ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
                           : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
                       }`}>
@@ -300,7 +300,7 @@ export default function AdminConsolidatedPage() {
                   </div>
                   <span
                     className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                      cumplimiento >= 70
+                      cumplimiento >= COMPLIANCE_THRESHOLD
                         ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
                         : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
                     }`}

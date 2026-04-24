@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { formatMonthYear, isDateInCurrentPeriod, isDateEditable } from '@/lib/format-date';
-import { DAYS_ES, TRANSPORT_CATEGORY_ID } from '@/constants/shared';
+import { DAYS_ES, TRANSPORT_CATEGORY_ID, COMPLIANCE_THRESHOLD, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import {
   ChevronLeft,
   ChevronRight,
@@ -25,7 +25,7 @@ export default function PastorCalendarPage() {
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  const deadlineDay = currentUser?.reportDeadlineDay ?? 19;
+  const deadlineDay = currentUser?.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY;
 
   const { data: monthReports = [] } = useReportsByPastorMonth(
     token ?? '',
@@ -104,8 +104,8 @@ export default function PastorCalendarPage() {
       label: 'Cumplimiento',
       value: `${cumplimiento}%`,
       sub: 'del mes',
-      color: cumplimiento >= 70 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
-      bg: cumplimiento >= 70 ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
+      color: cumplimiento >= COMPLIANCE_THRESHOLD ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
+      bg: cumplimiento >= COMPLIANCE_THRESHOLD ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
     },
     {
       icon: Activity,

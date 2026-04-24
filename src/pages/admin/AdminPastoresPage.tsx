@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { formatMonthYear } from '@/lib/format-date';
+import { PASTOR_POSITION_LABEL } from '@/constants/shared';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import {
   ChevronLeft,
@@ -123,7 +124,7 @@ export default function AdminPastoresPage() {
                     </p>
                     {pastor.position && (
                       <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md ${
-                        pastor.position === 'Pastor'
+                        pastor.position === PASTOR_POSITION_LABEL
                           ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
                           : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
                       }`}>

@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useAssociationsByUnion } from '@/features/association/presentation/hooks/use-association-queries';
 import { formatMonthYear } from '@/lib/format-date';
+import { COMPLIANCE_THRESHOLD } from '@/constants/shared';
 import {
   ArrowLeft,
   ChevronLeft,
@@ -158,7 +159,7 @@ export default function SuperAdminAssociationDetailPage() {
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">{ps.totalActivities}</p>
                       <p className="text-[10px] text-gray-400 dark:text-slate-500">act.</p>
                     </div>
-                    {cumplimiento >= 70 ? (
+                    {cumplimiento >= COMPLIANCE_THRESHOLD ? (
                       <CheckCircle className="w-5 h-5 text-emerald-500" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-amber-500" />
