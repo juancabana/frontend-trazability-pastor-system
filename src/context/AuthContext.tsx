@@ -14,6 +14,12 @@ interface AuthUser {
   associationName: string | null;
   unionName: string | null;
   reportDeadlineDay: number;
+  mustChangePassword: boolean;
+}
+
+interface LoginResult {
+  role: UserRole;
+  mustChangePassword: boolean;
 }
 
 interface AuthContextType {
@@ -21,9 +27,10 @@ interface AuthContextType {
   isAuthenticated: boolean;
   currentUser: AuthUser | null;
   role: UserRole | null;
-  login: (email: string, password: string) => Promise<UserRole | null>;
+  login: (email: string, password: string) => Promise<LoginResult | null>;
   logout: () => void;
   hasAccess: (section: string) => boolean;
+  clearMustChangePassword: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -78,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [currentUser]);
 
   const login = useCallback(
-    async (email: string, password: string): Promise<UserRole | null> => {
+    async (email: string, password: string): Promise<LoginResult | null> => {
       try {
         const res = await loginMutation.mutateAsync({ email, password });
         setToken(res.access_token);
@@ -92,14 +99,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           associationName: res.associationName ?? null,
           unionName: res.unionName ?? null,
           reportDeadlineDay: res.reportDeadlineDay ?? 19,
+          mustChangePassword: res.mustChangePassword,
         });
-        return res.role;
+        return { role: res.role, mustChangePassword: res.mustChangePassword };
       } catch {
         return null;
       }
     },
     [loginMutation],
   );
+
+  const clearMustChangePassword = useCallback(() => {
+    setCurrentUser((prev) => {
+      if (!prev) return prev;
+      return { ...prev, mustChangePassword: false };
+    });
+  }, []);
 
   const logout = useCallback(() => {
     setToken(null);
@@ -124,6 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         hasAccess,
+        clearMustChangePassword,
       }}
     >
       {children}

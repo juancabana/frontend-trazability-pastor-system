@@ -32,4 +32,8 @@ export class AuthRepositoryApiImpl implements AuthRepository {
   deleteUser(token: string, id: string): Promise<void> {
     return this.http.delete(API_ENDPOINTS.AUTH.USER_BY_ID(id), token);
   }
+
+  changeOwnPassword(token: string, newPassword: string): Promise<void> {
+    return this.http.patch<void>(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, { newPassword }, token);
+  }
 }

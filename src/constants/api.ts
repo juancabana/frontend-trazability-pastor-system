@@ -3,6 +3,7 @@ export const API_ENDPOINTS = {
     LOGIN: '/auth/login',
     USERS: '/auth/users',
     USER_BY_ID: (id: string) => `/auth/users/${id}`,
+    CHANGE_PASSWORD: '/auth/me/password',
   },
   ASSOCIATIONS: {
     LIST: '/associations',

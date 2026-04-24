@@ -82,7 +82,7 @@ export default function AdminUsuariosPage() {
       return;
     }
     if (!editingUser && !formPassword) {
-      toast.error('La contrasena es requerida');
+      toast.error('La contraseña es requerida');
       return;
     }
     try {
@@ -283,7 +283,7 @@ export default function AdminUsuariosPage() {
               )}
               <div>
                 <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
-                  {editingUser ? 'Nueva contrasena (dejar vacio para no cambiar)' : 'Contrasena'}
+                  {editingUser ? 'Nueva contraseña (dejar vacio para no cambiar)' : 'Contraseña'}
                 </label>
                 <input
                   type="password"

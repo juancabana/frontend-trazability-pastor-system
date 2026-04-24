@@ -11,4 +11,5 @@ export interface AuthToken {
   associationName?: string;
   unionName?: string;
   reportDeadlineDay?: number;
+  mustChangePassword: boolean;
 }

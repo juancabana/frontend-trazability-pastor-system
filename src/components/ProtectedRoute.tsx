@@ -22,10 +22,14 @@ export function getRoleRedirect(role: UserRole | null): string {
 }
 
 export function ProtectedRoute({ roles, children }: ProtectedRouteProps) {
-  const { isAuthenticated, role: userRole } = useAuth();
+  const { isAuthenticated, role: userRole, currentUser } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (currentUser?.mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
   }
 
   if (!userRole || !roles.includes(userRole)) {
