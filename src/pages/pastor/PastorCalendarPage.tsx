@@ -16,11 +16,13 @@ import {
   PenLine,
   Plus,
   CalendarX2,
+  ShieldCheck,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function PastorCalendarPage() {
   const { token, currentUser } = useAuth();
+  const canEditAllReports = currentUser?.canEditAllReports ?? false;
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
@@ -77,8 +79,8 @@ export default function PastorCalendarPage() {
       date.getMonth() === today.getMonth() &&
       date.getFullYear() === today.getFullYear();
     const inPeriod = isDateInCurrentPeriod(date, deadlineDay);
-    const editable = isDateEditable(date, deadlineDay);
     const isFuture = date > today;
+    const editable = !isFuture && (isDateEditable(date, deadlineDay) || canEditAllReports);
     return { report, isToday, inPeriod, editable, isFuture };
   };
 
@@ -135,18 +137,38 @@ export default function PastorCalendarPage() {
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-100 dark:border-blue-800 rounded-2xl p-4 mb-5 flex items-start gap-3"
+        className={`rounded-2xl p-4 mb-5 flex items-start gap-3 border ${
+          canEditAllReports
+            ? 'bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-100 dark:border-amber-800'
+            : 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border-blue-100 dark:border-blue-800'
+        }`}
       >
-        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
-          <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+          canEditAllReports
+            ? 'bg-amber-100 dark:bg-amber-900/30'
+            : 'bg-blue-100 dark:bg-blue-900/30'
+        }`}>
+          {canEditAllReports
+            ? <ShieldCheck className="w-4 h-4 text-amber-500" />
+            : <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          }
         </div>
         <div>
           <p className="text-sm font-medium text-gray-900 dark:text-white">
-            Periodo actual: {periodStart} del mes anterior — {periodEnd} del mes actual
+            {canEditAllReports
+              ? 'Excepción de edición activa'
+              : `Periodo actual: ${periodStart} del mes anterior — ${periodEnd} del mes actual`
+            }
           </p>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 hidden sm:block">
-            Solo puede editar informes dentro del periodo activo. Los anteriores son de
-            solo lectura.
+          <p className={`text-xs mt-0.5 hidden sm:block ${
+            canEditAllReports
+              ? 'text-amber-600 dark:text-amber-400'
+              : 'text-gray-500 dark:text-slate-400'
+          }`}>
+            {canEditAllReports
+              ? 'Puede editar informes de cualquier periodo vencido.'
+              : 'Solo puede editar informes dentro del periodo activo. Los anteriores son de solo lectura.'
+            }
           </p>
         </div>
       </motion.div>

@@ -15,6 +15,7 @@ interface AuthUser {
   unionName: string | null;
   reportDeadlineDay: number;
   mustChangePassword: boolean;
+  canEditAllReports: boolean;
 }
 
 interface LoginResult {
@@ -100,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           unionName: res.unionName ?? null,
           reportDeadlineDay: res.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY,
           mustChangePassword: res.mustChangePassword,
+          canEditAllReports: res.canEditAllReports ?? false,
         });
         return { role: res.role, mustChangePassword: res.mustChangePassword };
       } catch {

@@ -9,5 +9,6 @@ export interface UserAccount {
   districtId?: string;
   position?: string | null;
   phone?: string | null;
+  canEditAllReports?: boolean;
   createdAt: string;
 }

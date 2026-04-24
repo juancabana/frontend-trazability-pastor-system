@@ -26,12 +26,13 @@ export default function PastorReportEditPage() {
   const navigate = useNavigate();
   const { token, currentUser } = useAuth();
   const deadlineDay = currentUser?.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY;
+  const canEditAllReports = currentUser?.canEditAllReports ?? false;
 
   const reportDate = date ? new Date(date + 'T12:00:00') : new Date();
-  const editable = isDateEditable(reportDate, deadlineDay);
   const today = new Date();
   today.setHours(23, 59, 59, 999);
   const isFuture = reportDate > today;
+  const editable = !isFuture && (isDateEditable(reportDate, deadlineDay) || canEditAllReports);
 
   const { data: existingReport } = useReportByDate(
     token ?? '',

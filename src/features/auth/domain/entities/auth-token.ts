@@ -11,5 +11,7 @@ export interface AuthToken {
   associationName?: string;
   unionName?: string;
   reportDeadlineDay?: number;
+  position?: string;
   mustChangePassword: boolean;
+  canEditAllReports?: boolean;
 }
