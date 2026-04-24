@@ -3,8 +3,10 @@ import { useAuth } from '@/context/AuthContext';
 import { usePastorConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatMonthYear } from '@/lib/format-date';
+import { exportPastorPDF, exportPastorExcel } from '@/lib/export-utils';
 import { UNIT_LABELS, COMPLIANCE_THRESHOLD } from '@/constants/shared';
 import { EmptyState } from '@/components/atoms/EmptyState';
+import { Tooltip } from '@/components/atoms/Tooltip';
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,8 +17,11 @@ import {
   TrendingUp,
   Activity,
   DollarSign,
+  Download,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 export default function PastorConsolidatedPage() {
   const { token, currentUser } = useAuth();
@@ -51,6 +56,27 @@ export default function PastorConsolidatedPage() {
     : 0;
   const totalActivities = consolidated?.totals?.totalActivities || 0;
   const totalTransporte = consolidated?.totalTransportAmount || 0;
+  const monthLabel = formatMonthYear(currentMonth);
+
+  const handleExportPDF = async () => {
+    if (!consolidated) return;
+    try {
+      await exportPastorPDF(consolidated, monthLabel, currentUser?.displayName ?? 'Pastor');
+      toast.success('PDF generado correctamente');
+    } catch {
+      toast.error('Error al generar PDF');
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (!consolidated) return;
+    try {
+      await exportPastorExcel(consolidated, monthLabel, currentUser?.displayName ?? 'Pastor');
+      toast.success('Excel generado correctamente');
+    } catch {
+      toast.error('Error al generar Excel');
+    }
+  };
 
   const stats = [
     {
@@ -89,13 +115,35 @@ export default function PastorConsolidatedPage() {
 
   return (
     <div className="max-w-[900px] mx-auto">
-      <div className="mb-5">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-teal-600" /> Mi Consolidado Mensual
-        </h2>
-        <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-          Resumen personal de actividades por rubro y subcategoria
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-teal-600" /> Mi Consolidado Mensual
+          </h2>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+            Resumen personal de actividades por rubro y subcategoria
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Tooltip content={!consolidated ? 'Sin datos para exportar' : 'Exportar como PDF'} side="bottom">
+            <button
+              onClick={handleExportPDF}
+              disabled={!consolidated}
+              className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-3.5 h-3.5" /> PDF
+            </button>
+          </Tooltip>
+          <Tooltip content={!consolidated ? 'Sin datos para exportar' : 'Exportar como Excel'} side="bottom">
+            <button
+              onClick={handleExportExcel}
+              disabled={!consolidated}
+              className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" /> Excel
+            </button>
+          </Tooltip>
+        </div>
       </div>
 
       {/* Month nav */}

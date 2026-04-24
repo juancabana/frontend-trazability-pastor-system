@@ -84,3 +84,38 @@ export const UNIT_LABELS_FULL: Record<string, string> = {
   dias: 'Dias',
   noches: 'Noches',
 };
+
+// Colores de marca para exportaciones PDF (jsPDF RGB) y Excel (ExcelJS hex).
+export const EXPORT_BRAND = {
+  name: 'Sistema de Trazabilidad Pastoral',
+  pdf: {
+    teal:      [13, 148, 136]   as [number, number, number],
+    tealDark:  [15, 118, 110]   as [number, number, number],
+    purple:    [124, 58, 237]   as [number, number, number],
+    purpleDark:[109, 40, 217]   as [number, number, number],
+    slate:     [71, 85, 105]    as [number, number, number],
+    rowAlt:    [249, 250, 251]  as [number, number, number],
+    border:    [226, 232, 240]  as [number, number, number],
+    textDark:  [30, 41, 59]     as [number, number, number],
+    textMid:   [100, 116, 139]  as [number, number, number],
+    white:     [255, 255, 255]  as [number, number, number],
+    green:     { bg: [220, 252, 231] as [number,number,number], text: [21, 128, 61]   as [number,number,number] },
+    amber:     { bg: [254, 243, 199] as [number,number,number], text: [146, 64, 14]   as [number,number,number] },
+    red:       { bg: [254, 226, 226] as [number,number,number], text: [185, 28, 28]   as [number,number,number] },
+  },
+  excel: {
+    teal:       'FF0D9488',
+    tealDark:   'FF0F766E',
+    tealLight:  'FFE6FFFA',
+    purple:     'FF7C3AED',
+    purpleLight:'FFF5F3FF',
+    slate:      'FF475569',
+    slateLight: 'FFF8FAFC',
+    border:     'FFE2E8F0',
+    rowAlt:     'FFF9FAFB',
+    white:      'FFFFFFFF',
+    green:      { bg: 'FFDCFCE7', text: 'FF15803D' },
+    amber:      { bg: 'FFFEF3C7', text: 'FF92400E' },
+    red:        { bg: 'FFFEE2E2', text: 'FFB91C1C' },
+  },
+} as const;
