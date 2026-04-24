@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Lock, Eye, EyeOff, Check, X, Loader2, ShieldCheck } from 'lucide-react';
+import { Lock, Eye, EyeOff, Check, X, Loader2, ShieldCheck, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/context/AuthContext';
 import { useChangeOwnPassword } from '@/features/auth/presentation/hooks/use-auth-mutations';
@@ -31,7 +31,7 @@ const STRENGTH_CONFIG = [
 ];
 
 export default function ChangePasswordPage() {
-  const { token, currentUser, role, clearMustChangePassword } = useAuth();
+  const { token, currentUser, role, clearMustChangePassword, logout } = useAuth();
   const navigate = useNavigate();
   const mutation = useChangeOwnPassword();
 
@@ -355,6 +355,14 @@ export default function ChangePasswordPage() {
               )}
             </button>
           </form>
+
+          <button
+            type="button"
+            onClick={() => { logout(); navigate('/login', { replace: true }); }}
+            className="mt-5 w-full flex items-center justify-center gap-2 text-sm text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors py-2"
+          >
+            <LogOut className="w-3.5 h-3.5" /> Cerrar sesión e ingresar con otra cuenta
+          </button>
         </motion.div>
       </div>
     </div>
