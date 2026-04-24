@@ -250,12 +250,13 @@ function xlComplianceFill(pct: number): { bg: string; text: string } {
 export async function exportConsolidatedPDF(
   data: AssociationConsolidatedResponse,
   monthLabel: string,
+  title: string = 'Consolidado Pastoral',
 ) {
   const { jsPDF, autoTable } = await loadPdf();
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
   // Encabezado
-  drawHeader(doc, 'Consolidado Pastoral', `${monthLabel}  ·  Generado el ${formatDate(new Date())}`, C.teal);
+  drawHeader(doc, title, `${monthLabel}  ·  Generado el ${formatDate(new Date())}`, C.teal);
 
   // KPIs
   const totalPastors = data.pastorSummaries.length;
@@ -378,7 +379,8 @@ export async function exportConsolidatedPDF(
   }
 
   addPageFooters(doc, monthLabel);
-  doc.save(`consolidado_${monthLabel.replace(/\s/g, '_')}.pdf`);
+  const fileSlug = title.toLowerCase().replace(/\s+/g, '_');
+  doc.save(`${fileSlug}_${monthLabel.replace(/\s/g, '_')}.pdf`);
 }
 
 // ---------------------------------------------------------------------------
@@ -540,6 +542,7 @@ export async function exportPastorPDF(
 export async function exportConsolidatedExcel(
   data: AssociationConsolidatedResponse,
   monthLabel: string,
+  title: string = 'Consolidado Pastoral',
 ) {
   const ExcelJS = await loadExcel();
   const wb: Workbook = new ExcelJS.Workbook();
@@ -549,7 +552,7 @@ export async function exportConsolidatedExcel(
   // ── Hoja 1: Resumen ──────────────────────────────────────────────────────
   const wsResumen = wb.addWorksheet('Resumen');
   xlSetColWidths(wsResumen, [28, 20]);
-  xlSheetHeader(wsResumen, `Consolidado Pastoral — ${monthLabel}`, 2, E.teal);
+  xlSheetHeader(wsResumen, `${title} — ${monthLabel}`, 2, E.teal);
 
   const avgCompliance = data.pastorSummaries.length > 0
     ? data.pastorSummaries.reduce((s, p) => s + p.compliance, 0) / data.pastorSummaries.length
@@ -692,7 +695,8 @@ export async function exportConsolidatedExcel(
   }
 
   const buffer = await wb.xlsx.writeBuffer();
-  downloadBlob(buffer, `consolidado_${monthLabel.replace(/\s/g, '_')}.xlsx`);
+  const fileSlug = title.toLowerCase().replace(/\s+/g, '_');
+  downloadBlob(buffer, `${fileSlug}_${monthLabel.replace(/\s/g, '_')}.xlsx`);
 }
 
 // ---------------------------------------------------------------------------

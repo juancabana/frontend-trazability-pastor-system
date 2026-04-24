@@ -33,6 +33,8 @@ export const API_ENDPOINTS = {
       `/consolidated/association/${assocId}?month=${month}&year=${year}`,
     BY_UNION: (unionId: string, month: number, year: number) =>
       `/consolidated/union/${unionId}?month=${month}&year=${year}`,
+    BY_PASTORS: (pastorIds: string[], month: number, year: number) =>
+      `/consolidated/custom?pastorIds=${pastorIds.join(',')}&month=${month}&year=${year}`,
   },
   UNIONS: {
     LIST: '/unions',

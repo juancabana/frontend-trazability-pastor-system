@@ -26,4 +26,11 @@ export class ConsolidatedRepositoryApiImpl implements ConsolidatedRepository {
       token,
     );
   }
+
+  getByPastors(token: string, pastorIds: string[], month: number, year: number): Promise<AssociationConsolidatedResponse> {
+    return this.http.get<AssociationConsolidatedResponse>(
+      API_ENDPOINTS.CONSOLIDATED.BY_PASTORS(pastorIds, month, year),
+      token,
+    );
+  }
 }
