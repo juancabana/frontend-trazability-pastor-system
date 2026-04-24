@@ -15,6 +15,7 @@ import {
   Lock,
   PenLine,
   Plus,
+  CalendarX2,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -333,6 +334,19 @@ export default function PastorCalendarPage() {
             );
           })}
         </div>
+
+        {/* Empty month banner */}
+        {monthReports.length === 0 && (
+          <div className="px-4 py-8 text-center border-t border-gray-100 dark:border-slate-800">
+            <CalendarX2 className="w-8 h-8 mx-auto text-gray-300 dark:text-slate-600 mb-2" />
+            <p className="text-sm font-semibold text-gray-500 dark:text-slate-400">
+              Sin informes este mes
+            </p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 max-w-xs mx-auto">
+              Toca un día dentro del periodo activo para registrar tus actividades.
+            </p>
+          </div>
+        )}
 
         {/* Legend */}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 border-t border-gray-100 dark:border-slate-800 text-[11px] text-gray-400 dark:text-slate-500">

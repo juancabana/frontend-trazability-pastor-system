@@ -5,7 +5,8 @@ import { useReportByDate } from '@/features/daily-report/presentation/hooks/use-
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatDate, isDateEditable } from '@/lib/format-date';
 import { TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
-import { ArrowLeft, Edit3, FileText } from 'lucide-react';
+import { EmptyState } from '@/components/atoms/EmptyState';
+import { ArrowLeft, Edit3, FileText, Activity } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function PastorReportDetailPage() {
@@ -97,6 +98,17 @@ export default function PastorReportDetailPage() {
         </div>
       ) : (
         <>
+          {Object.entries(activitiesByCategory).length === 0 && (
+            <div className="mb-4 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800">
+              <EmptyState
+                compact
+                icon={Activity}
+                title="Sin actividades registradas"
+                description="Este informe no tiene actividades. Si el periodo sigue activo, puedes editarlo para agregar."
+              />
+            </div>
+          )}
+
           {Object.entries(activitiesByCategory).map(([catId, acts]) => {
             const cat = categoriesMap.get(catId);
             if (!cat) return null;

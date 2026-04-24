@@ -7,6 +7,7 @@ import { formatMonthYear } from '@/lib/format-date';
 import { exportConsolidatedPDF, exportConsolidatedExcel } from '@/lib/export-utils';
 import { UNIT_LABELS, COMPLIANCE_THRESHOLD, PASTOR_POSITION_LABEL } from '@/constants/shared';
 import { Tooltip } from '@/components/atoms/Tooltip';
+import { EmptyState } from '@/components/atoms/EmptyState';
 import {
   ChevronLeft,
   ChevronRight,
@@ -170,6 +171,21 @@ export default function AdminConsolidatedPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* Empty state cuando no hay actividades en ninguna categoría */}
+      {consolidated && (!consolidated.categories?.length ||
+        consolidated.categories.every(
+          (cat) => (cat.subcategories ?? []).reduce((s, sub) => s + sub.totalQuantity, 0) === 0,
+        )) && (
+        <div className="mb-3 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800">
+          <EmptyState
+            compact
+            icon={BarChart3}
+            title="Sin actividades registradas"
+            description="Los pastores aún no han registrado actividades para este periodo."
+          />
+        </div>
+      )}
 
       {/* Categories breakdown */}
       {consolidated?.categories?.map((cat) => {

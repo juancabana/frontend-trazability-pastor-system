@@ -4,6 +4,7 @@ import { usePastorConsolidated } from '@/features/consolidated/presentation/hook
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatMonthYear } from '@/lib/format-date';
 import { UNIT_LABELS, COMPLIANCE_THRESHOLD } from '@/constants/shared';
+import { EmptyState } from '@/components/atoms/EmptyState';
 import {
   ChevronLeft,
   ChevronRight,
@@ -143,6 +144,21 @@ export default function PastorConsolidatedPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* Empty state cuando no hay actividades en ninguna categoría */}
+      {consolidated && (!consolidated.categories?.length ||
+        consolidated.categories.every(
+          (cat) => (cat.subcategories ?? []).reduce((s, sub) => s + sub.totalQuantity, 0) === 0,
+        )) && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800">
+          <EmptyState
+            compact
+            icon={BarChart3}
+            title="Sin actividades este mes"
+            description="Cuando registres actividades en tu informe diario, aquí verás el resumen por rubro."
+          />
+        </div>
+      )}
 
       {/* Categories breakdown */}
       {consolidated?.categories?.map((cat) => {

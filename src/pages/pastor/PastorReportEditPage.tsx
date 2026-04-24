@@ -7,6 +7,7 @@ import { useActivityCategories } from '@/features/activity-category/presentation
 import type { ActivityEntry } from '@/features/daily-report/domain/entities/daily-report';
 import { formatDate, isDateEditable } from '@/lib/format-date';
 import { UNIT_LABELS, TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
+import { EmptyState } from '@/components/atoms/EmptyState';
 import {
   ArrowLeft,
   ChevronDown,
@@ -189,6 +190,17 @@ export default function PastorReportEditPage() {
       )}
 
       {/* Current activities grouped by category */}
+      {editable && Object.keys(activitiesByCategory).length === 0 && (
+        <div className="mb-4 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800">
+          <EmptyState
+            compact
+            icon={Plus}
+            title="Sin actividades aún"
+            description="Despliega las categorías a continuación para agregar actividades a este informe."
+          />
+        </div>
+      )}
+
       <AnimatePresence mode="popLayout">
         {Object.entries(activitiesByCategory).map(([catId, acts]) => {
           const cat = categoriesMap.get(catId);
