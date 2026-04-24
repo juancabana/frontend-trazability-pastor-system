@@ -32,9 +32,13 @@ export default function LoginPage() {
     setSubmitting(true);
     const result = await login(email, password);
     if (result) {
-      navigate(getRoleRedirect(result));
+      if (result.mustChangePassword) {
+        navigate('/change-password', { replace: true });
+      } else {
+        navigate(getRoleRedirect(result.role));
+      }
     } else {
-      setError('Credenciales invalidas. Verifique su correo y contrasena.');
+      setError('Credenciales invalidas. Verifique su correo y contraseña.');
     }
     setSubmitting(false);
   };
@@ -49,7 +53,11 @@ export default function LoginPage() {
     };
     const result = await login(emailMap[demoRole], import.meta.env.VITE_DEMO_PASSWORD || '');
     if (result) {
-      navigate(getRoleRedirect(result));
+      if (result.mustChangePassword) {
+        navigate('/change-password', { replace: true });
+      } else {
+        navigate(getRoleRedirect(result.role));
+      }
     } else {
       setError('Error en acceso rapido. Verifique que el backend esta corriendo.');
     }
@@ -198,7 +206,7 @@ export default function LoginPage() {
             {/* Password */}
             <div>
               <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5" /> Contrasena
+                <Lock className="w-3.5 h-3.5" /> Contraseña
               </label>
               <input
                 type="password"

@@ -45,3 +45,9 @@ export const useDeleteUser = () => {
     },
   });
 };
+
+export const useChangeOwnPassword = () =>
+  useMutation({
+    mutationFn: ({ token, newPassword }: { token: string; newPassword: string }) =>
+      repo.changeOwnPassword(token, newPassword),
+  });

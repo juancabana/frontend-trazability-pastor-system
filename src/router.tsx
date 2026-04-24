@@ -5,6 +5,7 @@ import { PastorLayout } from '@/components/PastorLayout';
 import { SuperAdminLayout } from '@/components/SuperAdminLayout';
 
 import LoginPage from '@/pages/LoginPage';
+import ChangePasswordPage from '@/pages/ChangePasswordPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import AdminPastoresPage from '@/pages/admin/AdminPastoresPage';
 import AdminConsolidatedPage from '@/pages/admin/AdminConsolidatedPage';
@@ -28,6 +29,7 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/change-password" element={<ChangePasswordPage />} />
 
       <Route
         path="/admin"

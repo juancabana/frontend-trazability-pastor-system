@@ -10,4 +10,5 @@ export interface AuthRepository {
   createUser(token: string, data: CreateUserRequest): Promise<UserAccount>;
   updateUser(token: string, id: string, data: UpdateUserRequest): Promise<UserAccount>;
   deleteUser(token: string, id: string): Promise<void>;
+  changeOwnPassword(token: string, newPassword: string): Promise<void>;
 }
