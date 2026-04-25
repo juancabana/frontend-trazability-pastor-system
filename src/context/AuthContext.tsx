@@ -32,6 +32,7 @@ interface AuthContextType {
   logout: () => void;
   hasAccess: (section: string) => boolean;
   clearMustChangePassword: () => void;
+  updateDeadlineDay: (day: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -118,6 +119,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const updateDeadlineDay = useCallback((day: number) => {
+    setCurrentUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, reportDeadlineDay: day };
+      localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   const logout = useCallback(() => {
     setToken(null);
     setCurrentUser(null);
@@ -142,6 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         hasAccess,
         clearMustChangePassword,
+        updateDeadlineDay,
       }}
     >
       {children}

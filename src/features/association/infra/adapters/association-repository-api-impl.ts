@@ -13,4 +13,12 @@ export class AssociationRepositoryApiImpl implements AssociationRepository {
   getByUnion(unionId: string): Promise<Association[]> {
     return this.http.get<Association[]>(`${API_ENDPOINTS.ASSOCIATIONS.LIST}?unionId=${unionId}`);
   }
+
+  updateMyDeadline(token: string, day: number): Promise<Association> {
+    return this.http.patch<Association>(
+      API_ENDPOINTS.ASSOCIATIONS.MY_DEADLINE,
+      { reportDeadlineDay: day },
+      token,
+    );
+  }
 }

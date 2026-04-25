@@ -14,6 +14,7 @@ import AdminPastorReportsPage from '@/pages/admin/AdminPastorReportsPage';
 import AdminReportDetailPage from '@/pages/admin/AdminReportDetailPage';
 import AdminDistritosPage from '@/pages/admin/AdminDistritosPage';
 import AdminSendReportPage from '@/pages/admin/AdminSendReportPage';
+import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
 import PastorCalendarPage from '@/pages/pastor/PastorCalendarPage';
 import PastorConsolidatedPage from '@/pages/pastor/PastorConsolidatedPage';
 import PastorReportDetailPage from '@/pages/pastor/PastorReportDetailPage';
@@ -46,6 +47,7 @@ export function AppRoutes() {
         <Route path="consolidated" element={<AdminConsolidatedPage />} />
         <Route path="usuarios" element={<AdminUsuariosPage />} />
         <Route path="send-report" element={<AdminSendReportPage />} />
+        <Route path="configuracion" element={<AdminSettingsPage />} />
         <Route path="pastor/:pastorId" element={<AdminPastorReportsPage />} />
         <Route
           path="pastor/:pastorId/report/:date"
