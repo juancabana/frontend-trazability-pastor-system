@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BarChart3, UserCog, MapPin } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart3, UserCog, MapPin, Mail } from 'lucide-react';
 import { SidebarLayout } from './SidebarLayout';
 
 const ADMIN_NAV = [
@@ -11,6 +11,11 @@ const ADMIN_NAV = [
     icon: <BarChart3 className="w-4 h-4" />,
   },
   { label: 'Usuarios', href: '/admin/usuarios', icon: <UserCog className="w-4 h-4" /> },
+  {
+    label: 'Enviar Reporte',
+    href: '/admin/send-report',
+    icon: <Mail className="w-4 h-4" />,
+  },
 ];
 
 export function AdminLayout() {

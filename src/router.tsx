@@ -13,6 +13,7 @@ import AdminUsuariosPage from '@/pages/admin/AdminUsuariosPage';
 import AdminPastorReportsPage from '@/pages/admin/AdminPastorReportsPage';
 import AdminReportDetailPage from '@/pages/admin/AdminReportDetailPage';
 import AdminDistritosPage from '@/pages/admin/AdminDistritosPage';
+import AdminSendReportPage from '@/pages/admin/AdminSendReportPage';
 import PastorCalendarPage from '@/pages/pastor/PastorCalendarPage';
 import PastorConsolidatedPage from '@/pages/pastor/PastorConsolidatedPage';
 import PastorReportDetailPage from '@/pages/pastor/PastorReportDetailPage';
@@ -44,6 +45,7 @@ export function AppRoutes() {
         <Route path="distritos" element={<AdminDistritosPage />} />
         <Route path="consolidated" element={<AdminConsolidatedPage />} />
         <Route path="usuarios" element={<AdminUsuariosPage />} />
+        <Route path="send-report" element={<AdminSendReportPage />} />
         <Route path="pastor/:pastorId" element={<AdminPastorReportsPage />} />
         <Route
           path="pastor/:pastorId/report/:date"

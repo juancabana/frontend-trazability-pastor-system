@@ -35,7 +35,10 @@ export const API_ENDPOINTS = {
       `/consolidated/union/${unionId}?month=${month}&year=${year}`,
     BY_PASTORS: (pastorIds: string[], month: number, year: number) =>
       `/consolidated/custom?pastorIds=${pastorIds.join(',')}&month=${month}&year=${year}`,
+    SEND_REPORT: '/consolidated/send-report',
   },
+  ADMIN_RECIPIENTS: (associationId: string) =>
+    `/auth/admin-recipients?associationId=${associationId}`,
   UNIONS: {
     LIST: '/unions',
   },

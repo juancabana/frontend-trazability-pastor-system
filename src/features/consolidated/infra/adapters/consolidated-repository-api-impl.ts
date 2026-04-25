@@ -1,6 +1,7 @@
 import type { HttpGateway } from '@/shared/domain/gateways/http-gateway';
 import type { ConsolidatedRepository } from '../../domain/gateways/consolidated-repository';
 import type { ConsolidatedResponse, AssociationConsolidatedResponse, UnionConsolidatedResponse } from '../../domain/entities/consolidated';
+import type { AdminRecipient, SendReportRequest, SendReportResponse } from '../../domain/entities/send-report';
 import { API_ENDPOINTS } from '@/constants/api';
 
 export class ConsolidatedRepositoryApiImpl implements ConsolidatedRepository {
@@ -30,6 +31,21 @@ export class ConsolidatedRepositoryApiImpl implements ConsolidatedRepository {
   getByPastors(token: string, pastorIds: string[], month: number, year: number): Promise<AssociationConsolidatedResponse> {
     return this.http.get<AssociationConsolidatedResponse>(
       API_ENDPOINTS.CONSOLIDATED.BY_PASTORS(pastorIds, month, year),
+      token,
+    );
+  }
+
+  sendReport(token: string, data: SendReportRequest): Promise<SendReportResponse> {
+    return this.http.post<SendReportResponse>(
+      API_ENDPOINTS.CONSOLIDATED.SEND_REPORT,
+      data,
+      token,
+    );
+  }
+
+  getAdminRecipients(token: string, associationId: string): Promise<AdminRecipient[]> {
+    return this.http.get<AdminRecipient[]>(
+      API_ENDPOINTS.ADMIN_RECIPIENTS(associationId),
       token,
     );
   }

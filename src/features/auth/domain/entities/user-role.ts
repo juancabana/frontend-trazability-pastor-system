@@ -13,6 +13,6 @@ export const ROLE_CONFIG: Record<
 export const ROLE_ACCESS: Record<UserRole, string[]> = {
   pastor: ['calendar', 'report', 'consolidated'],
   admin_readonly: ['dashboard', 'pastores', 'reports', 'consolidated', 'usuarios', 'distritos'],
-  admin: ['dashboard', 'pastores', 'reports', 'consolidated', 'usuarios', 'distritos'],
+  admin: ['dashboard', 'pastores', 'reports', 'consolidated', 'usuarios', 'distritos', 'send_report'],
   super_admin: ['dashboard', 'associations', 'consolidated', 'pastores', 'reports'],
 };
