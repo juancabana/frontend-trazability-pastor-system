@@ -288,7 +288,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <main
-          className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 lg:p-8"
+          className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain p-4 sm:p-5 lg:p-8"
           style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
         >
           <Outlet />

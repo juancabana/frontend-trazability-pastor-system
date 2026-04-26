@@ -14,6 +14,9 @@ body {
   height: 100%;
   margin: 0;
   overscroll-behavior: none;
+  /* Evita scroll horizontal a nivel de pagina; el scroll vertical vive
+     dentro del <main> del layout (o del root de la pagina sin layout). */
+  overflow-x: clip;
 }
 
 html {
