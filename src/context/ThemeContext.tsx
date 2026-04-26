@@ -41,6 +41,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       root.classList.remove('dark');
     }
+
+    // Sincroniza la barra del navegador (iOS Safari, Android Chrome) con el
+    // tema actual de la app. Removemos los meta con `media` para que el
+    // unico activo sea el manual.
+    const color = resolvedTheme === 'dark' ? '#020617' : '#f9fafb';
+    const metas = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]');
+    metas.forEach((m) => {
+      if (m.hasAttribute('media')) m.remove();
+    });
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]:not([media])');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      document.head.appendChild(meta);
+    }
+    meta.content = color;
   }, [resolvedTheme]);
 
   useEffect(() => {
