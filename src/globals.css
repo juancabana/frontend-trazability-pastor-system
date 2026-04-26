@@ -6,11 +6,26 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Rellena las safe areas (Dynamic Island, home indicator) con el color del tema
-   para que no queden en blanco en iOS dark mode. */
+/* Rellena las safe areas (Dynamic Island, home indicator, barra del navegador)
+   con el color del tema para que no queden en blanco en iOS dark mode, y
+   evita el rubber-band del body en mobile. El scroll vive en el <main>. */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
+}
+
 html {
   background-color: #f9fafb; /* gray-50  — mismo que el layout en light */
 }
 html.dark {
   background-color: #020617; /* slate-950 — mismo que el layout en dark  */
+}
+
+body {
+  background-color: #f9fafb;
+}
+html.dark body {
+  background-color: #020617;
 }
