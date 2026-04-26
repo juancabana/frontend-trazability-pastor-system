@@ -308,9 +308,10 @@ export default function AdminSendReportPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 8 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 overflow-y-auto overscroll-contain"
             >
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-2xl w-full max-w-md p-6">
+              <div className="flex min-h-full items-center justify-center p-4">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-2xl w-full max-w-md p-6 my-auto">
                 {/* Dialog header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -395,6 +396,7 @@ export default function AdminSendReportPage() {
                     )}
                   </button>
                 </div>
+              </div>
               </div>
             </motion.div>
           </>

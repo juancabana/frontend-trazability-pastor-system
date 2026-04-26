@@ -449,15 +449,16 @@ export default function AdminDistritosPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+            className="fixed inset-0 z-50 bg-black/40 overflow-y-auto overscroll-contain"
             onClick={closeModal}
           >
+            <div className="flex min-h-full items-center justify-center p-4">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-xl w-full max-w-md"
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-xl w-full max-w-md my-auto"
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-800">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -564,6 +565,7 @@ export default function AdminDistritosPage() {
                 </button>
               </div>
             </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
