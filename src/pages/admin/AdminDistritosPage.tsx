@@ -503,7 +503,7 @@ export default function AdminDistritosPage() {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
-                        Direccion (opcional)
+                        Dirección (opcional)
                       </label>
                       <input
                         type="text"
@@ -572,7 +572,7 @@ export default function AdminDistritosPage() {
         <ConfirmDialog
           isOpen={!!deleteTarget}
           title={`Eliminar ${deleteTarget?.type === 'district' ? 'distrito' : 'iglesia'}`}
-          message={`¿Esta seguro de eliminar "${deleteTarget?.item.name}"? Esta accion no se puede deshacer.`}
+          message={`¿Está seguro de eliminar "${deleteTarget?.item.name}"? Esta acción no se puede deshacer.`}
           confirmLabel="Eliminar"
           onConfirm={confirmDeleteTarget}
           onCancel={() => setDeleteTarget(null)}

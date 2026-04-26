@@ -75,9 +75,9 @@ export default function SuperAdminAssociationDetailPage() {
         </button>
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {assoc?.name ?? 'Asociacion'}
+            {assoc?.name ?? 'Asociación'}
           </h2>
-          <p className="text-xs text-gray-400 dark:text-slate-500">Detalle de la asociacion</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">Detalle de la asociación</p>
         </div>
       </div>
 

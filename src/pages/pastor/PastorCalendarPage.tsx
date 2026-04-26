@@ -111,7 +111,7 @@ export default function PastorCalendarPage() {
   const stats = [
     {
       icon: Calendar,
-      label: 'Dias',
+      label: 'Días',
       value: daysWithReportsInPeriod,
       sub: `de ${daysElapsedInPeriod} del periodo`,
       color: 'text-blue-600 dark:text-blue-400',

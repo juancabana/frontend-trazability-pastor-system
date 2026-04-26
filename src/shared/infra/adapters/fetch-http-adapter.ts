@@ -23,7 +23,7 @@ class FetchHttpAdapter implements HttpGateway {
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
       window.location.href = '/login';
-      throw new Error('Sesion expirada');
+      throw new Error('Sesión expirada');
     }
     if (!response.ok) {
       const body = await response.text().catch(() => '');

@@ -13,9 +13,9 @@ interface StrengthRule {
 
 const RULES: StrengthRule[] = [
   { label: 'Al menos 8 caracteres', test: (v) => v.length >= 8 },
-  { label: 'Una letra mayuscula', test: (v) => /[A-Z]/.test(v) },
-  { label: 'Una letra minuscula', test: (v) => /[a-z]/.test(v) },
-  { label: 'Un numero', test: (v) => /\d/.test(v) },
+  { label: 'Una letra mayúscula', test: (v) => /[A-Z]/.test(v) },
+  { label: 'Una letra minúscula', test: (v) => /[a-z]/.test(v) },
+  { label: 'Un número', test: (v) => /\d/.test(v) },
 ];
 
 function getStrengthLevel(password: string): number {
@@ -24,8 +24,8 @@ function getStrengthLevel(password: string): number {
 
 const STRENGTH_CONFIG = [
   { label: '', color: 'bg-gray-200 dark:bg-slate-700' },
-  { label: 'Muy debil', color: 'bg-red-500' },
-  { label: 'Debil', color: 'bg-orange-500' },
+  { label: 'Muy débil', color: 'bg-red-500' },
+  { label: 'Débil', color: 'bg-orange-500' },
   { label: 'Aceptable', color: 'bg-yellow-500' },
   { label: 'Fuerte', color: 'bg-teal-500' },
 ];
@@ -139,7 +139,7 @@ export default function ChangePasswordPage() {
             </ul>
           </div>
           <div className="mt-10 text-[11px] text-white/20">
-            &copy; {new Date().getFullYear()} Iglesia Adventista del Septimo Dia
+            &copy; {new Date().getFullYear()} Iglesia Adventista del Séptimo Día
           </div>
         </div>
       </div>

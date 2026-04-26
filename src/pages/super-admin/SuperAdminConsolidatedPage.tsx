@@ -34,7 +34,7 @@ export default function SuperAdminConsolidatedPage() {
   const assocSummaries = unionData?.associationSummaries ?? [];
 
   const stats = [
-    { icon: Building2, label: 'Asociaciones', value: unionData?.totalAssociations ?? 0, sub: 'en la union', color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/30' },
+    { icon: Building2, label: 'Asociaciones', value: unionData?.totalAssociations ?? 0, sub: 'en la unión', color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/30' },
     { icon: Users, label: 'Pastores', value: unionData?.totalPastors ?? 0, sub: 'activos', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
     { icon: Activity, label: 'Actividades', value: unionData?.totalActivities ?? 0, sub: 'registradas', color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-900/30' },
     { icon: Clock, label: 'Horas', value: `${(unionData?.totalHours ?? 0).toFixed(0)}h`, sub: 'dedicadas', color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/30' },
@@ -43,7 +43,7 @@ export default function SuperAdminConsolidatedPage() {
   const handleExportPDF = async () => {
     if (!unionData) return;
     try {
-      await exportUnionConsolidatedPDF(unionData, periodLabel, currentUser?.unionName ?? 'Union');
+      await exportUnionConsolidatedPDF(unionData, periodLabel, currentUser?.unionName ?? 'Unión');
       toast.success('PDF generado correctamente');
     } catch {
       toast.error('Error al generar PDF');
@@ -53,7 +53,7 @@ export default function SuperAdminConsolidatedPage() {
   const handleExportExcel = async () => {
     if (!unionData) return;
     try {
-      await exportUnionConsolidatedExcel(unionData, periodLabel, currentUser?.unionName ?? 'Union');
+      await exportUnionConsolidatedExcel(unionData, periodLabel, currentUser?.unionName ?? 'Unión');
       toast.success('Excel generado correctamente');
     } catch {
       toast.error('Error al generar Excel');
@@ -65,7 +65,7 @@ export default function SuperAdminConsolidatedPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 gap-3">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" /> Consolidado de Union
+            <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" /> Consolidado de Unión
           </h2>
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
             Resumen consolidado de todas las asociaciones
@@ -153,12 +153,12 @@ export default function SuperAdminConsolidatedPage() {
 
       {/* Association summaries table */}
       {loadingUnion && !unionData ? (
-        <TableSkeleton columns={5} rows={5} title="Resumen por Asociacion" />
+        <TableSkeleton columns={5} rows={5} title="Resumen por Asociación" />
       ) : (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            Resumen por Asociacion
+            Resumen por Asociación
           </h3>
         </div>
         {/* Desktop header */}
@@ -166,7 +166,7 @@ export default function SuperAdminConsolidatedPage() {
           className="hidden sm:grid px-5 py-2 bg-gray-50 dark:bg-slate-800/50 text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider"
           style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr' }}
         >
-          <span>Asociacion</span>
+          <span>Asociación</span>
           <span className="text-right">Pastores</span>
           <span className="text-right">Actividades</span>
           <span className="text-right">Horas</span>

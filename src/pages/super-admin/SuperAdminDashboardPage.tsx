@@ -46,7 +46,7 @@ export default function SuperAdminDashboardPage() {
     <div className="max-w-[1100px] mx-auto">
       <div className="mb-5">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <LayoutDashboard className="w-5 h-5 text-purple-600 dark:text-purple-400" /> Panel de Union
+          <LayoutDashboard className="w-5 h-5 text-purple-600 dark:text-purple-400" /> Panel de Unión
         </h2>
         <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
           Vista general de todas las asociaciones

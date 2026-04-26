@@ -437,7 +437,7 @@ export default function AdminConsolidatedPage() {
                       className="hidden sm:grid px-5 py-2 bg-gray-50 dark:bg-slate-950 text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider"
                       style={{ gridTemplateColumns: '2fr 1fr 1fr' }}
                     >
-                      <span>Subcategoria</span>
+                      <span>Subcategoría</span>
                       <span className="text-right">Cantidad</span>
                       <span className="text-right">Horas</span>
                     </div>

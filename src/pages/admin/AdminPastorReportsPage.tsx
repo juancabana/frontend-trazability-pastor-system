@@ -124,7 +124,7 @@ export default function AdminPastorReportsPage() {
   };
 
   const reportStats = [
-    { icon: Calendar, label: 'Dias', value: reports.length, sub: `de ${daysInMonth}`, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/30' },
+    { icon: Calendar, label: 'Días', value: reports.length, sub: `de ${daysInMonth}`, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/30' },
     { icon: Activity, label: 'Actividades', value: totalActivities, sub: 'registradas', color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-50 dark:bg-violet-900/30' },
     { icon: Clock, label: 'Horas', value: `${totalHours.toFixed(0)}h`, sub: 'dedicadas', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30' },
   ];
@@ -132,7 +132,7 @@ export default function AdminPastorReportsPage() {
   const consolidatedStats = [
     {
       icon: Calendar,
-      label: 'Dias',
+      label: 'Días',
       value: consolidated ? consolidated.daysWithReports : 0,
       sub: `de ${daysInPeriod}`,
       color: 'text-blue-600 dark:text-blue-400',
@@ -564,7 +564,7 @@ export default function AdminPastorReportsPage() {
                           className="hidden sm:grid px-5 py-2 bg-gray-50 dark:bg-slate-950 text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider"
                           style={{ gridTemplateColumns: '2fr 1fr 1fr' }}
                         >
-                          <span>Subcategoria</span>
+                          <span>Subcategoría</span>
                           <span className="text-right">Cantidad</span>
                           <span className="text-right">Horas</span>
                         </div>
