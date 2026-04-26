@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
+import { usePastorConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { formatMonthYear, isDateInCurrentPeriod, isDateEditable } from '@/lib/format-date';
 import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import { DAYS_ES, TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
@@ -41,6 +42,14 @@ export default function PastorCalendarPage() {
     year,
   );
 
+  // El cumplimiento y el conteo de dias se calculan en el back para el
+  // periodo activo del pastor (segun reportDeadlineDay).
+  const { data: consolidated } = usePastorConsolidated(
+    token ?? '',
+    currentUser?.id ?? '',
+    0,
+  );
+
   const today = new Date();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -64,8 +73,10 @@ export default function PastorCalendarPage() {
         .reduce((s, a) => s + (a.amount || 0), 0),
     0,
   );
-  const cumplimiento = daysInMonth > 0
-    ? Math.round((monthReports.length / daysInMonth) * 100)
+  const daysElapsedInPeriod = consolidated?.daysElapsedInPeriod ?? 0;
+  const daysWithReportsInPeriod = consolidated?.daysWithReports ?? 0;
+  const cumplimiento = consolidated?.compliance
+    ? Math.round(consolidated.compliance * 100)
     : 0;
 
   const formatDateStr = (day: number) =>
@@ -101,8 +112,8 @@ export default function PastorCalendarPage() {
     {
       icon: Calendar,
       label: 'Dias',
-      value: monthReports.length,
-      sub: `de ${daysInMonth}`,
+      value: daysWithReportsInPeriod,
+      sub: `de ${daysElapsedInPeriod} del periodo`,
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/30',
     },
@@ -110,7 +121,7 @@ export default function PastorCalendarPage() {
       icon: TrendingUp,
       label: 'Cumplimiento',
       value: `${cumplimiento}%`,
-      sub: 'del mes',
+      sub: 'del periodo',
       color: cumplimiento >= thresholdPct ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
       bg: cumplimiento >= thresholdPct ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
     },
