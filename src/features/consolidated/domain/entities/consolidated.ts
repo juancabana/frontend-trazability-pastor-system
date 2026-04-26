@@ -40,6 +40,7 @@ export interface ConsolidatedResponse {
   compliance: number;
   totalReports: number;
   daysInPeriod: number;
+  daysElapsedInPeriod: number;
   daysWithReports: number;
   totalTransportAmount: number;
 }
