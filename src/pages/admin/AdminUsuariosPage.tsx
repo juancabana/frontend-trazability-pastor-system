@@ -16,7 +16,7 @@ import { ConfirmDialog } from '@/components/atoms/ConfirmDialog';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
 import { ListSkeleton } from '@/components/atoms/Skeleton';
-import { Plus, Edit3, Trash2, UserCog, Phone, ShieldCheck } from 'lucide-react';
+import { Plus, Edit3, Trash2, UserCog, Phone, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminUsuariosPage() {
@@ -37,6 +37,7 @@ export default function AdminUsuariosPage() {
   const [formName, setFormName] = useState('');
   const [formEmail, setFormEmail] = useState('');
   const [formPassword, setFormPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [formRole, setFormRole] = useState<UserRole>('pastor');
   const [formDistrictId, setFormDistrictId] = useState('');
   const [formPosition, setFormPosition] = useState('');
@@ -301,14 +302,25 @@ export default function AdminUsuariosPage() {
               )}
               <div>
                 <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
-                  {editingUser ? 'Nueva contraseña (dejar vacio para no cambiar)' : 'Contraseña'}
+                  {editingUser ? 'Nueva contraseña (dejar vacío para no cambiar)' : 'Contraseña'}
                 </label>
-                <input
-                  type="password"
-                  value={formPassword}
-                  onChange={(e) => setFormPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none dark:text-white"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={formPassword}
+                    onChange={(e) => setFormPassword(e.target.value)}
+                    className="w-full px-3.5 py-2.5 pr-10 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
