@@ -21,6 +21,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Skeleton } from '@/components/atoms/Skeleton';
 
 export default function PastorCalendarPage() {
   const { token, currentUser } = useAuth();
@@ -33,7 +34,7 @@ export default function PastorCalendarPage() {
   const month = currentMonth.getMonth();
   const deadlineDay = currentUser?.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY;
 
-  const { data: monthReports = [] } = useReportsByPastorMonth(
+  const { data: monthReports = [], isLoading: loadingMonth } = useReportsByPastorMonth(
     token ?? '',
     currentUser?.id ?? '',
     month + 1,
@@ -174,6 +175,20 @@ export default function PastorCalendarPage() {
       </motion.div>
 
       {/* Stats */}
+      {loadingMonth && monthReports.length === 0 ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Skeleton className="w-7 h-7 rounded-lg" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+              <Skeleton className="h-6 w-20 mb-1.5" />
+              <Skeleton className="h-3 w-12" />
+            </div>
+          ))}
+        </div>
+      ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         {stats.map((s, i) => (
           <motion.div
@@ -198,6 +213,7 @@ export default function PastorCalendarPage() {
           </motion.div>
         ))}
       </div>
+      )}
 
       {/* Calendar */}
       <motion.div
@@ -241,7 +257,13 @@ export default function PastorCalendarPage() {
 
         {/* Days grid */}
         <div className="grid grid-cols-7 gap-px bg-gray-100 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800">
-          {calendarDays.map((day, i) => {
+          {loadingMonth && monthReports.length === 0
+            ? Array.from({ length: 42 }).map((_, i) => (
+                <div key={i} className="aspect-square bg-white dark:bg-slate-900 p-1.5 sm:p-2">
+                  <Skeleton className="w-6 h-6 sm:w-7 sm:h-7 rounded-full" />
+                </div>
+              ))
+            : calendarDays.map((day, i) => {
             if (day === null) {
               return (
                 <div
@@ -356,6 +378,7 @@ export default function PastorCalendarPage() {
             );
           })}
         </div>
+
 
         {/* Empty month banner */}
         {monthReports.length === 0 && (

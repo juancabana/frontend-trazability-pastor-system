@@ -17,6 +17,7 @@ import {
   ChevronRight as GoIcon,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { StatsGridSkeleton, ListSkeleton, BarChartSkeleton } from '@/components/atoms/Skeleton';
 
 export default function SuperAdminAssociationDetailPage() {
   const { associationId } = useParams<{ associationId: string }>();
@@ -28,7 +29,7 @@ export default function SuperAdminAssociationDetailPage() {
   const { data: associations = [] } = useAssociationsByUnion(currentUser?.unionId ?? undefined);
   const assoc = associations.find((a) => a.id === associationId);
 
-  const { data: consolidated } = useAssociationConsolidated(
+  const { data: consolidated, isLoading: loadingConsolidated } = useAssociationConsolidated(
     token ?? '',
     associationId ?? '',
     periodOffset,
@@ -102,6 +103,9 @@ export default function SuperAdminAssociationDetailPage() {
       </div>
 
       {/* Stats */}
+      {loadingConsolidated && !consolidated ? (
+        <StatsGridSkeleton count={4} />
+      ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         {stats.map((s, i) => (
           <motion.div
@@ -124,9 +128,13 @@ export default function SuperAdminAssociationDetailPage() {
           </motion.div>
         ))}
       </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Pastors list */}
+        {loadingConsolidated && !consolidated ? (
+          <div className="lg:col-span-2"><ListSkeleton rows={5} /></div>
+        ) : (
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -171,8 +179,12 @@ export default function SuperAdminAssociationDetailPage() {
             )}
           </div>
         </div>
+        )}
 
         {/* Category breakdown */}
+        {loadingConsolidated && !consolidated ? (
+          <BarChartSkeleton rows={5} />
+        ) : (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -208,6 +220,7 @@ export default function SuperAdminAssociationDetailPage() {
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { useActivityCategories } from '@/features/activity-category/presentation
 import { formatDate, isDateEditable } from '@/lib/format-date';
 import { TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import { EmptyState } from '@/components/atoms/EmptyState';
+import { DetailSkeleton } from '@/components/atoms/Skeleton';
 import { ArrowLeft, Edit3, FileText, Activity } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -41,8 +42,8 @@ export default function PastorReportDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-[700px] mx-auto flex items-center justify-center min-h-[50vh]">
-        <p className="text-gray-400 dark:text-slate-500 text-sm">Cargando...</p>
+      <div className="max-w-[700px] mx-auto">
+        <DetailSkeleton />
       </div>
     );
   }

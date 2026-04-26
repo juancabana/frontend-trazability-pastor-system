@@ -11,6 +11,7 @@ import { DAYS_ES, UNIT_LABELS } from '@/constants/shared';
 import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import { EmptyState } from '@/components/atoms/EmptyState';
 import { Tooltip } from '@/components/atoms/Tooltip';
+import { StatsGridSkeleton, CalendarSkeleton, ListSkeleton, BarChartSkeleton } from '@/components/atoms/Skeleton';
 import {
   ArrowLeft,
   ChevronLeft,
@@ -48,13 +49,13 @@ export default function AdminPastorReportsPage() {
   const firstDay = new Date(year, month, 1).getDay();
 
   const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
-  const { data: reports = [] } = useReportsByPastorMonth(
+  const { data: reports = [], isLoading: loadingReports } = useReportsByPastorMonth(
     token ?? '',
     pastorId ?? '',
     month + 1,
     year,
   );
-  const { data: consolidated } = usePastorConsolidated(
+  const { data: consolidated, isLoading: loadingConsolidated } = usePastorConsolidated(
     token ?? '',
     pastorId ?? '',
     periodOffset,
@@ -264,6 +265,20 @@ export default function AdminPastorReportsPage() {
       {activeTab === 'reports' && (
         <>
           {/* Stats */}
+          {loadingReports && reports.length === 0 ? (
+            <div className="grid grid-cols-3 gap-3 mb-5">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 animate-pulse">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-gray-200 dark:bg-slate-700" />
+                    <div className="h-3 w-16 rounded bg-gray-200 dark:bg-slate-700" />
+                  </div>
+                  <div className="h-6 w-20 rounded bg-gray-200 dark:bg-slate-700 mb-1.5" />
+                  <div className="h-3 w-12 rounded bg-gray-200 dark:bg-slate-700" />
+                </div>
+              ))}
+            </div>
+          ) : (
           <div className="grid grid-cols-3 gap-3 mb-5">
             {reportStats.map((s, i) => (
               <motion.div
@@ -286,8 +301,12 @@ export default function AdminPastorReportsPage() {
               </motion.div>
             ))}
           </div>
+          )}
 
           {/* Calendar */}
+          {loadingReports && reports.length === 0 ? (
+            <div className="mb-5"><CalendarSkeleton /></div>
+          ) : (
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden mb-5">
             <div className="grid grid-cols-7">
               {DAYS_ES.map((d) => (
@@ -359,8 +378,12 @@ export default function AdminPastorReportsPage() {
               })}
             </div>
           </div>
+          )}
 
           {/* Reports list */}
+          {loadingReports && reports.length === 0 ? (
+            <ListSkeleton rows={4} withMetrics={false} />
+          ) : (
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -395,6 +418,7 @@ export default function AdminPastorReportsPage() {
               )}
             </div>
           </div>
+          )}
         </>
       )}
 
@@ -435,6 +459,9 @@ export default function AdminPastorReportsPage() {
           </div>
 
           {/* Stats consolidado */}
+          {loadingConsolidated && !consolidated ? (
+            <StatsGridSkeleton count={4} />
+          ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             {consolidatedStats.map((s, i) => (
               <motion.div
@@ -457,6 +484,9 @@ export default function AdminPastorReportsPage() {
               </motion.div>
             ))}
           </div>
+          )}
+
+          {loadingConsolidated && !consolidated && <BarChartSkeleton rows={4} />}
 
           {/* Empty state */}
           {consolidated && (!consolidated.categories?.length ||

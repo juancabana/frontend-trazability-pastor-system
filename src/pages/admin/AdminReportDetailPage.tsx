@@ -8,6 +8,7 @@ import { formatDate } from '@/lib/format-date';
 import { TRANSPORT_CATEGORY_ID } from '@/constants/shared';
 import { ArrowLeft, Shield } from 'lucide-react';
 import { motion } from 'motion/react';
+import { DetailSkeleton } from '@/components/atoms/Skeleton';
 
 export default function AdminReportDetailPage() {
   const { pastorId, date } = useParams<{ pastorId: string; date: string }>();
@@ -40,8 +41,8 @@ export default function AdminReportDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-[700px] mx-auto flex items-center justify-center min-h-[50vh]">
-        <p className="text-gray-400 dark:text-slate-500 text-sm">Cargando...</p>
+      <div className="max-w-[700px] mx-auto">
+        <DetailSkeleton />
       </div>
     );
   }

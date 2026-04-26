@@ -15,13 +15,14 @@ import { Modal } from '@/components/atoms/Modal';
 import { ConfirmDialog } from '@/components/atoms/ConfirmDialog';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
+import { ListSkeleton } from '@/components/atoms/Skeleton';
 import { Plus, Edit3, Trash2, UserCog, Phone, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminUsuariosPage() {
   const { token, currentUser } = useAuth();
   const canWrite = useCanWrite();
-  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
+  const { data: users = [], isLoading: loadingUsers } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
   const { data: districts = [] } = useDistricts(currentUser?.associationId ?? undefined);
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
@@ -192,6 +193,9 @@ export default function AdminUsuariosPage() {
         />
       </div>
 
+      {loadingUsers && users.length === 0 ? (
+        <ListSkeleton rows={5} withHeader={false} withMetrics={false} />
+      ) : (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
         <div className="divide-y divide-gray-50 dark:divide-slate-800">
           {filteredUsers.map((user) => {
@@ -260,6 +264,7 @@ export default function AdminUsuariosPage() {
           )}
         </div>
       </div>
+      )}
 
       {/* Create/Edit Modal — solo visible para admin con escritura */}
       {canWrite && (

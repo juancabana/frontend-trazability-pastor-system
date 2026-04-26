@@ -8,6 +8,7 @@ import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useUpdateUser } from '@/features/auth/presentation/hooks/use-auth-mutations';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import { ConfirmDialog } from '@/components/atoms/ConfirmDialog';
+import { Skeleton } from '@/components/atoms/Skeleton';
 import {
   MapPin,
   ChevronDown,
@@ -30,7 +31,7 @@ export default function AdminDistritosPage() {
   const canWrite = useCanWrite();
   const associationId = currentUser?.associationId ?? '';
 
-  const { data: districts = [] } = useDistricts(associationId);
+  const { data: districts = [], isLoading: loadingDistricts } = useDistricts(associationId);
   const { data: churches = [] } = useChurches(token ?? '', undefined, associationId);
   const { data: users = [] } = useUsers(token ?? '', associationId);
 
@@ -223,11 +224,29 @@ export default function AdminDistritosPage() {
         <SearchInput value={search} onChange={setSearch} placeholder="Buscar distrito..." />
       </div>
 
-      {filteredDistricts.length === 0 && (
+      {loadingDistricts && districts.length === 0 ? (
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 space-y-3"
+            >
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-10 h-10 rounded-xl" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-3 w-1/4" />
+                </div>
+                <Skeleton className="w-5 h-5 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredDistricts.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-5 py-12 text-center text-sm text-gray-400 dark:text-slate-500">
           {search ? 'No se encontraron distritos' : 'Sin distritos creados'}
         </div>
-      )}
+      ) : null}
 
       {filteredDistricts.map((district, i) => {
         const isExpanded = expanded[district.id] !== false;

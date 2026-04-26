@@ -8,6 +8,7 @@ import type { ActivityEntry } from '@/features/daily-report/domain/entities/dail
 import { formatDate, isDateEditable } from '@/lib/format-date';
 import { UNIT_LABELS, TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import { EmptyState } from '@/components/atoms/EmptyState';
+import { DetailSkeleton } from '@/components/atoms/Skeleton';
 import {
   ArrowLeft,
   ChevronDown,
@@ -34,12 +35,12 @@ export default function PastorReportEditPage() {
   const isFuture = reportDate > today;
   const editable = !isFuture && (isDateEditable(reportDate, deadlineDay) || canEditAllReports);
 
-  const { data: existingReport } = useReportByDate(
+  const { data: existingReport, isLoading: loadingReport } = useReportByDate(
     token ?? '',
     currentUser?.id ?? '',
     date ?? '',
   );
-  const { data: categories = [] } = useActivityCategories();
+  const { data: categories = [], isLoading: loadingCategories } = useActivityCategories();
   const saveReport = useSaveReport();
   const deleteReport = useDeleteReport();
 
@@ -150,6 +151,14 @@ export default function PastorReportEditPage() {
   });
 
   if (isFuture) return null;
+
+  if ((loadingReport && !existingReport) || (loadingCategories && categories.length === 0)) {
+    return (
+      <div className="max-w-[700px] mx-auto">
+        <DetailSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[700px] mx-auto">

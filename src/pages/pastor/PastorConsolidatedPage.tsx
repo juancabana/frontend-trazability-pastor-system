@@ -7,6 +7,7 @@ import { UNIT_LABELS } from '@/constants/shared';
 import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import { EmptyState } from '@/components/atoms/EmptyState';
 import { Tooltip } from '@/components/atoms/Tooltip';
+import { StatsGridSkeleton, BarChartSkeleton } from '@/components/atoms/Skeleton';
 import {
   ChevronLeft,
   ChevronRight,
@@ -28,7 +29,7 @@ export default function PastorConsolidatedPage() {
   const { thresholdPct } = useComplianceThresholds();
   const [periodOffset, setPeriodOffset] = useState(0);
 
-  const { data: consolidated } = usePastorConsolidated(
+  const { data: consolidated, isLoading: loadingConsolidated } = usePastorConsolidated(
     token ?? '',
     currentUser?.id ?? '',
     periodOffset,
@@ -164,30 +165,37 @@ export default function PastorConsolidatedPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div
-                className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}
-              >
-                <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+      {loadingConsolidated && !consolidated ? (
+        <StatsGridSkeleton count={4} />
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}
+                >
+                  <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+                </div>
+                <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
+                  {s.label}
+                </span>
               </div>
-              <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
-                {s.label}
-              </span>
-            </div>
-            <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
-          </motion.div>
-        ))}
-      </div>
+              <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
+              <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* Skeleton del breakdown mientras carga */}
+      {loadingConsolidated && !consolidated && <BarChartSkeleton rows={4} />}
 
       {/* Empty state cuando no hay actividades en ninguna categoría */}
       {consolidated && (!consolidated.categories?.length ||

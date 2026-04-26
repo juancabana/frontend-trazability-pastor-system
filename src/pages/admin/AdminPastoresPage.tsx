@@ -5,6 +5,7 @@ import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { PASTOR_POSITION_LABEL } from '@/constants/shared';
 import { SearchInput } from '@/components/atoms/SearchInput';
+import { ListSkeleton } from '@/components/atoms/Skeleton';
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,7 +22,7 @@ export default function AdminPastoresPage() {
   const [search, setSearch] = useState('');
   const [periodOffset, setPeriodOffset] = useState(0);
 
-  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
+  const { data: users = [], isLoading: loadingUsers } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
   const { data: consolidated } = useAssociationConsolidated(
     token ?? '',
     currentUser?.associationId ?? '',
@@ -96,6 +97,9 @@ export default function AdminPastoresPage() {
         </div>
       </div>
 
+      {loadingUsers && users.length === 0 ? (
+        <ListSkeleton rows={5} withHeader={false} />
+      ) : (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
         <div className="divide-y divide-gray-50 dark:divide-slate-800">
           {filteredPastors.map((pastor, i) => {
@@ -164,6 +168,7 @@ export default function AdminPastoresPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

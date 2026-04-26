@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
+import { StatsGridSkeleton, ListSkeleton } from '@/components/atoms/Skeleton';
 
 export default function SuperAdminDashboardPage() {
   const { token, currentUser } = useAuth();
@@ -22,7 +23,7 @@ export default function SuperAdminDashboardPage() {
   const navigate = useNavigate();
   const [periodOffset, setPeriodOffset] = useState(0);
 
-  const { data: unionData } = useUnionConsolidated(
+  const { data: unionData, isLoading: loadingUnion } = useUnionConsolidated(
     token ?? '',
     currentUser?.unionId ?? '',
     periodOffset,
@@ -74,6 +75,9 @@ export default function SuperAdminDashboardPage() {
       </div>
 
       {/* Stats */}
+      {loadingUnion && !unionData ? (
+        <StatsGridSkeleton count={4} />
+      ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         {stats.map((s, i) => (
           <motion.div
@@ -96,8 +100,12 @@ export default function SuperAdminDashboardPage() {
           </motion.div>
         ))}
       </div>
+      )}
 
       {/* Association cards */}
+      {loadingUnion && !unionData ? (
+        <ListSkeleton rows={4} />
+      ) : (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -150,6 +158,7 @@ export default function SuperAdminDashboardPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

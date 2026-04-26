@@ -8,13 +8,14 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Skeleton } from '@/components/atoms/Skeleton';
 
 export default function SuperAdminAssociationsPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
 
-  const { data: associations = [] } = useAssociationsByUnion(currentUser?.unionId ?? undefined);
+  const { data: associations = [], isLoading: loadingAssociations } = useAssociationsByUnion(currentUser?.unionId ?? undefined);
 
   const filtered = useMemo(
     () =>
@@ -48,6 +49,20 @@ export default function SuperAdminAssociationsPage() {
       </div>
 
       {/* List */}
+      {loadingAssociations && associations.length === 0 ? (
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 flex items-center gap-4">
+              <Skeleton className="w-12 h-12 rounded-xl" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-3 w-1/3" />
+              </div>
+              <Skeleton className="w-4 h-4 rounded" />
+            </div>
+          ))}
+        </div>
+      ) : (
       <div className="space-y-3">
         {filtered.map((assoc, i) => (
           <motion.button
@@ -78,6 +93,7 @@ export default function SuperAdminAssociationsPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

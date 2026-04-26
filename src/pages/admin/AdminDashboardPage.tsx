@@ -5,6 +5,7 @@ import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
+import { StatsGridSkeleton, ListSkeleton, BarChartSkeleton } from '@/components/atoms/Skeleton';
 import {
   Users,
   FileText,
@@ -26,7 +27,7 @@ export default function AdminDashboardPage() {
   const [periodOffset, setPeriodOffset] = useState(0);
 
   const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
-  const { data: consolidated } = useAssociationConsolidated(
+  const { data: consolidated, isLoading: loadingConsolidated } = useAssociationConsolidated(
     token ?? '',
     currentUser?.associationId ?? '',
     periodOffset,
@@ -133,33 +134,42 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div
-                className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}
-              >
-                <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+      {loadingConsolidated && !consolidated ? (
+        <StatsGridSkeleton count={4} />
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}
+                >
+                  <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+                </div>
+                <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
+                  {s.label}
+                </span>
               </div>
-              <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
-                {s.label}
-              </span>
-            </div>
-            <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
-          </motion.div>
-        ))}
-      </div>
+              <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
+              <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Pastors list */}
+        {loadingConsolidated && !consolidated ? (
+          <div className="lg:col-span-2">
+            <ListSkeleton rows={5} />
+          </div>
+        ) : (
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -212,8 +222,12 @@ export default function AdminDashboardPage() {
             )}
           </div>
         </div>
+        )}
 
         {/* Category breakdown */}
+        {loadingConsolidated && !consolidated ? (
+          <BarChartSkeleton rows={5} />
+        ) : (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -258,6 +272,7 @@ export default function AdminDashboardPage() {
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );
