@@ -1,5 +1,6 @@
 import { LayoutDashboard, Users, BarChart3, UserCog, MapPin, Mail, Settings } from 'lucide-react';
 import { SidebarLayout } from './SidebarLayout';
+import { useFeatureFlags } from '@/features/config/hooks/use-business-config';
 
 const ADMIN_NAV = [
   { label: 'Dashboard', href: '/admin', icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -15,6 +16,7 @@ const ADMIN_NAV = [
     label: 'Enviar Reporte',
     href: '/admin/send-report',
     icon: <Mail className="w-4 h-4" />,
+    feature: 'emailEnabled' as const,
   },
   {
     label: 'Configuración',
@@ -24,5 +26,10 @@ const ADMIN_NAV = [
 ];
 
 export function AdminLayout() {
-  return <SidebarLayout items={ADMIN_NAV} />;
+  const { emailEnabled } = useFeatureFlags();
+  const items = ADMIN_NAV.filter((item) => {
+    if (item.feature === 'emailEnabled') return emailEnabled;
+    return true;
+  });
+  return <SidebarLayout items={items} />;
 }

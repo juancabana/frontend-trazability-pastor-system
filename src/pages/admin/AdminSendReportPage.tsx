@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminRecipients } from '@/features/consolidated/hooks/use-admin-recipients';
 import { useSendReport } from '@/features/consolidated/hooks/use-send-report';
+import { useFeatureFlags } from '@/features/config/hooks/use-business-config';
 import { ROLE_CONFIG } from '@/features/auth/domain/entities/user-role';
 import { MONTHS_ES } from '@/constants/shared';
 import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
@@ -14,12 +15,14 @@ import {
   Send,
   X,
   Users,
+  MailX,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
 export default function AdminSendReportPage() {
   const { token, currentUser } = useAuth();
+  const { emailEnabled } = useFeatureFlags();
 
   const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
@@ -77,6 +80,23 @@ export default function AdminSendReportPage() {
   };
 
   const selectedRecipients = recipients.filter((r) => selectedIds.has(r.id));
+
+  if (!emailEnabled) {
+    return (
+      <div className="max-w-[680px] mx-auto">
+        <div className="rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-8 text-center">
+          <MailX className="w-10 h-10 mx-auto text-amber-600 dark:text-amber-400 mb-3" />
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Envío de correos deshabilitado
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-slate-300">
+            Esta funcionalidad está temporalmente desactivada. Contacta al
+            administrador del sistema para habilitarla.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[680px] mx-auto">

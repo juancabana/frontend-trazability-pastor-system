@@ -30,6 +30,9 @@ const FALLBACK_CONFIG: BusinessConfig = {
     min: 2000,
     max: 2100,
   },
+  features: {
+    emailEnabled: false,
+  },
 };
 
 const QUERY_KEY = ['config', 'public'] as const;
@@ -83,5 +86,16 @@ export function useComplianceThresholds() {
     /** Umbrales en formato decimal 0-1 */
     threshold: config.compliance.threshold,
     amberThreshold: config.compliance.amberThreshold,
+  };
+}
+
+/**
+ * Atajo para acceder a los feature flags del server.
+ */
+export function useFeatureFlags() {
+  const { config, isLoading } = useBusinessConfig();
+  return {
+    emailEnabled: config.features.emailEnabled,
+    isLoading,
   };
 }

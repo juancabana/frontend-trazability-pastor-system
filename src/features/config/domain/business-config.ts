@@ -18,4 +18,8 @@ export interface BusinessConfig {
     min: number;
     max: number;
   };
+  features: {
+    /** Si el envio de correos esta habilitado en el server. */
+    emailEnabled: boolean;
+  };
 }
