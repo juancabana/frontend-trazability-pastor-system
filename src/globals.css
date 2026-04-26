@@ -19,6 +19,17 @@ body {
   overflow-x: clip;
 }
 
+/* En navegadores modernos (iOS Safari 15+, Chrome Android) usa la altura
+   GRANDE del viewport (`lvh`): el layout ocupa todo el alto fisico de la
+   pantalla, y la barra de URL / home indicator translucidos se dibujan
+   ENCIMA del contenido (no lo recortan). */
+@supports (height: 100lvh) {
+  html,
+  body {
+    height: 100lvh;
+  }
+}
+
 html {
   background-color: #f9fafb; /* gray-50  — mismo que el layout en light */
 }
