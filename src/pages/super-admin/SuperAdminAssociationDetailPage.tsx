@@ -16,9 +16,10 @@ import {
   AlertCircle,
   ChevronRight as GoIcon,
 } from 'lucide-react';
-import { motion } from 'motion/react';
 import { StatsGridSkeleton, ListSkeleton, BarChartSkeleton } from '@/components/atoms/Skeleton';
+import { StatCard } from '@/components/atoms/StatCard';
 import { Tooltip } from '@/components/atoms/Tooltip';
+import { motion } from 'motion/react';
 
 export default function SuperAdminAssociationDetailPage() {
   const { associationId } = useParams<{ associationId: string }>();
@@ -109,26 +110,9 @@ export default function SuperAdminAssociationDetailPage() {
       {loadingConsolidated && !consolidated ? (
         <StatsGridSkeleton count={4} />
       ) : (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-5">
         {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}>
-                <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
-              </div>
-              <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
-                {s.label}
-              </span>
-            </div>
-            <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
-          </motion.div>
+          <StatCard key={s.label} {...s} delay={i * 0.04} />
         ))}
       </div>
       )}

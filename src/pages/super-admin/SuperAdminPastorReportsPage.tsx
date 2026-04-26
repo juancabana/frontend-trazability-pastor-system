@@ -14,8 +14,8 @@ import {
   Clock,
   FileText,
 } from 'lucide-react';
-import { motion } from 'motion/react';
 import { StatsGridSkeleton, CalendarSkeleton, ListSkeleton } from '@/components/atoms/Skeleton';
+import { StatCard } from '@/components/atoms/StatCard';
 
 export default function SuperAdminPastorReportsPage() {
   const { pastorId } = useParams<{ pastorId: string }>();
@@ -106,26 +106,9 @@ export default function SuperAdminPastorReportsPage() {
       {loadingReports && reports.length === 0 ? (
         <StatsGridSkeleton count={3} />
       ) : (
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5">
         {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}>
-                <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
-              </div>
-              <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
-                {s.label}
-              </span>
-            </div>
-            <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
-          </motion.div>
+          <StatCard key={s.label} {...s} delay={i * 0.04} />
         ))}
       </div>
       )}

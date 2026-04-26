@@ -30,13 +30,13 @@ export function Skeleton({ className = '', ...rest }: SkeletonProps) {
 /** Skeleton de una "stat card" (icono + label + valor + sub). */
 export function StatCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <Skeleton className="w-7 h-7 rounded-lg" />
-        <Skeleton className="h-3 w-16" />
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-3 sm:p-4">
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+        <Skeleton className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg" />
+        <Skeleton className="h-3 w-14 sm:w-16" />
       </div>
-      <Skeleton className="h-6 w-20 mb-1.5" />
-      <Skeleton className="h-3 w-12" />
+      <Skeleton className="h-5 sm:h-6 w-16 sm:w-20 mb-1.5" />
+      <Skeleton className="h-3 w-10 sm:w-12" />
     </div>
   );
 }
@@ -44,7 +44,7 @@ export function StatCardSkeleton() {
 /** Grilla de stat cards (responsive 2/4 columnas). */
 export function StatsGridSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-5">
       {Array.from({ length: count }).map((_, i) => (
         <StatCardSkeleton key={i} />
       ))}
