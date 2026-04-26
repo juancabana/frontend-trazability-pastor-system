@@ -91,7 +91,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
     : (currentUser?.associationName || 'Asociacion');
 
   return (
-    <div className="h-dvh flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
+    <div className="h-lvh flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
       {/* Mobile top bar — el padding-top empuja el contenido bajo el Dynamic Island
           y el fondo del header cubre la safe area superior. */}
       <header
@@ -192,7 +192,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
       </AnimatePresence>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-[220px] h-screen sticky top-0 bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 flex-col shrink-0 transition-colors duration-300">
+      <aside className="hidden lg:flex w-[220px] h-lvh sticky top-0 bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 flex-col shrink-0 transition-colors duration-300">
         {/* Brand */}
         <div className="p-5 pb-4">
           <div className="flex items-center gap-3 mb-4">
@@ -287,10 +287,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
-        <main
-          className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain p-4 sm:p-5 lg:p-8"
-          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-        >
+        <main className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain p-4 sm:p-5 lg:p-8">
           <Outlet />
         </main>
       </div>
