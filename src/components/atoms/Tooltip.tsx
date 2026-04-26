@@ -20,11 +20,11 @@ export function Tooltip({ content, children, side = 'top', className = '' }: Too
       {children}
       <div
         className={`
-          pointer-events-none absolute z-50 max-w-xs
-          px-2.5 py-1.5 rounded-lg text-xs font-medium text-white text-center
-          bg-gray-900 dark:bg-slate-700
+          pointer-events-none absolute z-50 w-max max-w-[260px]
+          px-3 py-2 rounded-lg text-xs font-medium leading-snug text-white text-center
+          bg-gray-900 dark:bg-slate-700 shadow-lg shadow-black/10
           opacity-0 group-hover/tt:opacity-100
-          transition-opacity duration-150
+          transition-opacity duration-200 ease-out
           ${side === 'top'
             ? 'bottom-full left-1/2 -translate-x-1/2 mb-2'
             : 'top-full left-1/2 -translate-x-1/2 mt-2'}
