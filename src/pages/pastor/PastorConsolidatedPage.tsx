@@ -2,8 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { usePastorConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
-import { formatMonthYear } from '@/lib/format-date';
-import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import { exportPastorPDF, exportPastorExcel } from '@/lib/export-utils';
 import { UNIT_LABELS } from '@/constants/shared';
 import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
@@ -28,17 +26,12 @@ import { toast } from 'sonner';
 export default function PastorConsolidatedPage() {
   const { token, currentUser } = useAuth();
   const { thresholdPct } = useComplianceThresholds();
-  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
-
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const [periodOffset, setPeriodOffset] = useState(0);
 
   const { data: consolidated } = usePastorConsolidated(
     token ?? '',
     currentUser?.id ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
   const { data: allCategories = [] } = useActivityCategories();
 
@@ -56,12 +49,14 @@ export default function PastorConsolidatedPage() {
     : 0;
   const totalActivities = consolidated?.totals?.totalActivities || 0;
   const totalTransporte = consolidated?.totalTransportAmount || 0;
-  const monthLabel = formatMonthYear(currentMonth);
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
+  const daysInPeriod = consolidated?.daysInPeriod ?? 0;
+  const daysWithReports = consolidated?.daysWithReports ?? 0;
 
   const handleExportPDF = async () => {
     if (!consolidated) return;
     try {
-      await exportPastorPDF(consolidated, monthLabel, currentUser?.displayName ?? 'Pastor');
+      await exportPastorPDF(consolidated, periodLabel, currentUser?.displayName ?? 'Pastor');
       toast.success('PDF generado correctamente');
     } catch {
       toast.error('Error al generar PDF');
@@ -71,7 +66,7 @@ export default function PastorConsolidatedPage() {
   const handleExportExcel = async () => {
     if (!consolidated) return;
     try {
-      await exportPastorExcel(consolidated, monthLabel, currentUser?.displayName ?? 'Pastor');
+      await exportPastorExcel(consolidated, periodLabel, currentUser?.displayName ?? 'Pastor');
       toast.success('Excel generado correctamente');
     } catch {
       toast.error('Error al generar Excel');
@@ -82,8 +77,8 @@ export default function PastorConsolidatedPage() {
     {
       icon: Calendar,
       label: 'Dias',
-      value: compliance > 0 ? Math.round((compliance / 100) * daysInMonth) : 0,
-      sub: `de ${daysInMonth}`,
+      value: daysWithReports,
+      sub: `de ${daysInPeriod}`,
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/30',
     },
@@ -91,7 +86,7 @@ export default function PastorConsolidatedPage() {
       icon: TrendingUp,
       label: 'Cumplimiento',
       value: `${compliance}%`,
-      sub: 'del mes',
+      sub: 'del periodo',
       color: compliance >= thresholdPct ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
       bg: compliance >= thresholdPct ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
     },
@@ -118,7 +113,7 @@ export default function PastorConsolidatedPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 gap-3">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-teal-600" /> Mi Consolidado Mensual
+            <BarChart3 className="w-5 h-5 text-teal-600" /> Mi Consolidado por Periodo
           </h2>
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
             Resumen personal de actividades por rubro y subcategoria
@@ -146,22 +141,23 @@ export default function PastorConsolidatedPage() {
         </div>
       </div>
 
-      {/* Month nav */}
+      {/* Period nav */}
       <div className="flex items-center gap-3 mb-5">
         <button
-          aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          aria-label="Periodo anterior"
+          onClick={() => setPeriodOffset((o) => o - 1)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
-          {formatMonthYear(currentMonth)}
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
+          {periodLabel}
         </span>
         <button
-          aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          aria-label="Periodo siguiente"
+          onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+          disabled={periodOffset >= 0}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>

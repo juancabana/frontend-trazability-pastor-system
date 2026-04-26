@@ -8,35 +8,32 @@ const repo = new ConsolidatedRepositoryApiImpl(httpAdapter);
 export const usePastorConsolidated = (
   token: string,
   pastorId: string,
-  month: number,
-  year: number,
+  periodOffset: number,
 ) =>
   useQuery({
-    queryKey: consolidatedKeys.byPastor(pastorId, month, year),
-    queryFn: () => repo.getByPastor(token, pastorId, month, year),
+    queryKey: consolidatedKeys.byPastor(pastorId, periodOffset),
+    queryFn: () => repo.getByPastor(token, pastorId, periodOffset),
     enabled: !!token && !!pastorId,
   });
 
 export const useAssociationConsolidated = (
   token: string,
   assocId: string,
-  month: number,
-  year: number,
+  periodOffset: number,
 ) =>
   useQuery({
-    queryKey: consolidatedKeys.byAssociation(assocId, month, year),
-    queryFn: () => repo.getByAssociation(token, assocId, month, year),
+    queryKey: consolidatedKeys.byAssociation(assocId, periodOffset),
+    queryFn: () => repo.getByAssociation(token, assocId, periodOffset),
     enabled: !!token && !!assocId,
   });
 
 export const useUnionConsolidated = (
   token: string,
   unionId: string,
-  month: number,
-  year: number,
+  periodOffset: number,
 ) =>
   useQuery({
-    queryKey: consolidatedKeys.byUnion(unionId, month, year),
-    queryFn: () => repo.getByUnion(token, unionId, month, year),
+    queryKey: consolidatedKeys.byUnion(unionId, periodOffset),
+    queryFn: () => repo.getByUnion(token, unionId, periodOffset),
     enabled: !!token && !!unionId,
   });

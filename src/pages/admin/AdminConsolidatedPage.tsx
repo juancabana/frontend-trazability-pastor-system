@@ -5,8 +5,6 @@ import { useAssociationConsolidated } from '@/features/consolidated/presentation
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { ConsolidatedRepositoryApiImpl } from '@/features/consolidated/infra/adapters/consolidated-repository-api-impl';
 import { httpAdapter } from '@/shared/infra/adapters/fetch-http-adapter';
-import { formatMonthYear } from '@/lib/format-date';
-import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import { exportConsolidatedPDF, exportConsolidatedExcel } from '@/lib/export-utils';
 import { UNIT_LABELS, PASTOR_POSITION_LABEL } from '@/constants/shared';
 import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
@@ -37,22 +35,17 @@ const repo = new ConsolidatedRepositoryApiImpl(httpAdapter);
 export default function AdminConsolidatedPage() {
   const { token, currentUser } = useAuth();
   const { thresholdPct } = useComplianceThresholds();
-  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
+  const [periodOffset, setPeriodOffset] = useState(0);
   const [pastorFilter] = useState('all');
   const [showCustomPanel, setShowCustomPanel] = useState(false);
   const [selectedPastorIds, setSelectedPastorIds] = useState<Set<string>>(new Set());
   const [customExporting, setCustomExporting] = useState<'pdf' | 'excel' | null>(null);
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
   const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
   const { data: consolidated } = useAssociationConsolidated(
     token ?? '',
     currentUser?.associationId ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
   const { data: allCategories = [] } = useActivityCategories();
 
@@ -63,7 +56,7 @@ export default function AdminConsolidatedPage() {
 
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
-  // Reset selection when panel closes or month changes
+  // Reset selection when panel closes or period changes
   useEffect(() => {
     if (!showCustomPanel) setSelectedPastorIds(new Set());
   }, [showCustomPanel]);
@@ -72,10 +65,12 @@ export default function AdminConsolidatedPage() {
   const totalActivities = consolidated?.totals?.totalActivities || 0;
   const totalHours = consolidated?.totals?.totalHours || 0;
   const activePastors = pastorSummaries.filter((p) => p.totalActivities > 0).length;
-  const monthLabel = formatMonthYear(currentMonth);
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
+
+  const totalReports = pastorSummaries.reduce((s, p) => s + p.totalReports, 0);
 
   const stats = [
-    { icon: FileText, label: 'Informes', value: pastorSummaries.reduce((s, p) => s + Math.round(p.compliance * daysInMonth), 0), sub: 'recibidos', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
+    { icon: FileText, label: 'Informes', value: totalReports, sub: 'recibidos', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
     { icon: Users, label: 'Pastores', value: `${activePastors}/${pastors.length}`, sub: 'activos', color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/30' },
     { icon: Activity, label: 'Actividades', value: totalActivities, sub: 'registradas', color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-900/30' },
     { icon: Clock, label: 'Horas', value: `${totalHours.toFixed(0)}h`, sub: 'dedicadas', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30' },
@@ -84,7 +79,7 @@ export default function AdminConsolidatedPage() {
   const handleExportPDF = async () => {
     if (!consolidated) return;
     try {
-      await exportConsolidatedPDF(consolidated, monthLabel);
+      await exportConsolidatedPDF(consolidated, periodLabel);
       toast.success('PDF generado correctamente');
     } catch {
       toast.error('Error al generar PDF');
@@ -94,7 +89,7 @@ export default function AdminConsolidatedPage() {
   const handleExportExcel = async () => {
     if (!consolidated) return;
     try {
-      await exportConsolidatedExcel(consolidated, monthLabel);
+      await exportConsolidatedExcel(consolidated, periodLabel);
       toast.success('Excel generado correctamente');
     } catch {
       toast.error('Error al generar Excel');
@@ -108,14 +103,13 @@ export default function AdminConsolidatedPage() {
       const data = await repo.getByPastors(
         token ?? '',
         Array.from(selectedPastorIds),
-        month + 1,
-        year,
+        periodOffset,
       );
       const customTitle = `Consolidado Personalizado (${selectedPastorIds.size} pastor${selectedPastorIds.size > 1 ? 'es' : ''})`;
       if (format === 'pdf') {
-        await exportConsolidatedPDF(data, monthLabel, customTitle);
+        await exportConsolidatedPDF(data, periodLabel, customTitle);
       } else {
-        await exportConsolidatedExcel(data, monthLabel, customTitle);
+        await exportConsolidatedExcel(data, periodLabel, customTitle);
       }
       toast.success(`${format === 'pdf' ? 'PDF' : 'Excel'} generado correctamente`);
     } catch {
@@ -325,22 +319,23 @@ export default function AdminConsolidatedPage() {
         )}
       </AnimatePresence>
 
-      {/* Month nav */}
+      {/* Period nav */}
       <div className="flex items-center gap-3 mb-5">
         <button
-          aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          aria-label="Periodo anterior"
+          onClick={() => setPeriodOffset((o) => o - 1)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
-          {monthLabel}
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
+          {periodLabel}
         </span>
         <button
-          aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          aria-label="Periodo siguiente"
+          onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+          disabled={periodOffset >= 0}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>

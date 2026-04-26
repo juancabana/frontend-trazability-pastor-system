@@ -38,6 +38,7 @@ export default function AdminPastorReportsPage() {
   const { token, currentUser } = useAuth();
   const { thresholdPct } = useComplianceThresholds();
   const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
+  const [periodOffset, setPeriodOffset] = useState(0);
   const [activeTab, setActiveTab] = useState<Tab>('reports');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
@@ -56,13 +57,14 @@ export default function AdminPastorReportsPage() {
   const { data: consolidated } = usePastorConsolidated(
     token ?? '',
     pastorId ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
 
   const pastor = users.find((u) => u.id === pastorId);
   const today = new Date();
   const monthLabel = formatMonthYear(currentMonth);
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
+  const daysInPeriod = consolidated?.daysInPeriod ?? daysInMonth;
 
   const calendarDays: (number | null)[] = useMemo(() => {
     const days: (number | null)[] = [];
@@ -103,7 +105,7 @@ export default function AdminPastorReportsPage() {
   const handleExportPDF = async () => {
     if (!consolidated || !pastor) return;
     try {
-      await exportPastorPDF(consolidated, monthLabel, pastor.name, pastor.position ?? undefined);
+      await exportPastorPDF(consolidated, periodLabel, pastor.name, pastor.position ?? undefined);
       toast.success('PDF generado correctamente');
     } catch {
       toast.error('Error al generar PDF');
@@ -113,7 +115,7 @@ export default function AdminPastorReportsPage() {
   const handleExportExcel = async () => {
     if (!consolidated || !pastor) return;
     try {
-      await exportPastorExcel(consolidated, monthLabel, pastor.name, pastor.position ?? undefined);
+      await exportPastorExcel(consolidated, periodLabel, pastor.name, pastor.position ?? undefined);
       toast.success('Excel generado correctamente');
     } catch {
       toast.error('Error al generar Excel');
@@ -131,7 +133,7 @@ export default function AdminPastorReportsPage() {
       icon: Calendar,
       label: 'Dias',
       value: consolidated ? consolidated.daysWithReports : 0,
-      sub: `de ${daysInMonth}`,
+      sub: `de ${daysInPeriod}`,
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/30',
     },
@@ -139,7 +141,7 @@ export default function AdminPastorReportsPage() {
       icon: TrendingUp,
       label: 'Cumplimiento',
       value: `${compliance}%`,
-      sub: 'del mes',
+      sub: 'del periodo',
       color: compliance >= thresholdPct ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
       bg: compliance >= thresholdPct ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
     },
@@ -214,26 +216,49 @@ export default function AdminPastorReportsPage() {
         </button>
       </div>
 
-      {/* Month nav */}
-      <div className="flex items-center gap-3 mb-5">
-        <button
-          aria-label="Mes anterior"
-          onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-        </button>
-        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
-          {monthLabel}
-        </span>
-        <button
-          aria-label="Mes siguiente"
-          onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
-        >
-          <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-        </button>
-      </div>
+      {/* Period / Month nav (depends on tab) */}
+      {activeTab === 'reports' ? (
+        <div className="flex items-center gap-3 mb-5">
+          <button
+            aria-label="Mes anterior"
+            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+          </button>
+          <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
+            {monthLabel}
+          </span>
+          <button
+            aria-label="Mes siguiente"
+            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 mb-5">
+          <button
+            aria-label="Periodo anterior"
+            onClick={() => setPeriodOffset((o) => o - 1)}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+          </button>
+          <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
+            {periodLabel}
+          </span>
+          <button
+            aria-label="Periodo siguiente"
+            onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+            disabled={periodOffset >= 0}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+          </button>
+        </div>
+      )}
 
       {/* ── TAB: INFORMES ── */}
       {activeTab === 'reports' && (

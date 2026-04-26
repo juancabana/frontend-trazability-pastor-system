@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminRecipients } from '@/features/consolidated/hooks/use-admin-recipients';
 import { useSendReport } from '@/features/consolidated/hooks/use-send-report';
+import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useFeatureFlags } from '@/features/config/hooks/use-business-config';
 import { ROLE_CONFIG } from '@/features/auth/domain/entities/user-role';
-import { MONTHS_ES } from '@/constants/shared';
-import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import {
   Mail,
   ChevronLeft,
@@ -24,14 +23,19 @@ export default function AdminSendReportPage() {
   const { token, currentUser } = useAuth();
   const { emailEnabled } = useFeatureFlags();
 
-  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
+  const [periodOffset, setPeriodOffset] = useState(0);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth() + 1;
-  const monthLabel = `${MONTHS_ES[currentMonth.getMonth()]} ${year}`;
+  // El periodo lo calcula el server. Pedimos el consolidado solo para
+  // mostrar la etiqueta legible.
+  const { data: consolidated } = useAssociationConsolidated(
+    token ?? '',
+    currentUser?.associationId ?? '',
+    periodOffset,
+  );
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
 
   const { data: recipients = [], isLoading: loadingRecipients } =
     useAdminRecipients(token ?? '', currentUser?.associationId ?? null);
@@ -59,8 +63,7 @@ export default function AdminSendReportPage() {
         data: {
           recipientUserIds: Array.from(selectedIds),
           associationId: currentUser.associationId,
-          month,
-          year,
+          periodOffset,
         },
       },
       {
@@ -113,26 +116,27 @@ export default function AdminSendReportPage() {
         </div>
       </div>
 
-      {/* Month selector */}
+      {/* Period selector */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 mb-4">
         <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3">
           Periodo del reporte
         </p>
         <div className="flex items-center gap-3">
           <button
-            aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 2, 1))}
+            aria-label="Periodo anterior"
+            onClick={() => setPeriodOffset((o) => o - 1)}
             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
           >
             <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
-          <span className="text-sm font-semibold text-gray-900 dark:text-white px-5 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 min-w-[160px] text-center">
-            {monthLabel}
+          <span className="text-sm font-semibold text-gray-900 dark:text-white px-5 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 min-w-[200px] text-center">
+            {periodLabel}
           </span>
           <button
-            aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month, 1))}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+            aria-label="Periodo siguiente"
+            onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+            disabled={periodOffset >= 0}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
@@ -293,7 +297,7 @@ export default function AdminSendReportPage() {
                         Confirmar envío
                       </h3>
                       <p className="text-xs text-gray-400 dark:text-slate-500">
-                        Reporte de {monthLabel}
+                        Reporte de {periodLabel}
                       </p>
                     </div>
                   </div>
@@ -309,7 +313,7 @@ export default function AdminSendReportPage() {
 
                 {/* Summary */}
                 <p className="text-sm text-gray-600 dark:text-slate-300 mb-4">
-                  Se enviará el consolidado de <strong>{monthLabel}</strong> a los siguientes destinatarios:
+                  Se enviará el consolidado de <strong>{periodLabel}</strong> a los siguientes destinatarios:
                 </p>
 
                 <div className="space-y-1.5 mb-5 max-h-48 overflow-y-auto">

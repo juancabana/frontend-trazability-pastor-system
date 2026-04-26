@@ -1,3 +1,16 @@
+export interface PeriodMeta {
+  /** Fecha de inicio del periodo (YYYY-MM-DD). */
+  startDate: string;
+  /** Fecha de fin del periodo (YYYY-MM-DD). */
+  endDate: string;
+  /** Etiqueta legible. Ej: "20 feb - 19 mar 2026". */
+  label: string;
+  /** Dia de cierre usado para calcular el periodo. */
+  deadlineDay: number;
+  /** Offset solicitado: 0=actual, -1=anterior, +1=siguiente. */
+  offset: number;
+}
+
 export interface ConsolidatedSubcategory {
   subcategoryId: string;
   subcategoryName: string;
@@ -21,6 +34,7 @@ export interface ConsolidatedTotals {
 }
 
 export interface ConsolidatedResponse {
+  period: PeriodMeta;
   categories: ConsolidatedCategory[];
   totals: ConsolidatedTotals;
   compliance: number;
@@ -43,6 +57,7 @@ export interface PastorSummary {
 }
 
 export interface AssociationConsolidatedResponse {
+  period: PeriodMeta;
   categories: ConsolidatedCategory[];
   pastorSummaries: PastorSummary[];
   totals: ConsolidatedTotals;
@@ -56,9 +71,11 @@ export interface AssociationSummary {
   totalActivities: number;
   totalHours: number;
   avgCompliance: number;
+  period: PeriodMeta;
 }
 
 export interface UnionConsolidatedResponse {
+  period: PeriodMeta;
   associationSummaries: AssociationSummary[];
   totalAssociations: number;
   totalPastors: number;
@@ -66,3 +83,4 @@ export interface UnionConsolidatedResponse {
   totalHours: number;
   avgCompliance: number;
 }
+

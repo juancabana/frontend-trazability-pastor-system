@@ -7,30 +7,30 @@ import { API_ENDPOINTS } from '@/constants/api';
 export class ConsolidatedRepositoryApiImpl implements ConsolidatedRepository {
   constructor(private readonly http: HttpGateway) {}
 
-  getByPastor(token: string, pastorId: string, month: number, year: number): Promise<ConsolidatedResponse> {
+  getByPastor(token: string, pastorId: string, periodOffset: number): Promise<ConsolidatedResponse> {
     return this.http.get<ConsolidatedResponse>(
-      API_ENDPOINTS.CONSOLIDATED.BY_PASTOR(pastorId, month, year),
+      API_ENDPOINTS.CONSOLIDATED.BY_PASTOR(pastorId, periodOffset),
       token,
     );
   }
 
-  getByAssociation(token: string, assocId: string, month: number, year: number): Promise<AssociationConsolidatedResponse> {
+  getByAssociation(token: string, assocId: string, periodOffset: number): Promise<AssociationConsolidatedResponse> {
     return this.http.get<AssociationConsolidatedResponse>(
-      API_ENDPOINTS.CONSOLIDATED.BY_ASSOCIATION(assocId, month, year),
+      API_ENDPOINTS.CONSOLIDATED.BY_ASSOCIATION(assocId, periodOffset),
       token,
     );
   }
 
-  getByUnion(token: string, unionId: string, month: number, year: number): Promise<UnionConsolidatedResponse> {
+  getByUnion(token: string, unionId: string, periodOffset: number): Promise<UnionConsolidatedResponse> {
     return this.http.get<UnionConsolidatedResponse>(
-      API_ENDPOINTS.CONSOLIDATED.BY_UNION(unionId, month, year),
+      API_ENDPOINTS.CONSOLIDATED.BY_UNION(unionId, periodOffset),
       token,
     );
   }
 
-  getByPastors(token: string, pastorIds: string[], month: number, year: number): Promise<AssociationConsolidatedResponse> {
+  getByPastors(token: string, pastorIds: string[], periodOffset: number): Promise<AssociationConsolidatedResponse> {
     return this.http.get<AssociationConsolidatedResponse>(
-      API_ENDPOINTS.CONSOLIDATED.BY_PASTORS(pastorIds, month, year),
+      API_ENDPOINTS.CONSOLIDATED.BY_PASTORS(pastorIds, periodOffset),
       token,
     );
   }

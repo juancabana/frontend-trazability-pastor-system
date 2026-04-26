@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
-import { formatMonthYear } from '@/lib/format-date';
-import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import { PASTOR_POSITION_LABEL } from '@/constants/shared';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import {
@@ -21,18 +19,16 @@ export default function AdminPastoresPage() {
   const { token, currentUser } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
-
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
+  const [periodOffset, setPeriodOffset] = useState(0);
 
   const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
   const { data: consolidated } = useAssociationConsolidated(
     token ?? '',
     currentUser?.associationId ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
+
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
 
   const pastors = useMemo(
     () => users.filter((u) => u.role === 'pastor'),
@@ -80,19 +76,20 @@ export default function AdminPastoresPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+            aria-label="Periodo anterior"
+            onClick={() => setPeriodOffset((o) => o - 1)}
             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
           >
             <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
           <span className="text-sm font-medium text-gray-900 dark:text-white px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 whitespace-nowrap">
-            {formatMonthYear(currentMonth)}
+            {periodLabel}
           </span>
           <button
-            aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+            aria-label="Periodo siguiente"
+            onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+            disabled={periodOffset >= 0}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>

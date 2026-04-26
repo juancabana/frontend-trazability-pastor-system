@@ -4,8 +4,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
-import { formatMonthYear } from '@/lib/format-date';
-import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import {
   Users,
@@ -25,18 +23,13 @@ export default function AdminDashboardPage() {
   const { token, currentUser } = useAuth();
   const { thresholdPct } = useComplianceThresholds();
   const navigate = useNavigate();
-  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
-
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const [periodOffset, setPeriodOffset] = useState(0);
 
   const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
   const { data: consolidated } = useAssociationConsolidated(
     token ?? '',
     currentUser?.associationId ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
   const { data: categories = [] } = useActivityCategories();
 
@@ -48,6 +41,8 @@ export default function AdminDashboardPage() {
   const totalActivities = consolidated?.totals?.totalActivities || 0;
   const totalHours = consolidated?.totals?.totalHours || 0;
   const pastorSummaries = consolidated?.pastorSummaries || [];
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
+  const totalReports = pastorSummaries.reduce((s, p) => s + p.totalReports, 0);
 
   const getInitials = (name: string) =>
     name
@@ -70,8 +65,8 @@ export default function AdminDashboardPage() {
     {
       icon: FileText,
       label: 'Informes',
-      value: pastorSummaries.reduce((s, p) => s + Math.round(p.compliance * daysInMonth), 0),
-      sub: 'este mes',
+      value: totalReports,
+      sub: 'recibidos',
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/30',
     },
@@ -118,19 +113,20 @@ export default function AdminDashboardPage() {
 
       <div className="flex items-center gap-3 mb-5">
         <button
-          aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          aria-label="Periodo anterior"
+          onClick={() => setPeriodOffset((o) => o - 1)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
-          {formatMonthYear(currentMonth)}
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
+          {periodLabel}
         </span>
         <button
-          aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          aria-label="Periodo siguiente"
+          onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+          disabled={periodOffset >= 0}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
@@ -167,7 +163,7 @@ export default function AdminDashboardPage() {
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-              Pastores — {formatMonthYear(currentMonth)}
+              Pastores — {periodLabel}
             </h3>
           </div>
           <div className="divide-y divide-gray-50 dark:divide-slate-800">

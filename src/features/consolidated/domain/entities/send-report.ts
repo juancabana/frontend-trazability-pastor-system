@@ -3,8 +3,8 @@ import type { UserRole } from '@/features/auth/domain/entities/user-role';
 export interface SendReportRequest {
   recipientUserIds: string[];
   associationId: string;
-  month: number;
-  year: number;
+  /** Offset del periodo respecto al actual (0=actual). Default 0. */
+  periodOffset?: number;
 }
 
 export interface SendReportResponse {
@@ -18,3 +18,4 @@ export interface AdminRecipient {
   email: string;
   role: UserRole;
 }
+
