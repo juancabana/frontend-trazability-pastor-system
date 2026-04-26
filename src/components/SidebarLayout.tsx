@@ -289,6 +289,14 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <main className="app-main flex-1 min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain p-4 sm:p-5 lg:p-8">
           <Outlet />
+          {/* Spacer al final del scroll para que en mobile el ultimo item del
+              contenido pueda subir por encima de la barra translucida de
+              Safari (URL + home indicator). En desktop no aplica. */}
+          <div
+            aria-hidden
+            className="lg:hidden h-32"
+            style={{ height: 'calc(env(safe-area-inset-bottom, 0px) + 8rem)' }}
+          />
         </main>
       </div>
     </div>
