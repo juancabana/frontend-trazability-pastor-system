@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { Tooltip } from '@/components/atoms/Tooltip';
 
 export default function AdminSendReportPage() {
   const { token, currentUser } = useAuth();
@@ -132,6 +133,7 @@ export default function AdminSendReportPage() {
           <span className="text-sm font-semibold text-gray-900 dark:text-white px-5 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 min-w-[200px] text-center">
             {periodLabel}
           </span>
+          <Tooltip content={periodOffset >= 0 ? 'Ya estás en el periodo más reciente' : false} side="bottom">
           <button
             aria-label="Periodo siguiente"
             onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
@@ -140,6 +142,7 @@ export default function AdminSendReportPage() {
           >
             <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -265,6 +268,16 @@ export default function AdminSendReportPage() {
             {selectedIds.size} destinatario{selectedIds.size !== 1 ? 's' : ''} seleccionado{selectedIds.size !== 1 ? 's' : ''}
           </p>
         )}
+        <Tooltip
+          content={
+            sending
+              ? 'Enviando...'
+              : selectedIds.size === 0
+                ? 'Selecciona al menos un destinatario'
+                : false
+          }
+          side="top"
+        >
         <button
           onClick={() => setShowConfirm(true)}
           disabled={selectedIds.size === 0 || sending}
@@ -273,6 +286,7 @@ export default function AdminSendReportPage() {
           <Send className="w-4 h-4" />
           Enviar reporte
         </button>
+        </Tooltip>
       </div>
 
       {/* Confirmation dialog */}

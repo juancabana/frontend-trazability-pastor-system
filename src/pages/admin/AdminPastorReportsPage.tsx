@@ -250,6 +250,7 @@ export default function AdminPastorReportsPage() {
           <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
             {periodLabel}
           </span>
+        <Tooltip content={periodOffset >= 0 ? 'Ya estás en el periodo más reciente' : false} side="bottom">
           <button
             aria-label="Periodo siguiente"
             onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
@@ -258,6 +259,7 @@ export default function AdminPastorReportsPage() {
           >
             <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
+        </Tooltip>
         </div>
       )}
 

@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useUpdateDeadline } from '@/features/association/hooks/use-update-deadline';
 import { getCurrentPeriod } from '@/lib/format-date';
 import { MONTHS_ES } from '@/constants/shared';
+import { Tooltip } from '@/components/atoms/Tooltip';
 
 function getLastDayOfMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate();
@@ -123,6 +124,7 @@ export default function AdminSettingsPage() {
               </span>
             </label>
             <div className="flex items-center gap-3">
+              <Tooltip content={value <= minDay ? `Mínimo permitido: día ${minDay}` : false} side="top">
               <button
                 type="button"
                 onClick={handleDecrement}
@@ -132,6 +134,7 @@ export default function AdminSettingsPage() {
               >
                 <Minus className="w-4 h-4" />
               </button>
+              </Tooltip>
 
               <input
                 type="number"
@@ -144,6 +147,7 @@ export default function AdminSettingsPage() {
                 className="w-20 text-center text-2xl font-semibold text-gray-900 dark:text-white bg-transparent border-b-2 border-indigo-400 dark:border-indigo-500 focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 disabled:opacity-50 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
 
+              <Tooltip content={value >= maxDay ? `Máximo permitido: día ${maxDay}` : false} side="top">
               <button
                 type="button"
                 onClick={handleIncrement}
@@ -153,6 +157,7 @@ export default function AdminSettingsPage() {
               >
                 <Plus className="w-4 h-4" />
               </button>
+              </Tooltip>
 
               <span className="text-sm text-gray-400 dark:text-gray-500">
                 de cada mes
@@ -189,6 +194,18 @@ export default function AdminSettingsPage() {
           <span className="text-xs text-gray-400 dark:text-gray-500">
             Valor actual guardado: día <strong>{currentDeadline}</strong>
           </span>
+          <Tooltip
+            content={
+              updateDeadline.isPending
+                ? 'Guardando...'
+                : !isChanged
+                  ? 'No hay cambios para guardar'
+                  : !isValid
+                    ? `El valor debe estar entre ${minDay} y ${maxDay}`
+                    : false
+            }
+            side="top"
+          >
           <button
             type="button"
             onClick={handleSave}
@@ -204,6 +221,7 @@ export default function AdminSettingsPage() {
               'Guardar cambios'
             )}
           </button>
+          </Tooltip>
         </div>
       </div>
     </div>

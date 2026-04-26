@@ -1,5 +1,5 @@
 interface TooltipProps {
-  content: string;
+  content: string | null | false;
   children: React.ReactNode;
   side?: 'top' | 'bottom';
   className?: string;
@@ -9,15 +9,19 @@ interface TooltipProps {
  * Tooltip ligero basado en CSS/Tailwind puro.
  * Solo se muestra en hover (desktop). En mobile no interfiere.
  * Usa group/tt para aislar el scope de otros `group` del DOM.
+ * Si `content` es vacío/null/false, no se renderiza el tooltip.
  */
 export function Tooltip({ content, children, side = 'top', className = '' }: TooltipProps) {
+  if (!content) {
+    return <div className={`inline-flex ${className}`}>{children}</div>;
+  }
   return (
     <div className={`relative group/tt inline-flex ${className}`}>
       {children}
       <div
         className={`
-          pointer-events-none absolute z-50 whitespace-nowrap
-          px-2.5 py-1.5 rounded-lg text-xs font-medium text-white
+          pointer-events-none absolute z-50 max-w-xs
+          px-2.5 py-1.5 rounded-lg text-xs font-medium text-white text-center
           bg-gray-900 dark:bg-slate-700
           opacity-0 group-hover/tt:opacity-100
           transition-opacity duration-150

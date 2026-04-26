@@ -9,6 +9,7 @@ import { formatDate, isDateEditable } from '@/lib/format-date';
 import { UNIT_LABELS, TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import { EmptyState } from '@/components/atoms/EmptyState';
 import { DetailSkeleton } from '@/components/atoms/Skeleton';
+import { Tooltip } from '@/components/atoms/Tooltip';
 import {
   ArrowLeft,
   ChevronDown,
@@ -500,6 +501,16 @@ export default function PastorReportEditPage() {
           >
             Cancelar
           </button>
+          <Tooltip
+            content={
+              saving
+                ? 'Guardando...'
+                : !hasChanges
+                  ? 'No hay cambios para guardar'
+                  : false
+            }
+            side="top"
+          >
           <button
             onClick={handleSave}
             disabled={saving || !hasChanges}
@@ -508,6 +519,7 @@ export default function PastorReportEditPage() {
             <Save className="w-4 h-4" />
             {saving ? 'Guardando...' : 'Guardar Cambios'}
           </button>
+          </Tooltip>
         </div>
       )}
 
