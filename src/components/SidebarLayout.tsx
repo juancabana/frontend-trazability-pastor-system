@@ -287,7 +287,9 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
-        <main className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain p-4 sm:p-5 lg:p-8">
+        <main
+          className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain p-4 sm:p-5 lg:p-8 pb-[calc(env(safe-area-inset-bottom,0px)+7rem)] lg:pb-[calc(env(safe-area-inset-bottom,0px)+2rem)] scroll-pb-[calc(env(safe-area-inset-bottom,0px)+7rem)]"
+        >
           <Outlet />
         </main>
       </div>
