@@ -22,7 +22,8 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Skeleton } from '@/components/atoms/Skeleton';
+import { Skeleton, StatsGridSkeleton } from '@/components/atoms/Skeleton';
+import { StatCard } from '@/components/atoms/StatCard';
 
 export default function PastorCalendarPage() {
   const { token, currentUser } = useAuth();
@@ -187,41 +188,11 @@ export default function PastorCalendarPage() {
 
       {/* Stats */}
       {loadingMonth && monthReports.length === 0 ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Skeleton className="w-7 h-7 rounded-lg" />
-                <Skeleton className="h-3 w-16" />
-              </div>
-              <Skeleton className="h-6 w-20 mb-1.5" />
-              <Skeleton className="h-3 w-12" />
-            </div>
-          ))}
-        </div>
+        <StatsGridSkeleton count={4} />
       ) : (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-5">
         {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div
-                className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}
-              >
-                <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
-              </div>
-              <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
-                {s.label}
-              </span>
-            </div>
-            <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
-          </motion.div>
+          <StatCard key={s.label} {...s} delay={i * 0.05} />
         ))}
       </div>
       )}
