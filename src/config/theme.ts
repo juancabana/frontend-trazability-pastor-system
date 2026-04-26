@@ -58,11 +58,16 @@ export const layout = {
 } as const;
 
 // ── Overlay / Modal ──────────────────────────────────────────────────
+// El backdrop es el contenedor de scroll (overflow-y-auto) y `container`
+// es el wrapper interno que centra el panel pero permite que el contenido
+// crezca verticalmente y se haga scroll cuando excede el viewport (móvil).
 export const overlay = {
   backdrop:
-    'fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4',
+    'fixed inset-0 z-50 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain',
+  container:
+    'flex min-h-full items-center justify-center p-4',
   panel:
-    'w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden',
+    'w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden my-auto',
 } as const;
 
 // ── IconBox ─────────────────────────────────────────────────────────

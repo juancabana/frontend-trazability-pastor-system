@@ -30,24 +30,26 @@ export function Modal({
           className={overlay.backdrop}
           onClick={onClose}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className={`${overlay.panel} ${maxWidth}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
-              <h2 className="text-gray-900 dark:text-white text-xl font-bold">{title}</h2>
-              <button
-                onClick={onClose}
-                className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="p-5">{children}</div>
-          </motion.div>
+          <div className={overlay.container}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className={`${overlay.panel} ${maxWidth}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
+                <h2 className="text-gray-900 dark:text-white text-xl font-bold">{title}</h2>
+                <button
+                  onClick={onClose}
+                  className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="p-5">{children}</div>
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

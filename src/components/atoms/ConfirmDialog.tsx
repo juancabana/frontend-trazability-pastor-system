@@ -33,13 +33,14 @@ export function ConfirmDialog({
           className={overlay.backdrop}
           onClick={onCancel}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className={`${overlay.panel} max-w-sm`}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className={overlay.container}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className={`${overlay.panel} max-w-sm`}
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="p-5 text-center">
               <div
                 className={`w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center ${
@@ -82,6 +83,7 @@ export function ConfirmDialog({
               </div>
             </div>
           </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
