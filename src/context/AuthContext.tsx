@@ -1,8 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useLogin } from '@/features/auth/presentation/hooks/use-auth-mutations';
+import { httpAdapter } from '@/shared/infra/adapters/fetch-http-adapter';
+import { AuthRepositoryApiImpl } from '@/features/auth/infra/adapters/auth-repository-api-impl';
 import { STORAGE_KEYS, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import type { UserRole } from '@/features/auth/domain/entities/user-role';
 import { ROLE_ACCESS } from '@/features/auth/domain/entities/user-role';
+
+const authRepo = new AuthRepositoryApiImpl(httpAdapter);
 
 interface AuthUser {
   id: string;
@@ -69,6 +73,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, []);
+
+  // Refresca el perfil del usuario al montar (y cada vez que cambia el token)
+  // para que cambios hechos por el admin (p.ej. canEditAllReports,
+  // reportDeadlineDay) se reflejen sin necesidad de cerrar sesion. Si el
+  // token ya no es valido se cierra la sesion local.
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    authRepo
+      .getMe(token)
+      .then((me) => {
+        if (cancelled) return;
+        setCurrentUser({
+          id: me.userId,
+          email: me.email,
+          displayName: me.displayName,
+          role: me.role,
+          associationId: me.associationId,
+          unionId: me.unionId,
+          associationName: me.associationName ?? null,
+          unionName: me.unionName ?? null,
+          reportDeadlineDay: me.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY,
+          mustChangePassword: me.mustChangePassword,
+          canEditAllReports: me.canEditAllReports ?? false,
+        });
+      })
+      .catch(() => {
+        // El adapter HTTP ya redirige a /login ante 401. Para otros errores
+        // (red, 5xx) preferimos mantener el usuario en cache para no romper
+        // la sesion ante fallos transitorios.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   useEffect(() => {
     if (token) {

@@ -1,6 +1,7 @@
 import type { HttpGateway } from '@/shared/domain/gateways/http-gateway';
 import type { AuthRepository } from '../../domain/gateways/auth-repository';
 import type { AuthToken } from '../../domain/entities/auth-token';
+import type { AuthMe } from '../../domain/entities/auth-me';
 import type { UserAccount } from '../../domain/entities/user-account';
 import type { LoginRequest } from '../../domain/dto/login-request';
 import type { CreateUserRequest } from '../../domain/dto/create-user-request';
@@ -12,6 +13,10 @@ export class AuthRepositoryApiImpl implements AuthRepository {
 
   login(data: LoginRequest): Promise<AuthToken> {
     return this.http.post<AuthToken>(API_ENDPOINTS.AUTH.LOGIN, data);
+  }
+
+  getMe(token: string): Promise<AuthMe> {
+    return this.http.get<AuthMe>(API_ENDPOINTS.AUTH.ME, token);
   }
 
   getUsers(token: string, associationId?: string): Promise<UserAccount[]> {

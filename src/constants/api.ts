@@ -1,6 +1,7 @@
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',
+    ME: '/auth/me',
     USERS: '/auth/users',
     USER_BY_ID: (id: string) => `/auth/users/${id}`,
     CHANGE_PASSWORD: '/auth/me/password',
