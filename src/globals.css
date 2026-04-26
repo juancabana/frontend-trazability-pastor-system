@@ -45,12 +45,12 @@ html.dark body {
 }
 
 /* Reserva al fondo del scroll del contenido principal espacio suficiente
-   para que el ultimo item se pueda mover por encima del nav inferior
-   translucido (~64px) y la barra translucida de Safari (URL + home
-   indicator, ~80px). En desktop no hay nav inferior. */
+   para que el ultimo item se pueda mover por encima de la barra translucida
+   de Safari (URL + home indicator, ~80px). El spacer dentro del <main>
+   complementa este padding para garantizar el scroll en mobile. */
 .app-main {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10rem);
-  scroll-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10rem);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  scroll-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8rem);
 }
 
 @media (min-width: 1024px) {
