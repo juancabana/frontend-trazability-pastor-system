@@ -91,7 +91,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
     : (currentUser?.associationName || 'Asociacion');
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
       {/* Mobile top bar */}
       <header className="lg:hidden h-14 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between px-4 shrink-0 z-40 transition-colors duration-300">
         <div className="flex items-center gap-2.5">
@@ -184,7 +184,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
       </AnimatePresence>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-[220px] bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 flex-col shrink-0 transition-colors duration-300">
+      <aside className="hidden lg:flex w-[220px] h-screen sticky top-0 bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 flex-col shrink-0 transition-colors duration-300">
         {/* Brand */}
         <div className="p-5 pb-4">
           <div className="flex items-center gap-3 mb-4">
@@ -206,7 +206,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 space-y-1">
+        <nav className="flex-1 min-h-0 overflow-y-auto px-3 space-y-1">
           <p className="text-[10px] font-semibold text-gray-400 dark:text-slate-600 uppercase tracking-wider px-3 mb-2">
             Menu
           </p>
@@ -278,8 +278,8 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 overflow-auto p-4 sm:p-5 lg:p-8 pb-24 lg:pb-8">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
+        <main className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 lg:p-8 pb-24 lg:pb-8">
           <Outlet />
         </main>
       </div>
