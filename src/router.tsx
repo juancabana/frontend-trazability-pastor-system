@@ -1,33 +1,36 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AdminLayout } from '@/components/AdminLayout';
 import { PastorLayout } from '@/components/PastorLayout';
 import { SuperAdminLayout } from '@/components/SuperAdminLayout';
+import { PageLoader } from '@/components/atoms/PageLoader';
 
-import LoginPage from '@/pages/LoginPage';
-import ChangePasswordPage from '@/pages/ChangePasswordPage';
-import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
-import AdminPastoresPage from '@/pages/admin/AdminPastoresPage';
-import AdminConsolidatedPage from '@/pages/admin/AdminConsolidatedPage';
-import AdminUsuariosPage from '@/pages/admin/AdminUsuariosPage';
-import AdminPastorReportsPage from '@/pages/admin/AdminPastorReportsPage';
-import AdminReportDetailPage from '@/pages/admin/AdminReportDetailPage';
-import AdminDistritosPage from '@/pages/admin/AdminDistritosPage';
-import AdminSendReportPage from '@/pages/admin/AdminSendReportPage';
-import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
-import PastorCalendarPage from '@/pages/pastor/PastorCalendarPage';
-import PastorConsolidatedPage from '@/pages/pastor/PastorConsolidatedPage';
-import PastorReportDetailPage from '@/pages/pastor/PastorReportDetailPage';
-import PastorReportEditPage from '@/pages/pastor/PastorReportEditPage';
-import SuperAdminDashboardPage from '@/pages/super-admin/SuperAdminDashboardPage';
-import SuperAdminAssociationsPage from '@/pages/super-admin/SuperAdminAssociationsPage';
-import SuperAdminAssociationDetailPage from '@/pages/super-admin/SuperAdminAssociationDetailPage';
-import SuperAdminConsolidatedPage from '@/pages/super-admin/SuperAdminConsolidatedPage';
-import SuperAdminPastorReportsPage from '@/pages/super-admin/SuperAdminPastorReportsPage';
-import NotFoundPage from '@/pages/NotFoundPage';
+const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const ChangePasswordPage = lazy(() => import('@/pages/ChangePasswordPage'));
+const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'));
+const AdminPastoresPage = lazy(() => import('@/pages/admin/AdminPastoresPage'));
+const AdminConsolidatedPage = lazy(() => import('@/pages/admin/AdminConsolidatedPage'));
+const AdminUsuariosPage = lazy(() => import('@/pages/admin/AdminUsuariosPage'));
+const AdminPastorReportsPage = lazy(() => import('@/pages/admin/AdminPastorReportsPage'));
+const AdminReportDetailPage = lazy(() => import('@/pages/admin/AdminReportDetailPage'));
+const AdminDistritosPage = lazy(() => import('@/pages/admin/AdminDistritosPage'));
+const AdminSendReportPage = lazy(() => import('@/pages/admin/AdminSendReportPage'));
+const AdminSettingsPage = lazy(() => import('@/pages/admin/AdminSettingsPage'));
+const PastorCalendarPage = lazy(() => import('@/pages/pastor/PastorCalendarPage'));
+const PastorConsolidatedPage = lazy(() => import('@/pages/pastor/PastorConsolidatedPage'));
+const PastorReportDetailPage = lazy(() => import('@/pages/pastor/PastorReportDetailPage'));
+const PastorReportEditPage = lazy(() => import('@/pages/pastor/PastorReportEditPage'));
+const SuperAdminDashboardPage = lazy(() => import('@/pages/super-admin/SuperAdminDashboardPage'));
+const SuperAdminAssociationsPage = lazy(() => import('@/pages/super-admin/SuperAdminAssociationsPage'));
+const SuperAdminAssociationDetailPage = lazy(() => import('@/pages/super-admin/SuperAdminAssociationDetailPage'));
+const SuperAdminConsolidatedPage = lazy(() => import('@/pages/super-admin/SuperAdminConsolidatedPage'));
+const SuperAdminPastorReportsPage = lazy(() => import('@/pages/super-admin/SuperAdminPastorReportsPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 export function AppRoutes() {
   return (
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
@@ -87,5 +90,6 @@ export function AppRoutes() {
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
+    </Suspense>
   );
 }

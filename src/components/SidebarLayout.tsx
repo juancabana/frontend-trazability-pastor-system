@@ -91,33 +91,39 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
     : (currentUser?.associationName || 'Asociacion');
 
   return (
-    <div className="h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
-      {/* Mobile top bar */}
-      <header className="lg:hidden h-14 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between px-4 shrink-0 z-40 transition-colors duration-300">
-        <div className="flex items-center gap-2.5">
-          <img src={logoSrc} alt="IASD" className="w-7 h-7 rounded-full" />
-          <div>
-            <div className="text-xs font-semibold text-gray-900 dark:text-white leading-tight">
-              Trazabilidad Pastoral
-            </div>
-            <div className="text-[10px] text-gray-400 dark:text-slate-500">
-              {accent.label}
+    <div className="h-dvh flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
+      {/* Mobile top bar — el padding-top empuja el contenido bajo el Dynamic Island
+          y el fondo del header cubre la safe area superior. */}
+      <header
+        className="lg:hidden bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 shrink-0 z-40 transition-colors duration-300"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        <div className="h-14 flex items-center justify-between px-4">
+          <div className="flex items-center gap-2.5">
+            <img src={logoSrc} alt="IASD" className="w-7 h-7 rounded-full" />
+            <div>
+              <div className="text-xs font-semibold text-gray-900 dark:text-white leading-tight">
+                Trazabilidad Pastoral
+              </div>
+              <div className="text-[10px] text-gray-400 dark:text-slate-500">
+                {accent.label}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-xl text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-all"
-          >
-            {resolvedTheme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-          </button>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-xl text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-all"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-all"
+            >
+              {resolvedTheme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-all"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -129,7 +135,8 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 top-14 z-30 bg-black/40 backdrop-blur-sm"
+              className="lg:hidden fixed inset-0 z-30 bg-black/40 backdrop-blur-sm"
+              style={{ top: 'calc(3.5rem + env(safe-area-inset-top))' }}
               onClick={() => setMobileMenuOpen(false)}
             />
             <motion.div
@@ -137,7 +144,8 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
-              className="lg:hidden fixed top-14 left-0 right-0 z-30 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 shadow-xl rounded-b-2xl overflow-hidden transition-colors"
+              className="lg:hidden fixed left-0 right-0 z-30 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 shadow-xl rounded-b-2xl overflow-hidden transition-colors"
+              style={{ top: 'calc(3.5rem + env(safe-area-inset-top))' }}
             >
               <div className="p-3 space-y-1">
                 {items.map((item) => (
@@ -279,42 +287,13 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
-        <main className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 lg:p-8 pb-24 lg:pb-8">
+        <main
+          className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 lg:p-8"
+          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+        >
           <Outlet />
         </main>
       </div>
-
-      {/* Mobile bottom nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-200/50 dark:border-slate-800/50 z-40 transition-colors duration-300">
-        <div className="flex items-center max-w-md mx-auto">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 pt-3 text-[10px] font-medium transition-all relative ${
-                isActive(item.href) ? accent.text : 'text-gray-400 dark:text-slate-500'
-              }`}
-            >
-              {isActive(item.href) && (
-                <motion.div
-                  layoutId="bottomNavIndicator"
-                  className={`absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-full ${accent.indicator}`}
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-              {item.icon}
-              <span>{item.label}</span>
-            </Link>
-          ))}
-          <button
-            onClick={handleLogout}
-            className="flex-1 flex flex-col items-center gap-0.5 py-2.5 pt-3 text-[10px] font-medium text-gray-400 dark:text-slate-500"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Salir</span>
-          </button>
-        </div>
-      </nav>
     </div>
   );
 }
