@@ -32,7 +32,7 @@ export default function SuperAdminAssociationsPage() {
           <Building2 className="w-5 h-5 text-purple-600 dark:text-purple-400" /> Asociaciones
         </h2>
         <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-          Todas las asociaciones de tu union
+          Todas las asociaciones de tu unión
         </p>
       </div>
 
@@ -41,7 +41,7 @@ export default function SuperAdminAssociationsPage() {
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-500" />
         <input
           type="text"
-          placeholder="Buscar asociacion..."
+          placeholder="Buscar asociación..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 rounded-xl text-sm border border-gray-200 dark:border-slate-700 focus:border-purple-500 dark:focus:border-purple-400 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
@@ -81,7 +81,7 @@ export default function SuperAdminAssociationsPage() {
                 {assoc.name}
               </p>
               <p className="text-[11px] text-gray-400 dark:text-slate-500">
-                {assoc.country} · Cierre dia {assoc.reportDeadlineDay}
+                {assoc.country} · Cierre día {assoc.reportDeadlineDay}
               </p>
             </div>
             <ChevronRight className="w-4 h-4 text-gray-300 dark:text-slate-600 group-hover:text-gray-500 dark:group-hover:text-slate-400 transition-colors shrink-0" />

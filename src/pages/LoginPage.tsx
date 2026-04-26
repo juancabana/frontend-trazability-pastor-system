@@ -59,7 +59,7 @@ export default function LoginPage() {
         navigate(getRoleRedirect(result.role));
       }
     } else {
-      setError('Error en acceso rapido. Verifique que el backend esta corriendo.');
+      setError('Error en acceso rápido. Verifique que el backend está corriendo.');
     }
     setSubmitting(false);
   };
@@ -108,7 +108,7 @@ export default function LoginPage() {
             className="text-sm text-white/50 max-w-sm leading-relaxed"
           >
             Plataforma para el registro y seguimiento de actividades diarias de
-            pastores distritales en la Iglesia Adventista del Septimo Dia.
+            pastores distritales en la Iglesia Adventista del Séptimo Día.
           </motion.p>
         </div>
 
@@ -122,11 +122,11 @@ export default function LoginPage() {
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-teal-400" />
               <span className="text-sm font-medium">
-                Plataforma Multi-Union
+                Plataforma Multi-Unión
               </span>
             </div>
             <p className="text-xs text-white/40 leading-relaxed">
-              Cada union, asociacion y distrito tiene su propio espacio con datos
+              Cada unión, asociación y distrito tiene su propio espacio con datos
               independientes, pastores y administradores.
             </p>
           </div>
@@ -134,7 +134,7 @@ export default function LoginPage() {
           <div className="flex gap-10">
             {[
               { value: 7, label: 'Rubros' },
-              { value: 42, label: 'Subcategorias' },
+              { value: 42, label: 'Subcategorías' },
               { value: 3, label: 'Roles' },
             ].map((stat, i) => (
               <div key={i}>
@@ -147,7 +147,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-10 text-[11px] text-white/20">
-            &copy; {new Date().getFullYear()} Iglesia Adventista del Septimo Dia
+            &copy; {new Date().getFullYear()} Iglesia Adventista del Séptimo Día
           </div>
         </motion.div>
       </div>
@@ -191,7 +191,7 @@ export default function LoginPage() {
             {/* Email */}
             <div>
               <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5" /> Correo electronico
+                <Mail className="w-3.5 h-3.5" /> Correo electrónico
               </label>
               <input
                 type="email"
@@ -276,7 +276,7 @@ function QuickAccessDemo({
           <div className="w-full border-t border-gray-200 dark:border-slate-700" />
         </div>
         <span className="relative bg-gray-50 dark:bg-slate-950 px-3 text-xs text-gray-400 dark:text-slate-500">
-          Acceso rapido demo
+          Acceso rápido demo
         </span>
       </div>
       <div className="flex gap-3">

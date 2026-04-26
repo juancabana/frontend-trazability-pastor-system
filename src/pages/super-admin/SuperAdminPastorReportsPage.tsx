@@ -58,7 +58,7 @@ export default function SuperAdminPastorReportsPage() {
     `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
   const stats = [
-    { icon: Calendar, label: 'Dias', value: reports.length, sub: `de ${daysInMonth}`, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
+    { icon: Calendar, label: 'Días', value: reports.length, sub: `de ${daysInMonth}`, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
     { icon: Activity, label: 'Actividades', value: totalActivities, sub: 'registradas', color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-900/30' },
     { icon: Clock, label: 'Horas', value: `${totalHours.toFixed(0)}h`, sub: 'dedicadas', color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/30' },
   ];

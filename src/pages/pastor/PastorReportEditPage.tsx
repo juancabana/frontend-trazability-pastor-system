@@ -279,7 +279,7 @@ export default function PastorReportEditPage() {
                                 e.target.value,
                               )
                             }
-                            placeholder="Descripcion (opcional)..."
+                            placeholder="Descripción (opcional)..."
                             className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
                           />
                           <div className="grid grid-cols-2 gap-3">
@@ -480,7 +480,7 @@ export default function PastorReportEditPage() {
             <textarea
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
-              placeholder="Observaciones adicionales del dia (opcional)..."
+              placeholder="Observaciones adicionales del día (opcional)..."
               rows={3}
               className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none resize-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
             />
@@ -526,7 +526,7 @@ export default function PastorReportEditPage() {
       <ConfirmDialog
         isOpen={showDeleteConfirm}
         title="Eliminar informe"
-        message="¿Esta seguro de eliminar este informe? Se perderan todas las actividades registradas."
+        message="¿Está seguro de eliminar este informe? Se perderán todas las actividades registradas."
         confirmLabel="Eliminar"
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteConfirm(false)}

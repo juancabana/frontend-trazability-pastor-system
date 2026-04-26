@@ -5,10 +5,10 @@ const DAY_NAMES_FULL_ES = [
   'Domingo',
   'Lunes',
   'Martes',
-  'Miercoles',
+  'Miércoles',
   'Jueves',
   'Viernes',
-  'Sabado',
+  'Sábado',
 ];
 
 export function formatDate(date: Date): string {

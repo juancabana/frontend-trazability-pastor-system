@@ -77,7 +77,7 @@ export default function PastorConsolidatedPage() {
   const stats = [
     {
       icon: Calendar,
-      label: 'Dias',
+      label: 'Días',
       value: daysWithReports,
       sub: `de ${daysInPeriod}`,
       color: 'text-blue-600 dark:text-blue-400',
@@ -117,7 +117,7 @@ export default function PastorConsolidatedPage() {
             <BarChart3 className="w-5 h-5 text-teal-600" /> Mi Consolidado por Periodo
           </h2>
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-            Resumen personal de actividades por rubro y subcategoria
+            Resumen personal de actividades por rubro y subcategoría
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -283,7 +283,7 @@ export default function PastorConsolidatedPage() {
                       className="hidden sm:grid px-5 py-2 bg-gray-50 dark:bg-slate-950 text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider"
                       style={{ gridTemplateColumns: '2fr 1fr 1fr' }}
                     >
-                      <span>Subcategoria</span>
+                      <span>Subcategoría</span>
                       <span className="text-right">Cantidad</span>
                       <span className="text-right">Horas</span>
                     </div>

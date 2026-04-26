@@ -64,7 +64,7 @@ export default function AdminPastoresPage() {
       <div className="mb-5">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Pastores</h2>
         <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-          Lista de pastores de la asociacion
+          Lista de pastores de la asociación
         </p>
       </div>
 

@@ -106,10 +106,10 @@ export default function AdminDashboardPage() {
     <div className="max-w-[1100px] mx-auto">
       <div className="mb-5">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Panel de Administracion
+          Panel de Administración
         </h2>
         <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-          Vista general de la asociacion
+          Vista general de la asociación
         </p>
       </div>
 

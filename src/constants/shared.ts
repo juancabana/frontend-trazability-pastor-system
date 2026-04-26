@@ -73,7 +73,7 @@ export const UNIT_LABELS: Record<string, string> = {
   cantidad: 'Cant.',
   horas: 'Horas',
   veces: 'Veces',
-  dias: 'Dias',
+  dias: 'Días',
   noches: 'Noches',
 };
 
@@ -81,7 +81,7 @@ export const UNIT_LABELS_FULL: Record<string, string> = {
   cantidad: 'Cantidad',
   horas: 'Horas',
   veces: 'Veces',
-  dias: 'Dias',
+  dias: 'Días',
   noches: 'Noches',
 };
 

@@ -87,8 +87,8 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
   };
 
   const orgName = currentUser?.role === 'super_admin'
-    ? (currentUser?.unionName || 'Union')
-    : (currentUser?.associationName || 'Asociacion');
+    ? (currentUser?.unionName || 'Unión')
+    : (currentUser?.associationName || 'Asociación');
 
   return (
     <div className="h-lvh flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
