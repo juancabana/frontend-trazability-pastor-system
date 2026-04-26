@@ -6,8 +6,10 @@ import { useActivityCategories } from '@/features/activity-category/presentation
 import { ConsolidatedRepositoryApiImpl } from '@/features/consolidated/infra/adapters/consolidated-repository-api-impl';
 import { httpAdapter } from '@/shared/infra/adapters/fetch-http-adapter';
 import { formatMonthYear } from '@/lib/format-date';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import { exportConsolidatedPDF, exportConsolidatedExcel } from '@/lib/export-utils';
-import { UNIT_LABELS, COMPLIANCE_THRESHOLD, PASTOR_POSITION_LABEL } from '@/constants/shared';
+import { UNIT_LABELS, PASTOR_POSITION_LABEL } from '@/constants/shared';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import { Tooltip } from '@/components/atoms/Tooltip';
 import { EmptyState } from '@/components/atoms/EmptyState';
 import {
@@ -34,10 +36,8 @@ const repo = new ConsolidatedRepositoryApiImpl(httpAdapter);
 
 export default function AdminConsolidatedPage() {
   const { token, currentUser } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const { thresholdPct } = useComplianceThresholds();
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
   const [pastorFilter] = useState('all');
   const [showCustomPanel, setShowCustomPanel] = useState(false);
   const [selectedPastorIds, setSelectedPastorIds] = useState<Set<string>>(new Set());
@@ -525,7 +525,7 @@ export default function AdminConsolidatedPage() {
                   </div>
                   <span
                     className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                      cumplimiento >= COMPLIANCE_THRESHOLD
+                      cumplimiento >= thresholdPct
                         ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
                         : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
                     }`}

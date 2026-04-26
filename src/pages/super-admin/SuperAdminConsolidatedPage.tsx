@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useUnionConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { formatMonthYear } from '@/lib/format-date';
-import { COMPLIANCE_THRESHOLD } from '@/constants/shared';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import { Tooltip } from '@/components/atoms/Tooltip';
 import {
   ChevronLeft,
@@ -21,10 +22,8 @@ import { exportUnionConsolidatedPDF, exportUnionConsolidatedExcel } from '@/lib/
 
 export default function SuperAdminConsolidatedPage() {
   const { token, currentUser } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const { thresholdPct } = useComplianceThresholds();
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -181,7 +180,7 @@ export default function SuperAdminConsolidatedPage() {
                   <p className="text-sm text-right text-gray-400 dark:text-slate-500">{assoc.totalHours.toFixed(0)}h</p>
                   <div className="flex justify-end">
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                      compliance >= COMPLIANCE_THRESHOLD
+                      compliance >= thresholdPct
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                         : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
                     }`}>{compliance}%</span>
@@ -194,7 +193,7 @@ export default function SuperAdminConsolidatedPage() {
                     <span className="text-xs bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white font-medium px-2 py-0.5 rounded-md">{assoc.totalPastors} pastores</span>
                     <span className="text-xs bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white px-2 py-0.5 rounded-md">{assoc.totalActivities} act.</span>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${
-                      compliance >= COMPLIANCE_THRESHOLD
+                      compliance >= thresholdPct
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                         : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
                     }`}>{compliance}%</span>

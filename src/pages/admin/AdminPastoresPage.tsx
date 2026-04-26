@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { formatMonthYear } from '@/lib/format-date';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import { PASTOR_POSITION_LABEL } from '@/constants/shared';
 import { SearchInput } from '@/components/atoms/SearchInput';
 import {
@@ -20,10 +21,7 @@ export default function AdminPastoresPage() {
   const { token, currentUser } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();

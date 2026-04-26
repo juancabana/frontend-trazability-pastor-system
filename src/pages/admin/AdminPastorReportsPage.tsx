@@ -5,8 +5,10 @@ import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { usePastorConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { formatMonthYear } from '@/lib/format-date';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import { exportPastorPDF, exportPastorExcel } from '@/lib/export-utils';
-import { DAYS_ES, UNIT_LABELS, COMPLIANCE_THRESHOLD } from '@/constants/shared';
+import { DAYS_ES, UNIT_LABELS } from '@/constants/shared';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import { EmptyState } from '@/components/atoms/EmptyState';
 import { Tooltip } from '@/components/atoms/Tooltip';
 import {
@@ -34,10 +36,8 @@ export default function AdminPastorReportsPage() {
   const { pastorId } = useParams<{ pastorId: string }>();
   const navigate = useNavigate();
   const { token, currentUser } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const { thresholdPct } = useComplianceThresholds();
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
   const [activeTab, setActiveTab] = useState<Tab>('reports');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
@@ -140,8 +140,8 @@ export default function AdminPastorReportsPage() {
       label: 'Cumplimiento',
       value: `${compliance}%`,
       sub: 'del mes',
-      color: compliance >= COMPLIANCE_THRESHOLD ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
-      bg: compliance >= COMPLIANCE_THRESHOLD ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
+      color: compliance >= thresholdPct ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
+      bg: compliance >= thresholdPct ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
     },
     {
       icon: Activity,

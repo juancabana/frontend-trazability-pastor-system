@@ -6,6 +6,38 @@ import type {
 import { EXPORT_BRAND, COMPLIANCE_THRESHOLD } from '@/constants/shared';
 
 // ---------------------------------------------------------------------------
+// Umbrales de cumplimiento
+// ---------------------------------------------------------------------------
+//
+// Los umbrales son reglas de negocio gobernadas por el server (ver
+// `/api/config/public`). El frontend mantiene una copia mutable que se
+// sincroniza desde `useBusinessConfig` via `setExportComplianceThresholds`.
+// Los valores iniciales son fallback en caso de que el setter no se haya
+// invocado todavia (e.g. exportacion antes de que la config cargue).
+
+interface ExportThresholds {
+  /** Umbral verde como porcentaje 0-100 */
+  green: number;
+  /** Umbral ambar como porcentaje 0-100 */
+  amber: number;
+}
+
+const exportThresholds: ExportThresholds = {
+  green: COMPLIANCE_THRESHOLD,
+  amber: 40,
+};
+
+/**
+ * Sincroniza los umbrales usados por las funciones de exportacion con los
+ * valores que vienen del server. Llamar desde un useEffect tras consumir
+ * `useBusinessConfig`.
+ */
+export function setExportComplianceThresholds(thresholds: ExportThresholds): void {
+  exportThresholds.green = thresholds.green;
+  exportThresholds.amber = thresholds.amber;
+}
+
+// ---------------------------------------------------------------------------
 // Tipos auxiliares
 // ---------------------------------------------------------------------------
 
@@ -130,9 +162,9 @@ function addPageFooters(
 
 /** Color de celda para porcentaje de cumplimiento */
 function complianceCellStyle(pct: number) {
-  const t = COMPLIANCE_THRESHOLD;
+  const t = exportThresholds.green;
   if (pct >= t) return { fillColor: C.green.bg, textColor: C.green.text };
-  if (pct >= 40)  return { fillColor: C.amber.bg, textColor: C.amber.text };
+  if (pct >= exportThresholds.amber)  return { fillColor: C.amber.bg, textColor: C.amber.text };
   return              { fillColor: C.red.bg,   textColor: C.red.text };
 }
 
@@ -238,8 +270,8 @@ function xlDataCell(
 
 /** Color de celda de cumplimiento */
 function xlComplianceFill(pct: number): { bg: string; text: string } {
-  if (pct >= COMPLIANCE_THRESHOLD) return E.green;
-  if (pct >= 40) return E.amber;
+  if (pct >= exportThresholds.green) return E.green;
+  if (pct >= exportThresholds.amber) return E.amber;
   return E.red;
 }
 

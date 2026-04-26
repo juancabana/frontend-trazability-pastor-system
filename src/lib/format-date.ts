@@ -1,16 +1,18 @@
 import { MONTHS_ES } from '@/constants/shared';
+import { nowInBogota, parseBogotaDate } from '@/lib/bogota-time';
+
+const DAY_NAMES_FULL_ES = [
+  'Domingo',
+  'Lunes',
+  'Martes',
+  'Miercoles',
+  'Jueves',
+  'Viernes',
+  'Sabado',
+];
 
 export function formatDate(date: Date): string {
-  const days = [
-    'Domingo',
-    'Lunes',
-    'Martes',
-    'Miercoles',
-    'Jueves',
-    'Viernes',
-    'Sabado',
-  ];
-  return `${days[date.getDay()]}, ${date.getDate()} de ${MONTHS_ES[date.getMonth()]} ${date.getFullYear()}`;
+  return `${DAY_NAMES_FULL_ES[date.getDay()]}, ${date.getDate()} de ${MONTHS_ES[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 export function formatMonthYear(date: Date): string {
@@ -18,7 +20,7 @@ export function formatMonthYear(date: Date): string {
 }
 
 export function formatDateShort(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00');
+  const d = parseBogotaDate(dateStr);
   return `${d.getDate()} ${MONTHS_ES[d.getMonth()].substring(0, 3)}`;
 }
 
@@ -26,7 +28,7 @@ export function getCurrentPeriod(
   deadlineDay: number,
   referenceDate?: Date,
 ): { start: Date; end: Date } {
-  const today = referenceDate || new Date();
+  const today = referenceDate ?? nowInBogota();
   const year = today.getFullYear();
   const month = today.getMonth();
   const day = today.getDate();
@@ -51,8 +53,8 @@ export function isDateInCurrentPeriod(date: Date, deadlineDay: number): boolean 
 }
 
 export function isDateEditable(date: Date, deadlineDay: number): boolean {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = nowInBogota();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   if (d > today) return false;
   if (d.getTime() === today.getTime()) return true;

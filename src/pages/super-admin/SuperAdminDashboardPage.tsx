@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useUnionConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useAssociationsByUnion } from '@/features/association/presentation/hooks/use-association-queries';
 import { formatMonthYear } from '@/lib/format-date';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import {
   Building2,
   Users,
@@ -15,15 +16,13 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { COMPLIANCE_THRESHOLD } from '@/constants/shared';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 
 export default function SuperAdminDashboardPage() {
   const { token, currentUser } = useAuth();
+  const { thresholdPct } = useComplianceThresholds();
   const navigate = useNavigate();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -135,7 +134,7 @@ export default function SuperAdminDashboardPage() {
                   </div>
                   <span
                     className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                      compliance >= COMPLIANCE_THRESHOLD
+                      compliance >= thresholdPct
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                         : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
                     }`}

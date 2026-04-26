@@ -4,6 +4,7 @@ import { useAdminRecipients } from '@/features/consolidated/hooks/use-admin-reci
 import { useSendReport } from '@/features/consolidated/hooks/use-send-report';
 import { ROLE_CONFIG } from '@/features/auth/domain/entities/user-role';
 import { MONTHS_ES } from '@/constants/shared';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import {
   Mail,
   ChevronLeft,
@@ -20,10 +21,7 @@ import { toast } from 'sonner';
 export default function AdminSendReportPage() {
   const { token, currentUser } = useAuth();
 
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showConfirm, setShowConfirm] = useState(false);

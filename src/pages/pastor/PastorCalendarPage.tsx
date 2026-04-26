@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { formatMonthYear, isDateInCurrentPeriod, isDateEditable } from '@/lib/format-date';
-import { DAYS_ES, TRANSPORT_CATEGORY_ID, COMPLIANCE_THRESHOLD, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
+import { DAYS_ES, TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,12 +24,10 @@ import { motion } from 'motion/react';
 
 export default function PastorCalendarPage() {
   const { token, currentUser } = useAuth();
+  const { thresholdPct } = useComplianceThresholds();
   const canEditAllReports = currentUser?.canEditAllReports ?? false;
   const navigate = useNavigate();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -110,8 +110,8 @@ export default function PastorCalendarPage() {
       label: 'Cumplimiento',
       value: `${cumplimiento}%`,
       sub: 'del mes',
-      color: cumplimiento >= COMPLIANCE_THRESHOLD ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
-      bg: cumplimiento >= COMPLIANCE_THRESHOLD ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
+      color: cumplimiento >= thresholdPct ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
+      bg: cumplimiento >= thresholdPct ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
     },
     {
       icon: Activity,

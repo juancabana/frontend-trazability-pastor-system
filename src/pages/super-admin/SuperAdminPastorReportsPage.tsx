@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { formatMonthYear } from '@/lib/format-date';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import { DAYS_ES } from '@/constants/shared';
 import {
   ArrowLeft,
@@ -19,10 +20,7 @@ export default function SuperAdminPastorReportsPage() {
   const { pastorId } = useParams<{ pastorId: string }>();
   const navigate = useNavigate();
   const { token } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();

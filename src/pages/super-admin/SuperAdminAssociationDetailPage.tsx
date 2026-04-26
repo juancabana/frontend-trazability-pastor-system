@@ -4,7 +4,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useAssociationsByUnion } from '@/features/association/presentation/hooks/use-association-queries';
 import { formatMonthYear } from '@/lib/format-date';
-import { COMPLIANCE_THRESHOLD } from '@/constants/shared';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import {
   ArrowLeft,
   ChevronLeft,
@@ -23,10 +24,8 @@ export default function SuperAdminAssociationDetailPage() {
   const { associationId } = useParams<{ associationId: string }>();
   const navigate = useNavigate();
   const { token, currentUser } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const { thresholdPct } = useComplianceThresholds();
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -159,7 +158,7 @@ export default function SuperAdminAssociationDetailPage() {
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">{ps.totalActivities}</p>
                       <p className="text-[10px] text-gray-400 dark:text-slate-500">act.</p>
                     </div>
-                    {cumplimiento >= COMPLIANCE_THRESHOLD ? (
+                    {cumplimiento >= thresholdPct ? (
                       <CheckCircle className="w-5 h-5 text-emerald-500" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-amber-500" />

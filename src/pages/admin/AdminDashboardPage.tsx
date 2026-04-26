@@ -5,7 +5,8 @@ import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatMonthYear } from '@/lib/format-date';
-import { COMPLIANCE_THRESHOLD } from '@/constants/shared';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import {
   Users,
   FileText,
@@ -22,11 +23,9 @@ import { motion } from 'motion/react';
 
 export default function AdminDashboardPage() {
   const { token, currentUser } = useAuth();
+  const { thresholdPct } = useComplianceThresholds();
   const navigate = useNavigate();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -200,7 +199,7 @@ export default function AdminDashboardPage() {
                       </p>
                       <p className="text-[10px] text-gray-400 dark:text-slate-500">act.</p>
                     </div>
-                    {cumplimiento >= COMPLIANCE_THRESHOLD ? (
+                    {cumplimiento >= thresholdPct ? (
                       <CheckCircle className="w-5 h-5 text-emerald-500" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-amber-500" />
