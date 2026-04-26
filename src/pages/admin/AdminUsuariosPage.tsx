@@ -15,13 +15,14 @@ import { Modal } from '@/components/atoms/Modal';
 import { ConfirmDialog } from '@/components/atoms/ConfirmDialog';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
-import { Plus, Edit3, Trash2, UserCog, Phone } from 'lucide-react';
+import { ListSkeleton } from '@/components/atoms/Skeleton';
+import { Plus, Edit3, Trash2, UserCog, Phone, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminUsuariosPage() {
   const { token, currentUser } = useAuth();
   const canWrite = useCanWrite();
-  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
+  const { data: users = [], isLoading: loadingUsers } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
   const { data: districts = [] } = useDistricts(currentUser?.associationId ?? undefined);
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
@@ -40,6 +41,7 @@ export default function AdminUsuariosPage() {
   const [formDistrictId, setFormDistrictId] = useState('');
   const [formPosition, setFormPosition] = useState('');
   const [formPhone, setFormPhone] = useState('');
+  const [formCanEditAllReports, setFormCanEditAllReports] = useState(false);
 
   const filteredUsers = users.filter(
     (u) =>
@@ -56,6 +58,7 @@ export default function AdminUsuariosPage() {
     setFormDistrictId('');
     setFormPosition('Pastor');
     setFormPhone('');
+    setFormCanEditAllReports(false);
     setShowModal(true);
   };
 
@@ -68,6 +71,7 @@ export default function AdminUsuariosPage() {
     setFormDistrictId(user.districtId || '');
     setFormPosition(user.position || '');
     setFormPhone(user.phone || '');
+    setFormCanEditAllReports(user.canEditAllReports ?? false);
     setShowModal(true);
   };
 
@@ -97,6 +101,7 @@ export default function AdminUsuariosPage() {
             districtId: formDistrictId || undefined,
             position: formPosition || undefined,
             phone: formPhone || undefined,
+            canEditAllReports: formRole === 'pastor' ? formCanEditAllReports : undefined,
           },
         });
         toast.success('Usuario actualizado');
@@ -188,6 +193,9 @@ export default function AdminUsuariosPage() {
         />
       </div>
 
+      {loadingUsers && users.length === 0 ? (
+        <ListSkeleton rows={5} withHeader={false} withMetrics={false} />
+      ) : (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
         <div className="divide-y divide-gray-50 dark:divide-slate-800">
           {filteredUsers.map((user) => {
@@ -203,13 +211,22 @@ export default function AdminUsuariosPage() {
                   {getInitials(user.name)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                       {user.name}
                     </p>
                     <Badge variant={getBadgeVariant(user.role)}>
                       {user.position || rc.label}
                     </Badge>
+                    {user.canEditAllReports && (
+                      <span
+                        className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                        title="Puede editar informes de periodos vencidos"
+                      >
+                        <ShieldCheck className="w-3 h-3" />
+                        Excepción
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     <p className="text-[11px] text-gray-400 dark:text-slate-500 truncate">{user.email}</p>
@@ -247,6 +264,7 @@ export default function AdminUsuariosPage() {
           )}
         </div>
       </div>
+      )}
 
       {/* Create/Edit Modal — solo visible para admin con escritura */}
       {canWrite && (
@@ -350,6 +368,37 @@ export default function AdminUsuariosPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+              )}
+              {formRole === 'pastor' && editingUser && (
+                <div className="flex items-start justify-between gap-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40 rounded-xl px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-amber-500" />
+                      Excepción de edición
+                    </p>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
+                      Permite al pastor editar informes de cualquier periodo vencido.
+                    </p>
+                    <p className="text-[10px] text-amber-500 dark:text-amber-400 mt-1">
+                      El cambio aplica desde el próximo inicio de sesión del pastor.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormCanEditAllReports((v) => !v)}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                      formCanEditAllReports ? 'bg-amber-500' : 'bg-gray-200 dark:bg-slate-700'
+                    }`}
+                    role="switch"
+                    aria-checked={formCanEditAllReports}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
+                        formCanEditAllReports ? 'translate-x-4' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
                 </div>
               )}
               <div className="flex justify-end gap-3 pt-2">

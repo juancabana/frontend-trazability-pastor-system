@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useUnionConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useAssociationsByUnion } from '@/features/association/presentation/hooks/use-association-queries';
-import { formatMonthYear } from '@/lib/format-date';
 import {
   Building2,
   Users,
@@ -15,25 +14,24 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
+import { StatsGridSkeleton, ListSkeleton } from '@/components/atoms/Skeleton';
+import { Tooltip } from '@/components/atoms/Tooltip';
 
 export default function SuperAdminDashboardPage() {
   const { token, currentUser } = useAuth();
+  const { thresholdPct } = useComplianceThresholds();
   const navigate = useNavigate();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const [periodOffset, setPeriodOffset] = useState(0);
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  const { data: unionData } = useUnionConsolidated(
+  const { data: unionData, isLoading: loadingUnion } = useUnionConsolidated(
     token ?? '',
     currentUser?.unionId ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
   const { data: associations = [] } = useAssociationsByUnion(currentUser?.unionId ?? undefined);
+
+  const periodLabel = unionData?.period?.label ?? 'Cargando periodo...';
 
   const stats = [
     { icon: Building2, label: 'Asociaciones', value: unionData?.totalAssociations ?? associations.length, sub: 'registradas', color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/30' },
@@ -55,28 +53,34 @@ export default function SuperAdminDashboardPage() {
         </p>
       </div>
 
-      {/* Month nav */}
+      {/* Period nav */}
       <div className="flex items-center gap-3 mb-5">
         <button
-          aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          aria-label="Periodo anterior"
+          onClick={() => setPeriodOffset((o) => o - 1)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
-          {formatMonthYear(currentMonth)}
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
+          {periodLabel}
         </span>
+        <Tooltip content={periodOffset >= 0 ? 'Ya estás en el periodo más reciente' : false} side="bottom">
         <button
-          aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          aria-label="Periodo siguiente"
+          onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+          disabled={periodOffset >= 0}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
+        </Tooltip>
       </div>
 
       {/* Stats */}
+      {loadingUnion && !unionData ? (
+        <StatsGridSkeleton count={4} />
+      ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         {stats.map((s, i) => (
           <motion.div
@@ -99,12 +103,16 @@ export default function SuperAdminDashboardPage() {
           </motion.div>
         ))}
       </div>
+      )}
 
       {/* Association cards */}
+      {loadingUnion && !unionData ? (
+        <ListSkeleton rows={4} />
+      ) : (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            Asociaciones — {formatMonthYear(currentMonth)}
+            Asociaciones — {periodLabel}
           </h3>
         </div>
         <div className="divide-y divide-gray-50 dark:divide-slate-800">
@@ -134,7 +142,7 @@ export default function SuperAdminDashboardPage() {
                   </div>
                   <span
                     className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                      compliance >= 70
+                      compliance >= thresholdPct
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                         : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
                     }`}
@@ -153,6 +161,7 @@ export default function SuperAdminDashboardPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

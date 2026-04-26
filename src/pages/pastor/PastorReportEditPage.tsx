@@ -6,7 +6,10 @@ import { useSaveReport, useDeleteReport } from '@/features/daily-report/presenta
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import type { ActivityEntry } from '@/features/daily-report/domain/entities/daily-report';
 import { formatDate, isDateEditable } from '@/lib/format-date';
-import { UNIT_LABELS, TRANSPORT_CATEGORY_ID } from '@/constants/shared';
+import { UNIT_LABELS, TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
+import { EmptyState } from '@/components/atoms/EmptyState';
+import { DetailSkeleton } from '@/components/atoms/Skeleton';
+import { Tooltip } from '@/components/atoms/Tooltip';
 import {
   ArrowLeft,
   ChevronDown,
@@ -24,20 +27,21 @@ export default function PastorReportEditPage() {
   const { date } = useParams<{ date: string }>();
   const navigate = useNavigate();
   const { token, currentUser } = useAuth();
-  const deadlineDay = currentUser?.reportDeadlineDay ?? 19;
+  const deadlineDay = currentUser?.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY;
+  const canEditAllReports = currentUser?.canEditAllReports ?? false;
 
   const reportDate = date ? new Date(date + 'T12:00:00') : new Date();
-  const editable = isDateEditable(reportDate, deadlineDay);
   const today = new Date();
   today.setHours(23, 59, 59, 999);
   const isFuture = reportDate > today;
+  const editable = !isFuture && (isDateEditable(reportDate, deadlineDay) || canEditAllReports);
 
-  const { data: existingReport } = useReportByDate(
+  const { data: existingReport, isLoading: loadingReport } = useReportByDate(
     token ?? '',
     currentUser?.id ?? '',
     date ?? '',
   );
-  const { data: categories = [] } = useActivityCategories();
+  const { data: categories = [], isLoading: loadingCategories } = useActivityCategories();
   const saveReport = useSaveReport();
   const deleteReport = useDeleteReport();
 
@@ -149,6 +153,14 @@ export default function PastorReportEditPage() {
 
   if (isFuture) return null;
 
+  if ((loadingReport && !existingReport) || (loadingCategories && categories.length === 0)) {
+    return (
+      <div className="max-w-[700px] mx-auto">
+        <DetailSkeleton />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[700px] mx-auto">
       {/* Header */}
@@ -189,6 +201,17 @@ export default function PastorReportEditPage() {
       )}
 
       {/* Current activities grouped by category */}
+      {editable && Object.keys(activitiesByCategory).length === 0 && (
+        <div className="mb-4 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800">
+          <EmptyState
+            compact
+            icon={Plus}
+            title="Sin actividades aún"
+            description="Despliega las categorías a continuación para agregar actividades a este informe."
+          />
+        </div>
+      )}
+
       <AnimatePresence mode="popLayout">
         {Object.entries(activitiesByCategory).map(([catId, acts]) => {
           const cat = categoriesMap.get(catId);
@@ -478,6 +501,16 @@ export default function PastorReportEditPage() {
           >
             Cancelar
           </button>
+          <Tooltip
+            content={
+              saving
+                ? 'Guardando...'
+                : !hasChanges
+                  ? 'No hay cambios para guardar'
+                  : false
+            }
+            side="top"
+          >
           <button
             onClick={handleSave}
             disabled={saving || !hasChanges}
@@ -486,6 +519,7 @@ export default function PastorReportEditPage() {
             <Save className="w-4 h-4" />
             {saving ? 'Guardando...' : 'Guardar Cambios'}
           </button>
+          </Tooltip>
         </div>
       )}
 

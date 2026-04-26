@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
   ASSOCIATIONS: {
     LIST: '/associations',
     BY_ID: (id: string) => `/associations/${id}`,
+    MY_DEADLINE: '/associations/my/deadline',
   },
   DISTRICTS: {
     LIST: '/districts',
@@ -27,13 +28,18 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/daily-reports/${id}`,
   },
   CONSOLIDATED: {
-    BY_PASTOR: (pastorId: string, month: number, year: number) =>
-      `/consolidated/pastor/${pastorId}?month=${month}&year=${year}`,
-    BY_ASSOCIATION: (assocId: string, month: number, year: number) =>
-      `/consolidated/association/${assocId}?month=${month}&year=${year}`,
-    BY_UNION: (unionId: string, month: number, year: number) =>
-      `/consolidated/union/${unionId}?month=${month}&year=${year}`,
+    BY_PASTOR: (pastorId: string, periodOffset: number) =>
+      `/consolidated/pastor/${pastorId}?periodOffset=${periodOffset}`,
+    BY_ASSOCIATION: (assocId: string, periodOffset: number) =>
+      `/consolidated/association/${assocId}?periodOffset=${periodOffset}`,
+    BY_UNION: (unionId: string, periodOffset: number) =>
+      `/consolidated/union/${unionId}?periodOffset=${periodOffset}`,
+    BY_PASTORS: (pastorIds: string[], periodOffset: number) =>
+      `/consolidated/custom?pastorIds=${pastorIds.join(',')}&periodOffset=${periodOffset}`,
+    SEND_REPORT: '/consolidated/send-report',
   },
+  ADMIN_RECIPIENTS: (associationId: string) =>
+    `/auth/admin-recipients?associationId=${associationId}`,
   UNIONS: {
     LIST: '/unions',
   },

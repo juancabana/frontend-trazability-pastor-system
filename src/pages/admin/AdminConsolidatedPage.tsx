@@ -1,11 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
-import { formatMonthYear } from '@/lib/format-date';
+import { ConsolidatedRepositoryApiImpl } from '@/features/consolidated/infra/adapters/consolidated-repository-api-impl';
+import { httpAdapter } from '@/shared/infra/adapters/fetch-http-adapter';
 import { exportConsolidatedPDF, exportConsolidatedExcel } from '@/lib/export-utils';
-import { UNIT_LABELS } from '@/constants/shared';
+import { UNIT_LABELS, PASTOR_POSITION_LABEL } from '@/constants/shared';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
+import { Tooltip } from '@/components/atoms/Tooltip';
+import { EmptyState } from '@/components/atoms/EmptyState';
+import { StatsGridSkeleton, BarChartSkeleton } from '@/components/atoms/Skeleton';
 import {
   ChevronLeft,
   ChevronRight,
@@ -18,28 +23,30 @@ import {
   Activity,
   Download,
   FileSpreadsheet,
+  SlidersHorizontal,
+  X,
+  Check,
+  Loader2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
+const repo = new ConsolidatedRepositoryApiImpl(httpAdapter);
+
 export default function AdminConsolidatedPage() {
   const { token, currentUser } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
-  const [pastorFilter, setPastorFilter] = useState('all');
-
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const { thresholdPct } = useComplianceThresholds();
+  const [periodOffset, setPeriodOffset] = useState(0);
+  const [pastorFilter] = useState('all');
+  const [showCustomPanel, setShowCustomPanel] = useState(false);
+  const [selectedPastorIds, setSelectedPastorIds] = useState<Set<string>>(new Set());
+  const [customExporting, setCustomExporting] = useState<'pdf' | 'excel' | null>(null);
 
   const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
-  const { data: consolidated } = useAssociationConsolidated(
+  const { data: consolidated, isLoading: loadingConsolidated } = useAssociationConsolidated(
     token ?? '',
     currentUser?.associationId ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
   const { data: allCategories = [] } = useActivityCategories();
 
@@ -50,14 +57,21 @@ export default function AdminConsolidatedPage() {
 
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
+  // Reset selection when panel closes or period changes
+  useEffect(() => {
+    if (!showCustomPanel) setSelectedPastorIds(new Set());
+  }, [showCustomPanel]);
+
   const pastorSummaries = consolidated?.pastorSummaries || [];
   const totalActivities = consolidated?.totals?.totalActivities || 0;
   const totalHours = consolidated?.totals?.totalHours || 0;
   const activePastors = pastorSummaries.filter((p) => p.totalActivities > 0).length;
-  const monthLabel = formatMonthYear(currentMonth);
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
+
+  const totalReports = pastorSummaries.reduce((s, p) => s + p.totalReports, 0);
 
   const stats = [
-    { icon: FileText, label: 'Informes', value: pastorSummaries.reduce((s, p) => s + Math.round(p.compliance * daysInMonth), 0), sub: 'recibidos', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
+    { icon: FileText, label: 'Informes', value: totalReports, sub: 'recibidos', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
     { icon: Users, label: 'Pastores', value: `${activePastors}/${pastors.length}`, sub: 'activos', color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/30' },
     { icon: Activity, label: 'Actividades', value: totalActivities, sub: 'registradas', color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-900/30' },
     { icon: Clock, label: 'Horas', value: `${totalHours.toFixed(0)}h`, sub: 'dedicadas', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30' },
@@ -66,7 +80,7 @@ export default function AdminConsolidatedPage() {
   const handleExportPDF = async () => {
     if (!consolidated) return;
     try {
-      await exportConsolidatedPDF(consolidated, monthLabel);
+      await exportConsolidatedPDF(consolidated, periodLabel);
       toast.success('PDF generado correctamente');
     } catch {
       toast.error('Error al generar PDF');
@@ -76,12 +90,47 @@ export default function AdminConsolidatedPage() {
   const handleExportExcel = async () => {
     if (!consolidated) return;
     try {
-      await exportConsolidatedExcel(consolidated, monthLabel);
+      await exportConsolidatedExcel(consolidated, periodLabel);
       toast.success('Excel generado correctamente');
     } catch {
       toast.error('Error al generar Excel');
     }
   };
+
+  const handleCustomExport = async (format: 'pdf' | 'excel') => {
+    if (selectedPastorIds.size === 0) return;
+    setCustomExporting(format);
+    try {
+      const data = await repo.getByPastors(
+        token ?? '',
+        Array.from(selectedPastorIds),
+        periodOffset,
+      );
+      const customTitle = `Consolidado Personalizado (${selectedPastorIds.size} pastor${selectedPastorIds.size > 1 ? 'es' : ''})`;
+      if (format === 'pdf') {
+        await exportConsolidatedPDF(data, periodLabel, customTitle);
+      } else {
+        await exportConsolidatedExcel(data, periodLabel, customTitle);
+      }
+      toast.success(`${format === 'pdf' ? 'PDF' : 'Excel'} generado correctamente`);
+    } catch {
+      toast.error(`Error al generar ${format === 'pdf' ? 'PDF' : 'Excel'}`);
+    } finally {
+      setCustomExporting(null);
+    }
+  };
+
+  const togglePastor = (id: string) => {
+    setSelectedPastorIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => setSelectedPastorIds(new Set(pastors.map((p) => p.id)));
+  const clearAll = () => setSelectedPastorIds(new Set());
 
   const getInitials = (name: string) =>
     name.split(' ').filter((w) => w.length > 2).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
@@ -98,67 +147,247 @@ export default function AdminConsolidatedPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportPDF}
-            disabled={!consolidated}
-            className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+          <Tooltip
+            content={!consolidated ? 'Sin datos para exportar' : 'Exportar como PDF'}
+            side="bottom"
           >
-            <Download className="w-3.5 h-3.5" /> PDF
-          </button>
-          <button
-            onClick={handleExportExcel}
-            disabled={!consolidated}
-            className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            <button
+              onClick={handleExportPDF}
+              disabled={!consolidated}
+              className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-3.5 h-3.5" /> PDF
+            </button>
+          </Tooltip>
+          <Tooltip
+            content={!consolidated ? 'Sin datos para exportar' : 'Exportar como Excel'}
+            side="bottom"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5" /> Excel
-          </button>
+            <button
+              onClick={handleExportExcel}
+              disabled={!consolidated}
+              className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" /> Excel
+            </button>
+          </Tooltip>
+          <Tooltip content="Descarga personalizada por pastor" side="bottom">
+            <button
+              onClick={() => setShowCustomPanel((v) => !v)}
+              className={`px-3 py-2 border rounded-xl text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                showCustomPanel
+                  ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
+                  : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" /> Personalizar
+            </button>
+          </Tooltip>
         </div>
       </div>
 
-      {/* Month nav */}
+      {/* Panel de descarga personalizada */}
+      <AnimatePresence>
+        {showCustomPanel && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden mb-5"
+          >
+            <div className="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+                    Descarga personalizada
+                  </p>
+                  <p className="text-[11px] text-indigo-500 dark:text-indigo-400 mt-0.5">
+                    Selecciona los pastores que deseas incluir en el consolidado
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowCustomPanel(false)}
+                  className="p-1 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4 text-indigo-400" />
+                </button>
+              </div>
+
+              {/* Acciones rápidas */}
+              <div className="flex items-center gap-2 mb-3">
+                <button
+                  onClick={selectAll}
+                  className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
+                  Seleccionar todos
+                </button>
+                <span className="text-indigo-300 dark:text-indigo-700">·</span>
+                <button
+                  onClick={clearAll}
+                  className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
+                  Limpiar
+                </button>
+                <span className="text-[11px] text-indigo-400 ml-auto">
+                  {selectedPastorIds.size}/{pastors.length} seleccionados
+                </span>
+              </div>
+
+              {/* Lista de pastores */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mb-4 max-h-64 overflow-y-auto">
+                {pastors.map((pastor) => {
+                  const summary = pastorSummaries.find((s) => s.pastorId === pastor.id);
+                  const pct = summary ? Math.round(summary.compliance * 100) : null;
+                  const isSelected = selectedPastorIds.has(pastor.id);
+                  return (
+                    <button
+                      key={pastor.id}
+                      onClick={() => togglePastor(pastor.id)}
+                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-all ${
+                        isSelected
+                          ? 'border-indigo-400 dark:border-indigo-600 bg-white dark:bg-indigo-900/20'
+                          : 'border-transparent bg-white/60 dark:bg-slate-900/40 hover:bg-white dark:hover:bg-slate-900/60'
+                      }`}
+                    >
+                      <div
+                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
+                          isSelected
+                            ? 'border-indigo-500 bg-indigo-500'
+                            : 'border-gray-300 dark:border-slate-600'
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                          {pastor.name}
+                        </p>
+                        {summary && (
+                          <p className="text-[10px] text-gray-400 dark:text-slate-500">
+                            {summary.totalActivities} act. · {pct}% cumpl.
+                          </p>
+                        )}
+                      </div>
+                      {pastor.position && (
+                        <span className={`text-[9px] font-medium px-1 py-0.5 rounded shrink-0 ${
+                          pastor.position === PASTOR_POSITION_LABEL
+                            ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
+                            : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                        }`}>
+                          {pastor.position}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Botones de descarga personalizada */}
+              <div className="flex items-center gap-2 pt-3 border-t border-indigo-200 dark:border-indigo-800">
+                <button
+                  onClick={() => handleCustomExport('pdf')}
+                  disabled={selectedPastorIds.size === 0 || customExporting !== null}
+                  className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-medium transition-colors flex items-center gap-1.5"
+                >
+                  {customExporting === 'pdf' ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5" />
+                  )}
+                  PDF personalizado
+                </button>
+                <button
+                  onClick={() => handleCustomExport('excel')}
+                  disabled={selectedPastorIds.size === 0 || customExporting !== null}
+                  className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-medium transition-colors flex items-center gap-1.5"
+                >
+                  {customExporting === 'excel' ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                  )}
+                  Excel personalizado
+                </button>
+                {selectedPastorIds.size === 0 && (
+                  <span className="text-[11px] text-indigo-400 dark:text-indigo-500 ml-1">
+                    Selecciona al menos un pastor
+                  </span>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Period nav */}
       <div className="flex items-center gap-3 mb-5">
         <button
-          aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          aria-label="Periodo anterior"
+          onClick={() => setPeriodOffset((o) => o - 1)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
-          {monthLabel}
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
+          {periodLabel}
         </span>
+        <Tooltip content={periodOffset >= 0 ? 'Ya estás en el periodo más reciente' : false} side="bottom">
         <button
-          aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          aria-label="Periodo siguiente"
+          onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+          disabled={periodOffset >= 0}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
+        </Tooltip>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}>
-                <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+      {loadingConsolidated && !consolidated ? (
+        <StatsGridSkeleton count={4} />
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}>
+                  <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+                </div>
+                <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
+                  {s.label}
+                </span>
               </div>
-              <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
-                {s.label}
-              </span>
-            </div>
-            <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
-          </motion.div>
-        ))}
-      </div>
+              <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
+              <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {loadingConsolidated && !consolidated && <BarChartSkeleton rows={4} />}
+
+      {/* Empty state cuando no hay actividades en ninguna categoría */}
+      {consolidated && (!consolidated.categories?.length ||
+        consolidated.categories.every(
+          (cat) => (cat.subcategories ?? []).reduce((s, sub) => s + sub.totalQuantity, 0) === 0,
+        )) && (
+        <div className="mb-3 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800">
+          <EmptyState
+            compact
+            icon={BarChart3}
+            title="Sin actividades registradas"
+            description="Los pastores aún no han registrado actividades para este periodo."
+          />
+        </div>
+      )}
 
       {/* Categories breakdown */}
       {consolidated?.categories?.map((cat) => {
@@ -279,7 +508,7 @@ export default function AdminConsolidatedPage() {
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{ps.pastorName}</p>
                     {ps.position && (
                       <span className={`text-[9px] font-medium px-1 py-0.5 rounded shrink-0 ${
-                        ps.position === 'Pastor'
+                        ps.position === PASTOR_POSITION_LABEL
                           ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
                           : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
                       }`}>
@@ -300,7 +529,7 @@ export default function AdminConsolidatedPage() {
                   </div>
                   <span
                     className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                      cumplimiento >= 70
+                      cumplimiento >= thresholdPct
                         ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
                         : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
                     }`}

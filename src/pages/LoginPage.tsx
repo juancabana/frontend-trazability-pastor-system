@@ -147,7 +147,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-10 text-[11px] text-white/20">
-            &copy; 2026 Iglesia Adventista del Septimo Dia
+            &copy; {new Date().getFullYear()} Iglesia Adventista del Septimo Dia
           </div>
         </motion.div>
       </div>

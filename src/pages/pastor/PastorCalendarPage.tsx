@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { formatMonthYear, isDateInCurrentPeriod, isDateEditable } from '@/lib/format-date';
-import { DAYS_ES, TRANSPORT_CATEGORY_ID } from '@/constants/shared';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
+import { DAYS_ES, TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,22 +14,27 @@ import {
   TrendingUp,
   Activity,
   DollarSign,
+  Lock,
+  PenLine,
+  Plus,
+  CalendarX2,
+  ShieldCheck,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Skeleton } from '@/components/atoms/Skeleton';
 
 export default function PastorCalendarPage() {
   const { token, currentUser } = useAuth();
+  const { thresholdPct } = useComplianceThresholds();
+  const canEditAllReports = currentUser?.canEditAllReports ?? false;
   const navigate = useNavigate();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  const deadlineDay = currentUser?.reportDeadlineDay ?? 19;
+  const deadlineDay = currentUser?.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY;
 
-  const { data: monthReports = [] } = useReportsByPastorMonth(
+  const { data: monthReports = [], isLoading: loadingMonth } = useReportsByPastorMonth(
     token ?? '',
     currentUser?.id ?? '',
     month + 1,
@@ -73,8 +80,8 @@ export default function PastorCalendarPage() {
       date.getMonth() === today.getMonth() &&
       date.getFullYear() === today.getFullYear();
     const inPeriod = isDateInCurrentPeriod(date, deadlineDay);
-    const editable = isDateEditable(date, deadlineDay);
     const isFuture = date > today;
+    const editable = !isFuture && (isDateEditable(date, deadlineDay) || canEditAllReports);
     return { report, isToday, inPeriod, editable, isFuture };
   };
 
@@ -104,8 +111,8 @@ export default function PastorCalendarPage() {
       label: 'Cumplimiento',
       value: `${cumplimiento}%`,
       sub: 'del mes',
-      color: cumplimiento >= 70 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
-      bg: cumplimiento >= 70 ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
+      color: cumplimiento >= thresholdPct ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
+      bg: cumplimiento >= thresholdPct ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
     },
     {
       icon: Activity,
@@ -131,23 +138,57 @@ export default function PastorCalendarPage() {
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-100 dark:border-blue-800 rounded-2xl p-4 mb-5 flex items-start gap-3"
+        className={`rounded-2xl p-4 mb-5 flex items-start gap-3 border ${
+          canEditAllReports
+            ? 'bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-100 dark:border-amber-800'
+            : 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border-blue-100 dark:border-blue-800'
+        }`}
       >
-        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
-          <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+          canEditAllReports
+            ? 'bg-amber-100 dark:bg-amber-900/30'
+            : 'bg-blue-100 dark:bg-blue-900/30'
+        }`}>
+          {canEditAllReports
+            ? <ShieldCheck className="w-4 h-4 text-amber-500" />
+            : <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          }
         </div>
         <div>
           <p className="text-sm font-medium text-gray-900 dark:text-white">
-            Periodo actual: {periodStart} del mes anterior — {periodEnd} del mes actual
+            {canEditAllReports
+              ? 'Excepción de edición activa'
+              : `Periodo actual: ${periodStart} del mes anterior — ${periodEnd} del mes actual`
+            }
           </p>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 hidden sm:block">
-            Solo puede editar informes dentro del periodo activo. Los anteriores son de
-            solo lectura.
+          <p className={`text-xs mt-0.5 hidden sm:block ${
+            canEditAllReports
+              ? 'text-amber-600 dark:text-amber-400'
+              : 'text-gray-500 dark:text-slate-400'
+          }`}>
+            {canEditAllReports
+              ? 'Puede editar informes de cualquier periodo vencido.'
+              : 'Solo puede editar informes dentro del periodo activo. Los anteriores son de solo lectura.'
+            }
           </p>
         </div>
       </motion.div>
 
       {/* Stats */}
+      {loadingMonth && monthReports.length === 0 ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Skeleton className="w-7 h-7 rounded-lg" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+              <Skeleton className="h-6 w-20 mb-1.5" />
+              <Skeleton className="h-3 w-12" />
+            </div>
+          ))}
+        </div>
+      ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         {stats.map((s, i) => (
           <motion.div
@@ -172,6 +213,7 @@ export default function PastorCalendarPage() {
           </motion.div>
         ))}
       </div>
+      )}
 
       {/* Calendar */}
       <motion.div
@@ -215,7 +257,13 @@ export default function PastorCalendarPage() {
 
         {/* Days grid */}
         <div className="grid grid-cols-7 gap-px bg-gray-100 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800">
-          {calendarDays.map((day, i) => {
+          {loadingMonth && monthReports.length === 0
+            ? Array.from({ length: 42 }).map((_, i) => (
+                <div key={i} className="aspect-square bg-white dark:bg-slate-900 p-1.5 sm:p-2">
+                  <Skeleton className="w-6 h-6 sm:w-7 sm:h-7 rounded-full" />
+                </div>
+              ))
+            : calendarDays.map((day, i) => {
             if (day === null) {
               return (
                 <div
@@ -225,17 +273,59 @@ export default function PastorCalendarPage() {
               );
             }
 
-            const { report, isToday, inPeriod, isFuture } = getDayStatus(day);
+            const { report, isToday, inPeriod, editable, isFuture } = getDayStatus(day);
             const actCount = report?.activities?.length || 0;
+
+            // Tooltip nativo (title) — explica el estado al usuario
+            const tooltipText = isFuture
+              ? 'Fecha futura'
+              : !editable && !report
+                ? 'Sin informe · Periodo cerrado'
+                : !editable && report
+                  ? 'Ver informe (solo lectura)'
+                  : editable && !report
+                    ? 'Crear informe'
+                    : 'Editar informe';
+
+            // Cursor e interactividad según estado
+            const interactiveClass =
+              isFuture || (!editable && !report)
+                ? 'cursor-default'
+                : 'cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800';
+
+            // Opacidad: días cerrados sin informe se difuminan más para
+            // indicar que no son accionables
+            const opacityClass = isFuture
+              ? 'opacity-30'
+              : !editable && !report
+                ? 'opacity-40'
+                : '';
+
+            // Icono de estado (solo desktop) en la esquina superior derecha
+            const StatusIcon =
+              isFuture || (!editable && !report)
+                ? null
+                : !editable && report
+                  ? Lock
+                  : editable && report
+                    ? PenLine
+                    : Plus;
+
+            const statusIconColor =
+              !editable && report
+                ? 'text-gray-400 dark:text-slate-500'
+                : 'text-teal-500 dark:text-teal-400';
 
             return (
               <div
                 key={day}
                 onClick={() => handleDayClick(day)}
+                title={tooltipText}
                 className={`min-h-[56px] sm:min-h-[90px] bg-white dark:bg-slate-900 p-1.5 sm:p-2 transition-all duration-150 relative group
                   ${isToday ? 'bg-teal-50/60 dark:bg-teal-900/20' : ''}
-                  ${isFuture ? 'opacity-30 cursor-default' : 'cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800'}
                   ${!inPeriod && !isFuture ? 'bg-gray-50/80 dark:bg-slate-950/80' : ''}
+                  ${interactiveClass}
+                  ${opacityClass}
                 `}
               >
                 <div className="flex items-center justify-between mb-0.5 sm:mb-1">
@@ -250,6 +340,12 @@ export default function PastorCalendarPage() {
                   >
                     {day}
                   </span>
+                  {/* Icono de estado — solo desktop, solo si no es futuro */}
+                  {StatusIcon && !isFuture && (
+                    <span className={`hidden sm:flex ${statusIconColor}`}>
+                      <StatusIcon className="w-3 h-3" />
+                    </span>
+                  )}
                 </div>
                 {report && (
                   <>
@@ -283,19 +379,42 @@ export default function PastorCalendarPage() {
           })}
         </div>
 
+
+        {/* Empty month banner */}
+        {monthReports.length === 0 && (
+          <div className="px-4 py-8 text-center border-t border-gray-100 dark:border-slate-800">
+            <CalendarX2 className="w-8 h-8 mx-auto text-gray-300 dark:text-slate-600 mb-2" />
+            <p className="text-sm font-semibold text-gray-500 dark:text-slate-400">
+              Sin informes este mes
+            </p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 max-w-xs mx-auto">
+              Toca un día dentro del periodo activo para registrar tus actividades.
+            </p>
+          </div>
+        )}
+
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 border-t border-gray-100 dark:border-slate-800 text-[11px] text-gray-400 dark:text-slate-500">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 border-t border-gray-100 dark:border-slate-800 text-[11px] text-gray-400 dark:text-slate-500">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-teal-500" /> Completado
+            <span className="w-2 h-2 rounded-full bg-teal-500" /> Informe completado
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-gray-300" /> Cerrado
+            <span className="w-2 h-2 rounded-full bg-gray-300" /> Informe cerrado
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-5 h-5 bg-teal-600 text-white rounded-full flex items-center justify-center text-[9px] font-medium">
               {today.getDate()}
             </span>{' '}
             Hoy
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5">
+            <PenLine className="w-3 h-3 text-teal-500" /> Editable
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5">
+            <Plus className="w-3 h-3 text-teal-500" /> Crear informe
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5">
+            <Lock className="w-3 h-3 text-gray-400" /> Solo lectura
           </span>
         </div>
       </motion.div>

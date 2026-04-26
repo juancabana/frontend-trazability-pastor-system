@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useUnionConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
-import { formatMonthYear } from '@/lib/format-date';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
+import { Tooltip } from '@/components/atoms/Tooltip';
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,25 +17,20 @@ import {
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { exportUnionConsolidatedPDF, exportUnionConsolidatedExcel } from '@/lib/export-utils';
+import { StatsGridSkeleton, TableSkeleton } from '@/components/atoms/Skeleton';
 
 export default function SuperAdminConsolidatedPage() {
   const { token, currentUser } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const { thresholdPct } = useComplianceThresholds();
+  const [periodOffset, setPeriodOffset] = useState(0);
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-  const monthLabel = formatMonthYear(currentMonth);
-
-  const { data: unionData } = useUnionConsolidated(
+  const { data: unionData, isLoading: loadingUnion } = useUnionConsolidated(
     token ?? '',
     currentUser?.unionId ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
 
+  const periodLabel = unionData?.period?.label ?? 'Cargando periodo...';
   const assocSummaries = unionData?.associationSummaries ?? [];
 
   const stats = [
@@ -47,7 +43,7 @@ export default function SuperAdminConsolidatedPage() {
   const handleExportPDF = async () => {
     if (!unionData) return;
     try {
-      await exportUnionConsolidatedPDF(unionData, monthLabel, currentUser?.unionName ?? 'Union');
+      await exportUnionConsolidatedPDF(unionData, periodLabel, currentUser?.unionName ?? 'Union');
       toast.success('PDF generado correctamente');
     } catch {
       toast.error('Error al generar PDF');
@@ -57,7 +53,7 @@ export default function SuperAdminConsolidatedPage() {
   const handleExportExcel = async () => {
     if (!unionData) return;
     try {
-      await exportUnionConsolidatedExcel(unionData, monthLabel, currentUser?.unionName ?? 'Union');
+      await exportUnionConsolidatedExcel(unionData, periodLabel, currentUser?.unionName ?? 'Union');
       toast.success('Excel generado correctamente');
     } catch {
       toast.error('Error al generar Excel');
@@ -76,45 +72,61 @@ export default function SuperAdminConsolidatedPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportPDF}
-            disabled={!unionData}
-            className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+          <Tooltip
+            content={!unionData ? 'Sin datos para exportar' : 'Exportar como PDF'}
+            side="bottom"
           >
-            <Download className="w-3.5 h-3.5" /> PDF
-          </button>
-          <button
-            onClick={handleExportExcel}
-            disabled={!unionData}
-            className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            <button
+              onClick={handleExportPDF}
+              disabled={!unionData}
+              className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-3.5 h-3.5" /> PDF
+            </button>
+          </Tooltip>
+          <Tooltip
+            content={!unionData ? 'Sin datos para exportar' : 'Exportar como Excel'}
+            side="bottom"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5" /> Excel
-          </button>
+            <button
+              onClick={handleExportExcel}
+              disabled={!unionData}
+              className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" /> Excel
+            </button>
+          </Tooltip>
         </div>
       </div>
 
-      {/* Month nav */}
+      {/* Period nav */}
       <div className="flex items-center gap-3 mb-5">
         <button
-          aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          aria-label="Periodo anterior"
+          onClick={() => setPeriodOffset((o) => o - 1)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
-          {monthLabel}
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
+          {periodLabel}
         </span>
+        <Tooltip content={periodOffset >= 0 ? 'Ya estás en el periodo más reciente' : false} side="bottom">
         <button
-          aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          aria-label="Periodo siguiente"
+          onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+          disabled={periodOffset >= 0}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
+        </Tooltip>
       </div>
 
       {/* Stats */}
+      {loadingUnion && !unionData ? (
+        <StatsGridSkeleton count={4} />
+      ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         {stats.map((s, i) => (
           <motion.div
@@ -137,8 +149,12 @@ export default function SuperAdminConsolidatedPage() {
           </motion.div>
         ))}
       </div>
+      )}
 
       {/* Association summaries table */}
+      {loadingUnion && !unionData ? (
+        <TableSkeleton columns={5} rows={5} title="Resumen por Asociacion" />
+      ) : (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -169,7 +185,7 @@ export default function SuperAdminConsolidatedPage() {
                   <p className="text-sm text-right text-gray-400 dark:text-slate-500">{assoc.totalHours.toFixed(0)}h</p>
                   <div className="flex justify-end">
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                      compliance >= 70
+                      compliance >= thresholdPct
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                         : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
                     }`}>{compliance}%</span>
@@ -182,7 +198,7 @@ export default function SuperAdminConsolidatedPage() {
                     <span className="text-xs bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white font-medium px-2 py-0.5 rounded-md">{assoc.totalPastors} pastores</span>
                     <span className="text-xs bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white px-2 py-0.5 rounded-md">{assoc.totalActivities} act.</span>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${
-                      compliance >= 70
+                      compliance >= thresholdPct
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                         : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
                     }`}>{compliance}%</span>
@@ -198,6 +214,7 @@ export default function SuperAdminConsolidatedPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

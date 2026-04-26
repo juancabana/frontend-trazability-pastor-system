@@ -1,9 +1,16 @@
 export const consolidatedKeys = {
   all: ['consolidated'] as const,
-  byPastor: (pastorId: string, month: number, year: number) =>
-    [...consolidatedKeys.all, 'pastor', pastorId, month, year] as const,
-  byAssociation: (assocId: string, month: number, year: number) =>
-    [...consolidatedKeys.all, 'association', assocId, month, year] as const,
-  byUnion: (unionId: string, month: number, year: number) =>
-    [...consolidatedKeys.all, 'union', unionId, month, year] as const,
+  byPastor: (pastorId: string, periodOffset: number) =>
+    [...consolidatedKeys.all, 'pastor', pastorId, periodOffset] as const,
+  byAssociation: (assocId: string, periodOffset: number) =>
+    [...consolidatedKeys.all, 'association', assocId, periodOffset] as const,
+  byUnion: (unionId: string, periodOffset: number) =>
+    [...consolidatedKeys.all, 'union', unionId, periodOffset] as const,
+  byPastors: (pastorIds: string[], periodOffset: number) =>
+    [
+      ...consolidatedKeys.all,
+      'custom',
+      [...pastorIds].sort().join(','),
+      periodOffset,
+    ] as const,
 };

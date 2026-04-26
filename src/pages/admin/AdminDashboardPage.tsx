@@ -4,7 +4,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
-import { formatMonthYear } from '@/lib/format-date';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
+import { StatsGridSkeleton, ListSkeleton, BarChartSkeleton } from '@/components/atoms/Skeleton';
+import { Tooltip } from '@/components/atoms/Tooltip';
 import {
   Users,
   FileText,
@@ -21,22 +23,15 @@ import { motion } from 'motion/react';
 
 export default function AdminDashboardPage() {
   const { token, currentUser } = useAuth();
+  const { thresholdPct } = useComplianceThresholds();
   const navigate = useNavigate();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
-
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const [periodOffset, setPeriodOffset] = useState(0);
 
   const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
-  const { data: consolidated } = useAssociationConsolidated(
+  const { data: consolidated, isLoading: loadingConsolidated } = useAssociationConsolidated(
     token ?? '',
     currentUser?.associationId ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
   const { data: categories = [] } = useActivityCategories();
 
@@ -48,6 +43,8 @@ export default function AdminDashboardPage() {
   const totalActivities = consolidated?.totals?.totalActivities || 0;
   const totalHours = consolidated?.totals?.totalHours || 0;
   const pastorSummaries = consolidated?.pastorSummaries || [];
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
+  const totalReports = pastorSummaries.reduce((s, p) => s + p.totalReports, 0);
 
   const getInitials = (name: string) =>
     name
@@ -70,8 +67,8 @@ export default function AdminDashboardPage() {
     {
       icon: FileText,
       label: 'Informes',
-      value: pastorSummaries.reduce((s, p) => s + Math.round(p.compliance * daysInMonth), 0),
-      sub: 'este mes',
+      value: totalReports,
+      sub: 'recibidos',
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/30',
     },
@@ -118,56 +115,68 @@ export default function AdminDashboardPage() {
 
       <div className="flex items-center gap-3 mb-5">
         <button
-          aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          aria-label="Periodo anterior"
+          onClick={() => setPeriodOffset((o) => o - 1)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
-          {formatMonthYear(currentMonth)}
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
+          {periodLabel}
         </span>
+        <Tooltip content={periodOffset >= 0 ? 'Ya estás en el periodo más reciente' : false} side="bottom">
         <button
-          aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          aria-label="Periodo siguiente"
+          onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+          disabled={periodOffset >= 0}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
+        </Tooltip>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div
-                className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}
-              >
-                <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+      {loadingConsolidated && !consolidated ? (
+        <StatsGridSkeleton count={4} />
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}
+                >
+                  <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+                </div>
+                <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
+                  {s.label}
+                </span>
               </div>
-              <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
-                {s.label}
-              </span>
-            </div>
-            <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
-          </motion.div>
-        ))}
-      </div>
+              <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
+              <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Pastors list */}
+        {loadingConsolidated && !consolidated ? (
+          <div className="lg:col-span-2">
+            <ListSkeleton rows={5} />
+          </div>
+        ) : (
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-              Pastores — {formatMonthYear(currentMonth)}
+              Pastores — {periodLabel}
             </h3>
           </div>
           <div className="divide-y divide-gray-50 dark:divide-slate-800">
@@ -199,7 +208,7 @@ export default function AdminDashboardPage() {
                       </p>
                       <p className="text-[10px] text-gray-400 dark:text-slate-500">act.</p>
                     </div>
-                    {cumplimiento >= 70 ? (
+                    {cumplimiento >= thresholdPct ? (
                       <CheckCircle className="w-5 h-5 text-emerald-500" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-amber-500" />
@@ -216,8 +225,12 @@ export default function AdminDashboardPage() {
             )}
           </div>
         </div>
+        )}
 
         {/* Category breakdown */}
+        {loadingConsolidated && !consolidated ? (
+          <BarChartSkeleton rows={5} />
+        ) : (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -262,6 +275,7 @@ export default function AdminDashboardPage() {
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

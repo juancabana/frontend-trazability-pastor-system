@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useLogin } from '@/features/auth/presentation/hooks/use-auth-mutations';
-import { STORAGE_KEYS } from '@/constants/shared';
+import { STORAGE_KEYS, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import type { UserRole } from '@/features/auth/domain/entities/user-role';
 import { ROLE_ACCESS } from '@/features/auth/domain/entities/user-role';
 
@@ -15,6 +15,7 @@ interface AuthUser {
   unionName: string | null;
   reportDeadlineDay: number;
   mustChangePassword: boolean;
+  canEditAllReports: boolean;
 }
 
 interface LoginResult {
@@ -31,6 +32,7 @@ interface AuthContextType {
   logout: () => void;
   hasAccess: (section: string) => boolean;
   clearMustChangePassword: () => void;
+  updateDeadlineDay: (day: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -98,8 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           unionId: res.unionId,
           associationName: res.associationName ?? null,
           unionName: res.unionName ?? null,
-          reportDeadlineDay: res.reportDeadlineDay ?? 19,
+          reportDeadlineDay: res.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY,
           mustChangePassword: res.mustChangePassword,
+          canEditAllReports: res.canEditAllReports ?? false,
         });
         return { role: res.role, mustChangePassword: res.mustChangePassword };
       } catch {
@@ -113,6 +116,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setCurrentUser((prev) => {
       if (!prev) return prev;
       return { ...prev, mustChangePassword: false };
+    });
+  }, []);
+
+  const updateDeadlineDay = useCallback((day: number) => {
+    setCurrentUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, reportDeadlineDay: day };
+      localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(updated));
+      return updated;
     });
   }, []);
 
@@ -140,6 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         hasAccess,
         clearMustChangePassword,
+        updateDeadlineDay,
       }}
     >
       {children}

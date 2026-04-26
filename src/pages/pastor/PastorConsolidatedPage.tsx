@@ -2,8 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { usePastorConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
-import { formatMonthYear } from '@/lib/format-date';
+import { exportPastorPDF, exportPastorExcel } from '@/lib/export-utils';
 import { UNIT_LABELS } from '@/constants/shared';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
+import { EmptyState } from '@/components/atoms/EmptyState';
+import { Tooltip } from '@/components/atoms/Tooltip';
+import { StatsGridSkeleton, BarChartSkeleton } from '@/components/atoms/Skeleton';
 import {
   ChevronLeft,
   ChevronRight,
@@ -14,25 +18,21 @@ import {
   TrendingUp,
   Activity,
   DollarSign,
+  Download,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 export default function PastorConsolidatedPage() {
   const { token, currentUser } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const { thresholdPct } = useComplianceThresholds();
+  const [periodOffset, setPeriodOffset] = useState(0);
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const { data: consolidated } = usePastorConsolidated(
+  const { data: consolidated, isLoading: loadingConsolidated } = usePastorConsolidated(
     token ?? '',
     currentUser?.id ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
   const { data: allCategories = [] } = useActivityCategories();
 
@@ -50,13 +50,36 @@ export default function PastorConsolidatedPage() {
     : 0;
   const totalActivities = consolidated?.totals?.totalActivities || 0;
   const totalTransporte = consolidated?.totalTransportAmount || 0;
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
+  const daysInPeriod = consolidated?.daysInPeriod ?? 0;
+  const daysWithReports = consolidated?.daysWithReports ?? 0;
+
+  const handleExportPDF = async () => {
+    if (!consolidated) return;
+    try {
+      await exportPastorPDF(consolidated, periodLabel, currentUser?.displayName ?? 'Pastor');
+      toast.success('PDF generado correctamente');
+    } catch {
+      toast.error('Error al generar PDF');
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (!consolidated) return;
+    try {
+      await exportPastorExcel(consolidated, periodLabel, currentUser?.displayName ?? 'Pastor');
+      toast.success('Excel generado correctamente');
+    } catch {
+      toast.error('Error al generar Excel');
+    }
+  };
 
   const stats = [
     {
       icon: Calendar,
       label: 'Dias',
-      value: compliance > 0 ? Math.round((compliance / 100) * daysInMonth) : 0,
-      sub: `de ${daysInMonth}`,
+      value: daysWithReports,
+      sub: `de ${daysInPeriod}`,
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/30',
     },
@@ -64,9 +87,9 @@ export default function PastorConsolidatedPage() {
       icon: TrendingUp,
       label: 'Cumplimiento',
       value: `${compliance}%`,
-      sub: 'del mes',
-      color: compliance >= 70 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
-      bg: compliance >= 70 ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
+      sub: 'del periodo',
+      color: compliance >= thresholdPct ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400',
+      bg: compliance >= thresholdPct ? 'bg-emerald-50 dark:bg-emerald-900/30' : 'bg-amber-50 dark:bg-amber-900/30',
     },
     {
       icon: Activity,
@@ -88,61 +111,108 @@ export default function PastorConsolidatedPage() {
 
   return (
     <div className="max-w-[900px] mx-auto">
-      <div className="mb-5">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-teal-600" /> Mi Consolidado Mensual
-        </h2>
-        <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-          Resumen personal de actividades por rubro y subcategoria
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-teal-600" /> Mi Consolidado por Periodo
+          </h2>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+            Resumen personal de actividades por rubro y subcategoria
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Tooltip content={!consolidated ? 'Sin datos para exportar' : 'Exportar como PDF'} side="bottom">
+            <button
+              onClick={handleExportPDF}
+              disabled={!consolidated}
+              className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-3.5 h-3.5" /> PDF
+            </button>
+          </Tooltip>
+          <Tooltip content={!consolidated ? 'Sin datos para exportar' : 'Exportar como Excel'} side="bottom">
+            <button
+              onClick={handleExportExcel}
+              disabled={!consolidated}
+              className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" /> Excel
+            </button>
+          </Tooltip>
+        </div>
       </div>
 
-      {/* Month nav */}
+      {/* Period nav */}
       <div className="flex items-center gap-3 mb-5">
         <button
-          aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          aria-label="Periodo anterior"
+          onClick={() => setPeriodOffset((o) => o - 1)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
-          {formatMonthYear(currentMonth)}
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
+          {periodLabel}
         </span>
+        <Tooltip content={periodOffset >= 0 ? 'Ya estás en el periodo más reciente' : false} side="bottom">
         <button
-          aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          aria-label="Periodo siguiente"
+          onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+          disabled={periodOffset >= 0}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
+        </Tooltip>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div
-                className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}
-              >
-                <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+      {loadingConsolidated && !consolidated ? (
+        <StatsGridSkeleton count={4} />
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 hover:shadow-md transition-all duration-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className={`w-7 h-7 ${s.bg} rounded-lg flex items-center justify-center`}
+                >
+                  <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+                </div>
+                <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
+                  {s.label}
+                </span>
               </div>
-              <span className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">
-                {s.label}
-              </span>
-            </div>
-            <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
-          </motion.div>
-        ))}
-      </div>
+              <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
+              <p className="text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</p>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* Skeleton del breakdown mientras carga */}
+      {loadingConsolidated && !consolidated && <BarChartSkeleton rows={4} />}
+
+      {/* Empty state cuando no hay actividades en ninguna categoría */}
+      {consolidated && (!consolidated.categories?.length ||
+        consolidated.categories.every(
+          (cat) => (cat.subcategories ?? []).reduce((s, sub) => s + sub.totalQuantity, 0) === 0,
+        )) && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800">
+          <EmptyState
+            compact
+            icon={BarChart3}
+            title="Sin actividades este mes"
+            description="Cuando registres actividades en tu informe diario, aquí verás el resumen por rubro."
+          />
+        </div>
+      )}
 
       {/* Categories breakdown */}
       {consolidated?.categories?.map((cat) => {

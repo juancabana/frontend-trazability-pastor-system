@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { formatMonthYear } from '@/lib/format-date';
+import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
 import { DAYS_ES } from '@/constants/shared';
 import {
   ArrowLeft,
@@ -14,22 +15,20 @@ import {
   FileText,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { StatsGridSkeleton, CalendarSkeleton, ListSkeleton } from '@/components/atoms/Skeleton';
 
 export default function SuperAdminPastorReportsPage() {
   const { pastorId } = useParams<{ pastorId: string }>();
   const navigate = useNavigate();
   const { token } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const [currentMonth, setCurrentMonth] = useState(() => startOfCurrentMonthBogota());
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = new Date(year, month, 1).getDay();
 
-  const { data: reports = [] } = useReportsByPastorMonth(
+  const { data: reports = [], isLoading: loadingReports } = useReportsByPastorMonth(
     token ?? '',
     pastorId ?? '',
     month + 1,
@@ -104,6 +103,9 @@ export default function SuperAdminPastorReportsPage() {
       </div>
 
       {/* Stats */}
+      {loadingReports && reports.length === 0 ? (
+        <StatsGridSkeleton count={3} />
+      ) : (
       <div className="grid grid-cols-3 gap-3 mb-5">
         {stats.map((s, i) => (
           <motion.div
@@ -126,8 +128,12 @@ export default function SuperAdminPastorReportsPage() {
           </motion.div>
         ))}
       </div>
+      )}
 
       {/* Calendar */}
+      {loadingReports && reports.length === 0 ? (
+        <div className="mb-5"><CalendarSkeleton /></div>
+      ) : (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden mb-5">
         <div className="grid grid-cols-7">
           {DAYS_ES.map((d) => (
@@ -196,8 +202,12 @@ export default function SuperAdminPastorReportsPage() {
           })}
         </div>
       </div>
+      )}
 
       {/* Reports list */}
+      {loadingReports && reports.length === 0 ? (
+        <ListSkeleton rows={4} withMetrics={false} />
+      ) : (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -230,6 +240,7 @@ export default function SuperAdminPastorReportsPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

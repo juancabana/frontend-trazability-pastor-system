@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useAssociationsByUnion } from '@/features/association/presentation/hooks/use-association-queries';
-import { formatMonthYear } from '@/lib/format-date';
+import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import {
   ArrowLeft,
   ChevronLeft,
@@ -17,33 +17,30 @@ import {
   ChevronRight as GoIcon,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { StatsGridSkeleton, ListSkeleton, BarChartSkeleton } from '@/components/atoms/Skeleton';
+import { Tooltip } from '@/components/atoms/Tooltip';
 
 export default function SuperAdminAssociationDetailPage() {
   const { associationId } = useParams<{ associationId: string }>();
   const navigate = useNavigate();
   const { token, currentUser } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
-
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const { thresholdPct } = useComplianceThresholds();
+  const [periodOffset, setPeriodOffset] = useState(0);
 
   const { data: associations = [] } = useAssociationsByUnion(currentUser?.unionId ?? undefined);
   const assoc = associations.find((a) => a.id === associationId);
 
-  const { data: consolidated } = useAssociationConsolidated(
+  const { data: consolidated, isLoading: loadingConsolidated } = useAssociationConsolidated(
     token ?? '',
     associationId ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
 
   const pastorSummaries = consolidated?.pastorSummaries ?? [];
   const totalActivities = consolidated?.totals?.totalActivities ?? 0;
   const totalHours = consolidated?.totals?.totalHours ?? 0;
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
+  const totalReports = pastorSummaries.reduce((s, p) => s + p.totalReports, 0);
 
   const getInitials = (name: string) =>
     name.split(' ').filter((w) => w.length > 2).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
@@ -61,7 +58,7 @@ export default function SuperAdminAssociationDetailPage() {
 
   const stats = [
     { icon: Users, label: 'Pastores', value: pastorSummaries.length, sub: 'activos', color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/30' },
-    { icon: FileText, label: 'Informes', value: pastorSummaries.reduce((s, p) => s + Math.round(p.compliance * daysInMonth), 0), sub: 'este mes', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
+    { icon: FileText, label: 'Informes', value: totalReports, sub: 'recibidos', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
     { icon: Activity, label: 'Actividades', value: totalActivities, sub: 'registradas', color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-900/30' },
     { icon: Clock, label: 'Horas', value: `${totalHours.toFixed(0)}h`, sub: 'dedicadas', color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/30' },
   ];
@@ -84,28 +81,34 @@ export default function SuperAdminAssociationDetailPage() {
         </div>
       </div>
 
-      {/* Month nav */}
+      {/* Period nav */}
       <div className="flex items-center gap-3 mb-5">
         <button
-          aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+          aria-label="Periodo anterior"
+          onClick={() => setPeriodOffset((o) => o - 1)}
           className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
-        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
-          {formatMonthYear(currentMonth)}
+        <span className="text-sm font-medium text-gray-900 dark:text-white px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-w-[200px] text-center">
+          {periodLabel}
         </span>
+        <Tooltip content={periodOffset >= 0 ? 'Ya estás en el periodo más reciente' : false} side="bottom">
         <button
-          aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+          aria-label="Periodo siguiente"
+          onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+          disabled={periodOffset >= 0}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
+        </Tooltip>
       </div>
 
       {/* Stats */}
+      {loadingConsolidated && !consolidated ? (
+        <StatsGridSkeleton count={4} />
+      ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         {stats.map((s, i) => (
           <motion.div
@@ -128,13 +131,17 @@ export default function SuperAdminAssociationDetailPage() {
           </motion.div>
         ))}
       </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Pastors list */}
+        {loadingConsolidated && !consolidated ? (
+          <div className="lg:col-span-2"><ListSkeleton rows={5} /></div>
+        ) : (
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-              Pastores — {formatMonthYear(currentMonth)}
+              Pastores — {periodLabel}
             </h3>
           </div>
           <div className="divide-y divide-gray-50 dark:divide-slate-800">
@@ -158,7 +165,7 @@ export default function SuperAdminAssociationDetailPage() {
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">{ps.totalActivities}</p>
                       <p className="text-[10px] text-gray-400 dark:text-slate-500">act.</p>
                     </div>
-                    {cumplimiento >= 70 ? (
+                    {cumplimiento >= thresholdPct ? (
                       <CheckCircle className="w-5 h-5 text-emerald-500" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-amber-500" />
@@ -175,8 +182,12 @@ export default function SuperAdminAssociationDetailPage() {
             )}
           </div>
         </div>
+        )}
 
         {/* Category breakdown */}
+        {loadingConsolidated && !consolidated ? (
+          <BarChartSkeleton rows={5} />
+        ) : (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -212,6 +223,7 @@ export default function SuperAdminAssociationDetailPage() {
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

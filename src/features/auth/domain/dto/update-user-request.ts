@@ -7,4 +7,5 @@ export interface UpdateUserRequest {
   districtId?: string;
   position?: string;
   phone?: string;
+  canEditAllReports?: boolean;
 }

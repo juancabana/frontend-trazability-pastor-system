@@ -4,15 +4,17 @@ import { useAuth } from '@/context/AuthContext';
 import { useReportByDate } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatDate, isDateEditable } from '@/lib/format-date';
-import { TRANSPORT_CATEGORY_ID } from '@/constants/shared';
-import { ArrowLeft, Edit3, FileText } from 'lucide-react';
+import { TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
+import { EmptyState } from '@/components/atoms/EmptyState';
+import { DetailSkeleton } from '@/components/atoms/Skeleton';
+import { ArrowLeft, Edit3, FileText, Activity } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function PastorReportDetailPage() {
   const { date } = useParams<{ date: string }>();
   const navigate = useNavigate();
   const { token, currentUser } = useAuth();
-  const deadlineDay = currentUser?.reportDeadlineDay ?? 19;
+  const deadlineDay = currentUser?.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY;
 
   const reportDate = date ? new Date(date + 'T12:00:00') : new Date();
   const editable = isDateEditable(reportDate, deadlineDay);
@@ -40,8 +42,8 @@ export default function PastorReportDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-[700px] mx-auto flex items-center justify-center min-h-[50vh]">
-        <p className="text-gray-400 dark:text-slate-500 text-sm">Cargando...</p>
+      <div className="max-w-[700px] mx-auto">
+        <DetailSkeleton />
       </div>
     );
   }
@@ -97,6 +99,17 @@ export default function PastorReportDetailPage() {
         </div>
       ) : (
         <>
+          {Object.entries(activitiesByCategory).length === 0 && (
+            <div className="mb-4 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800">
+              <EmptyState
+                compact
+                icon={Activity}
+                title="Sin actividades registradas"
+                description="Este informe no tiene actividades. Si el periodo sigue activo, puedes editarlo para agregar."
+              />
+            </div>
+          )}
+
           {Object.entries(activitiesByCategory).map(([catId, acts]) => {
             const cat = categoriesMap.get(catId);
             if (!cat) return null;

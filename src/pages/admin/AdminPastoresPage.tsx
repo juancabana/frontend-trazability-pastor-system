@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
-import { formatMonthYear } from '@/lib/format-date';
+import { PASTOR_POSITION_LABEL } from '@/constants/shared';
 import { SearchInput } from '@/components/atoms/SearchInput';
+import { ListSkeleton } from '@/components/atoms/Skeleton';
+import { Tooltip } from '@/components/atoms/Tooltip';
 import {
   ChevronLeft,
   ChevronRight,
@@ -19,21 +21,16 @@ export default function AdminPastoresPage() {
   const { token, currentUser } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  const [periodOffset, setPeriodOffset] = useState(0);
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  const { data: users = [] } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
+  const { data: users = [], isLoading: loadingUsers } = useUsers(token ?? '', currentUser?.associationId ?? undefined);
   const { data: consolidated } = useAssociationConsolidated(
     token ?? '',
     currentUser?.associationId ?? '',
-    month + 1,
-    year,
+    periodOffset,
   );
+
+  const periodLabel = consolidated?.period?.label ?? 'Cargando periodo...';
 
   const pastors = useMemo(
     () => users.filter((u) => u.role === 'pastor'),
@@ -81,25 +78,31 @@ export default function AdminPastoresPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            aria-label="Mes anterior"
-            onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+            aria-label="Periodo anterior"
+            onClick={() => setPeriodOffset((o) => o - 1)}
             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
           >
             <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
           <span className="text-sm font-medium text-gray-900 dark:text-white px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 whitespace-nowrap">
-            {formatMonthYear(currentMonth)}
+            {periodLabel}
           </span>
+          <Tooltip content={periodOffset >= 0 ? 'Ya estás en el periodo más reciente' : false} side="bottom">
           <button
-            aria-label="Mes siguiente"
-            onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors"
+            aria-label="Periodo siguiente"
+            onClick={() => setPeriodOffset((o) => Math.min(0, o + 1))}
+            disabled={periodOffset >= 0}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
+          </Tooltip>
         </div>
       </div>
 
+      {loadingUsers && users.length === 0 ? (
+        <ListSkeleton rows={5} withHeader={false} />
+      ) : (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
         <div className="divide-y divide-gray-50 dark:divide-slate-800">
           {filteredPastors.map((pastor, i) => {
@@ -123,7 +126,7 @@ export default function AdminPastoresPage() {
                     </p>
                     {pastor.position && (
                       <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md ${
-                        pastor.position === 'Pastor'
+                        pastor.position === PASTOR_POSITION_LABEL
                           ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
                           : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
                       }`}>
@@ -168,6 +171,7 @@ export default function AdminPastoresPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
