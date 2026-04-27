@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
+import { SEO } from '@/shared/presentation/SEO';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { PASTOR_POSITION_LABEL } from '@/constants/shared';
@@ -61,6 +62,7 @@ export default function AdminPastoresPage() {
 
   return (
     <div className="max-w-[900px] mx-auto">
+      <SEO title="Pastores" noIndex />
       <div className="mb-5">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Pastores</h2>
         <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">

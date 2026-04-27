@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useCanWrite } from '@/hooks/use-can-write';
+import { SEO } from '@/shared/presentation/SEO';
 import { useDistricts } from '@/features/district/presentation/hooks/use-district-queries';
 import { useCreateDistrict, useUpdateDistrict, useDeleteDistrict } from '@/features/district/presentation/hooks/use-district-mutations';
 import { useChurches, useCreateChurch, useUpdateChurch, useMoveChurch, useDeleteChurch } from '@/features/church/presentation/hooks/use-church-queries';
@@ -201,6 +202,7 @@ export default function AdminDistritosPage() {
 
   return (
     <div className="max-w-[900px] mx-auto">
+      <SEO title="Distritos" noIndex />
       <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">

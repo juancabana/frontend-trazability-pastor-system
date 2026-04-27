@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
+import { SEO } from '@/shared/presentation/SEO';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useAssociationsByUnion } from '@/features/association/presentation/hooks/use-association-queries';
 import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
@@ -66,6 +67,7 @@ export default function SuperAdminAssociationDetailPage() {
 
   return (
     <div className="max-w-[1100px] mx-auto">
+      <SEO title="Detalle de Asociación" noIndex />
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <button

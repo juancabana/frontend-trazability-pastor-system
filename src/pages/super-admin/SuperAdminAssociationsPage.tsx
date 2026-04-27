@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
+import { SEO } from '@/shared/presentation/SEO';
 import { useAssociationsByUnion } from '@/features/association/presentation/hooks/use-association-queries';
 import {
   Building2,
@@ -27,6 +28,7 @@ export default function SuperAdminAssociationsPage() {
 
   return (
     <div className="max-w-[900px] mx-auto">
+      <SEO title="Asociaciones" noIndex />
       <div className="mb-5">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <Building2 className="w-5 h-5 text-purple-600 dark:text-purple-400" /> Asociaciones

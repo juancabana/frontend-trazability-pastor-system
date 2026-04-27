@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
+import { SEO } from '@/shared/presentation/SEO';
 import { useReportByDate } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { useSaveReport, useDeleteReport } from '@/features/daily-report/presentation/hooks/use-daily-report-mutations';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
@@ -163,6 +164,7 @@ export default function PastorReportEditPage() {
 
   return (
     <div className="max-w-[700px] mx-auto">
+      <SEO title="Editar Reporte" noIndex />
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <button

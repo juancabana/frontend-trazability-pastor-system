@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
+import { SEO } from '@/shared/presentation/SEO';
 import { useAuth } from '@/context/AuthContext';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useAssociationConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
@@ -105,6 +106,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="max-w-[1100px] mx-auto">
+      <SEO title="Panel de Administración" noIndex />
       <div className="mb-5">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           Panel de Administración

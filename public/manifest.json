@@ -1,0 +1,31 @@
+{
+  "name": "Sistema de Trazabilidad Pastoral IASD",
+  "short_name": "Trazabilidad Pastoral",
+  "description": "Plataforma para el registro y seguimiento de actividades diarias de pastores distritales en la Iglesia Adventista del Séptimo Día.",
+  "start_url": "/login",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#020617",
+  "theme_color": "#14b8a6",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["productivity", "business"],
+  "icons": [
+    {
+      "src": "/iasd-logo-ligth.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/iasd-logo-ligth.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

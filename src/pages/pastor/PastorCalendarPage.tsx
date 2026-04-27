@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
+import { SEO } from '@/shared/presentation/SEO';
 import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { usePastorConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { formatMonthYear, isDateInCurrentPeriod, isDateEditable } from '@/lib/format-date';
@@ -146,6 +147,7 @@ export default function PastorCalendarPage() {
 
   return (
     <div className="max-w-[1100px] mx-auto">
+      <SEO title="Mi Calendario" noIndex />
       {/* Period banner */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}

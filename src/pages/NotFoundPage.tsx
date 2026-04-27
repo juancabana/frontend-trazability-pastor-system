@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { getRoleRedirect } from '@/components/ProtectedRoute';
 import { Home } from 'lucide-react';
+import { SEO } from '@/shared/presentation/SEO';
 
 export default function NotFoundPage() {
   const { role, isAuthenticated } = useAuth();
@@ -9,6 +10,12 @@ export default function NotFoundPage() {
   const homeLink = isAuthenticated ? getRoleRedirect(role) : '/login';
 
   return (
+    <>
+      <SEO
+        title="Página no encontrada"
+        description="La página que buscas no existe o fue movida."
+        noIndex
+      />
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 px-4">
       <div className="text-center">
         <p className="text-7xl font-bold text-gray-200 dark:text-slate-800">404</p>
@@ -27,5 +34,6 @@ export default function NotFoundPage() {
         </Link>
       </div>
     </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
+import { SEO } from '@/shared/presentation/SEO';
 import { useReportByDate } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatDate, isDateEditable } from '@/lib/format-date';
@@ -50,6 +51,7 @@ export default function PastorReportDetailPage() {
 
   return (
     <div className="max-w-[700px] mx-auto">
+      <SEO title="Detalle de Reporte" noIndex />
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <button

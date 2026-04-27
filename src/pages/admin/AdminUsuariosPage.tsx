@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useCanWrite } from '@/hooks/use-can-write';
+import { SEO } from '@/shared/presentation/SEO';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import {
   useCreateUser,
@@ -170,6 +171,7 @@ export default function AdminUsuariosPage() {
 
   return (
     <div className="max-w-[900px] mx-auto">
+      <SEO title="Usuarios" noIndex />
       <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">

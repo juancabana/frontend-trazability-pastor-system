@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
+import { SEO } from '@/shared/presentation/SEO';
 import { useUnionConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useAssociationsByUnion } from '@/features/association/presentation/hooks/use-association-queries';
 import {
@@ -44,6 +45,7 @@ export default function SuperAdminDashboardPage() {
 
   return (
     <div className="max-w-[1100px] mx-auto">
+      <SEO title="Panel Super Admin" noIndex />
       <div className="mb-5">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <LayoutDashboard className="w-5 h-5 text-purple-600 dark:text-purple-400" /> Panel de Unión
