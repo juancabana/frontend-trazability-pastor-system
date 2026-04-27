@@ -18,7 +18,7 @@ import {
   useRemoveExtraRecipient,
 } from '@/features/association/hooks/use-extra-recipients';
 import { getCurrentPeriod } from '@/lib/format-date';
-import { MONTHS_ES } from '@/constants/shared';
+import { MONTHS_ES, MIN_REPORT_DEADLINE_DAY, MAX_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import { Tooltip } from '@/components/atoms/Tooltip';
 import { toast } from 'sonner';
 
@@ -48,11 +48,13 @@ export default function AdminSettingsPage() {
 
   const today = new Date();
   const maxDay = useMemo(
-    () => getLastDayOfMonth(today.getFullYear(), today.getMonth()),
+    // Clampeamos al maximo del sistema (27) aunque el mes tenga mas dias,
+    // para evitar el desbordamiento de fecha en febrero.
+    () => Math.min(getLastDayOfMonth(today.getFullYear(), today.getMonth()), MAX_REPORT_DEADLINE_DAY),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
-  const minDay = 1;
+  const minDay = MIN_REPORT_DEADLINE_DAY;
 
   const currentDeadline = currentUser?.reportDeadlineDay ?? 19;
   const [value, setValue] = useState<number>(currentDeadline);
