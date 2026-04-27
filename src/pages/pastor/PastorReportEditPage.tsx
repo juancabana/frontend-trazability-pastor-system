@@ -51,8 +51,10 @@ export default function PastorReportEditPage() {
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
   const initialSnapshot = useRef<string>('');
   const lastSyncedAt = useRef<string>('');
+  const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     if (existingReport) {
@@ -103,7 +105,19 @@ export default function PastorReportEditPage() {
         amount: isTransport ? 0 : undefined,
       },
     ]);
+    setNewlyAddedId(subcategoryId);
   };
+
+  useEffect(() => {
+    if (newlyAddedId) {
+      const el = activityRefs.current[newlyAddedId];
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const timer = setTimeout(() => setNewlyAddedId(null), 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [newlyAddedId, activities]);
 
   const removeActivity = (subcategoryId: string) => {
     setActivities((prev) => prev.filter((a) => a.subcategoryId !== subcategoryId));
@@ -202,6 +216,93 @@ export default function PastorReportEditPage() {
         </div>
       )}
 
+      {/* Add activity accordion — arriba para que el pastor lo vea de entrada */}
+      {editable && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 mb-4">
+          <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <div className="w-6 h-6 bg-teal-50 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
+                <Plus className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+              </div>
+              Agregar Actividad
+            </h3>
+          </div>
+          <div className="divide-y divide-gray-50 dark:divide-slate-800">
+            {categories.map((cat) => {
+              const isExpanded = expandedCategories[cat.id];
+              return (
+                <div key={cat.id}>
+                  <button
+                    onClick={() => toggleCategory(cat.id)}
+                    className="w-full px-5 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: cat.color }}
+                      />
+                      <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                        {cat.name}
+                      </span>
+                      <span className="text-[11px] text-gray-400 dark:text-slate-500">
+                        ({cat.subcategories.length})
+                      </span>
+                    </div>
+                    {isExpanded ? (
+                      <ChevronUp className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+                    )}
+                  </button>
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-5 pb-3 space-y-1">
+                          {cat.subcategories.map((sub) => {
+                            const isAdded = activities.some(
+                              (a) => a.subcategoryId === sub.id,
+                            );
+                            return (
+                              <button
+                                key={sub.id}
+                                onClick={() =>
+                                  !isAdded && addActivity(cat.id, sub.id)
+                                }
+                                disabled={isAdded}
+                                className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm flex items-center justify-between transition-all ${
+                                  isAdded
+                                    ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 cursor-default'
+                                    : 'hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-600 dark:text-slate-400'
+                                }`}
+                              >
+                                <span>{sub.name}</span>
+                                {isAdded ? (
+                                  <span className="text-[11px] font-medium text-teal-500">
+                                    Agregado
+                                  </span>
+                                ) : (
+                                  <Plus className="w-4 h-4 text-gray-300 dark:text-slate-600" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Current activities grouped by category */}
       {editable && Object.keys(activitiesByCategory).length === 0 && (
         <div className="mb-4 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800">
@@ -209,7 +310,7 @@ export default function PastorReportEditPage() {
             compact
             icon={Plus}
             title="Sin actividades aún"
-            description="Despliega las categorías a continuación para agregar actividades a este informe."
+            description="Selecciona las categorías de arriba para agregar actividades a este informe."
           />
         </div>
       )}
@@ -245,9 +346,14 @@ export default function PastorReportEditPage() {
                   );
                   if (!sub) return null;
                   const isTransport = act.categoryId === TRANSPORT_CATEGORY_ID;
+                  const isNew = newlyAddedId === act.subcategoryId;
 
                   return (
-                    <div key={act.subcategoryId} className="px-5 py-4">
+                    <div
+                      key={act.subcategoryId}
+                      ref={(el) => { activityRefs.current[act.subcategoryId] = el; }}
+                      className={`px-5 py-4 transition-colors duration-700 ${isNew ? 'bg-teal-50/80 dark:bg-teal-900/20' : ''}`}
+                    >
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -384,93 +490,6 @@ export default function PastorReportEditPage() {
           );
         })}
       </AnimatePresence>
-
-      {/* Add activity accordion */}
-      {editable && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 mb-4">
-          <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <div className="w-6 h-6 bg-teal-50 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
-                <Plus className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-              </div>
-              Agregar Actividad
-            </h3>
-          </div>
-          <div className="divide-y divide-gray-50 dark:divide-slate-800">
-            {categories.map((cat) => {
-              const isExpanded = expandedCategories[cat.id];
-              return (
-                <div key={cat.id}>
-                  <button
-                    onClick={() => toggleCategory(cat.id)}
-                    className="w-full px-5 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: cat.color }}
-                      />
-                      <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
-                        {cat.name}
-                      </span>
-                      <span className="text-[11px] text-gray-400 dark:text-slate-500">
-                        ({cat.subcategories.length})
-                      </span>
-                    </div>
-                    {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-gray-400 dark:text-slate-500" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-500" />
-                    )}
-                  </button>
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-5 pb-3 space-y-1">
-                          {cat.subcategories.map((sub) => {
-                            const isAdded = activities.some(
-                              (a) => a.subcategoryId === sub.id,
-                            );
-                            return (
-                              <button
-                                key={sub.id}
-                                onClick={() =>
-                                  !isAdded && addActivity(cat.id, sub.id)
-                                }
-                                disabled={isAdded}
-                                className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm flex items-center justify-between transition-all ${
-                                  isAdded
-                                    ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 cursor-default'
-                                    : 'hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-600 dark:text-slate-400'
-                                }`}
-                              >
-                                <span>{sub.name}</span>
-                                {isAdded ? (
-                                  <span className="text-[11px] font-medium text-teal-500">
-                                    Agregado
-                                  </span>
-                                ) : (
-                                  <Plus className="w-4 h-4 text-gray-300 dark:text-slate-600" />
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Observations */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 mb-5">
