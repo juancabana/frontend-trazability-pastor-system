@@ -59,3 +59,25 @@ html.dark body {
     scroll-padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Scrollbar sutil para listas internas (pastor list, recipient list, etc.) */
+.scroll-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+.scroll-subtle::-webkit-scrollbar {
+  width: 4px;
+}
+.scroll-subtle::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-subtle::-webkit-scrollbar-thumb {
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+}
+html.dark .scroll-subtle {
+  scrollbar-color: #334155 transparent;
+}
+html.dark .scroll-subtle::-webkit-scrollbar-thumb {
+  background-color: #334155;
+}
