@@ -3,22 +3,78 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Tema / PWA -->
     <meta name="theme-color" content="#f9fafb" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Trazabilidad Pastoral" />
+    <link rel="apple-touch-icon" href="/iasd-logo-ligth.png" />
+
+    <!-- Favicon & Manifest -->
     <link rel="icon" type="image/x-icon" href="/logo-blue.ico" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- SEO básico (react-helmet-async lo sobreescribe por ruta) -->
+    <title>Sistema de Trazabilidad Pastoral — IASD</title>
     <meta
       name="description"
-      content="Sistema de seguimiento de actividades pastorales. Registro diario de actividades ministeriales, consolidados mensuales y reportes por asociacion."
+      content="Plataforma para el registro y seguimiento de actividades diarias de pastores distritales en la Iglesia Adventista del Séptimo Día. Consolidados mensuales, reportes por asociación y gestión multi-unión."
     />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Iglesia Adventista del Séptimo Día" />
+    <meta name="keywords" content="trazabilidad pastoral, IASD, actividades pastorales, registro ministerial, iglesia adventista, reportes pastorales" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sistema de Trazabilidad Pastoral — IASD" />
+    <meta property="og:title" content="Sistema de Trazabilidad Pastoral — IASD" />
+    <meta
+      property="og:description"
+      content="Plataforma para el registro y seguimiento de actividades diarias de pastores distritales en la Iglesia Adventista del Séptimo Día."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Sistema de Trazabilidad Pastoral IASD" />
+    <meta property="og:locale" content="es_ES" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sistema de Trazabilidad Pastoral — IASD" />
+    <meta
+      name="twitter:description"
+      content="Plataforma para el registro y seguimiento de actividades diarias de pastores distritales en la Iglesia Adventista del Séptimo Día."
+    />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <!-- Fuentes: precarga para eliminar FOUT -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>Pastor Activity Tracking — Sistema de Seguimiento Pastoral</title>
+
+    <!-- JSON-LD: WebSite Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Sistema de Trazabilidad Pastoral IASD",
+      "description": "Plataforma para el registro y seguimiento de actividades diarias de pastores distritales en la Iglesia Adventista del Séptimo Día.",
+      "inLanguage": "es",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Iglesia Adventista del Séptimo Día",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "/iasd-logo-ligth.png"
+        }
+      }
+    }
+    </script>
   </head>
   <body class="font-sans antialiased bg-gray-50 dark:bg-slate-950">
     <div id="root"></div>

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { SEO } from '@/shared/presentation/SEO';
 import { usePastorConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { exportPastorPDF, exportPastorExcel } from '@/lib/export-utils';
@@ -112,6 +113,7 @@ export default function PastorConsolidatedPage() {
 
   return (
     <div className="max-w-[900px] mx-auto">
+      <SEO title="Mi Consolidado" noIndex />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 gap-3">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">

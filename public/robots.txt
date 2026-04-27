@@ -1,0 +1,15 @@
+User-agent: *
+
+# Permitir la página de inicio de sesión (única página pública)
+Allow: /login
+
+# Bloquear rutas protegidas del dashboard
+Disallow: /admin/
+Disallow: /pastor/
+Disallow: /super-admin/
+Disallow: /change-password
+
+# Bloquear activos de build de Vite
+Disallow: /assets/
+
+Sitemap: https://trazabilidad-pastoral.vercel.app/sitemap.xml

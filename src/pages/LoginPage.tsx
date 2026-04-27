@@ -12,6 +12,23 @@ import {
 import { motion } from 'motion/react';
 import { useAuth } from '@/context/AuthContext';
 import { getRoleRedirect } from '@/components/ProtectedRoute';
+import { SEO } from '@/shared/presentation/SEO';
+
+const LOGIN_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Sistema de Trazabilidad Pastoral IASD',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  inLanguage: 'es',
+  description:
+    'Plataforma para el registro y seguimiento de actividades diarias de pastores distritales en la Iglesia Adventista del Séptimo Día.',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Iglesia Adventista del Séptimo Día',
+  },
+};
 
 export default function LoginPage() {
   const { login, isAuthenticated, role } = useAuth();
@@ -68,6 +85,13 @@ export default function LoginPage() {
   };
 
   return (
+    <>
+      <SEO
+        title="Iniciar Sesión"
+        description="Accede al Sistema de Trazabilidad Pastoral de la Iglesia Adventista del Séptimo Día. Registro y seguimiento de actividades ministeriales."
+        canonicalPath="/login"
+        jsonLd={LOGIN_JSON_LD}
+      />
     <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950">
       {/* Left panel - desktop only */}
       <div className="hidden lg:flex lg:w-[48%] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex-col justify-between p-12 relative overflow-hidden">
@@ -150,7 +174,16 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-10 text-[11px] text-white/20">
-            &copy; {new Date().getFullYear()} Iglesia Adventista del Séptimo Día
+            <span>&copy; {new Date().getFullYear()} Iglesia Adventista del Séptimo Día</span>
+            <span className="block mt-1">
+              Desarrollado por{' '}
+              <a
+                href="mailto:juandaka78@gmail.com"
+                className="text-white/40 hover:text-white/70 transition-colors duration-200"
+              >
+                Juan Cabana
+              </a>
+            </span>
           </div>
         </motion.div>
       </div>
@@ -264,9 +297,20 @@ export default function LoginPage() {
             <QuickAccessDemo onAccess={handleQuickAccess} submitting={submitting} />
           )}
 
+          <p className="mt-8 text-center text-[11px] text-gray-400/70 dark:text-slate-600">
+            Desarrollado por{' '}
+            <a
+              href="mailto:juandaka78@gmail.com"
+              className="text-gray-500 dark:text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors duration-200"
+            >
+              Juan Cabana
+            </a>
+          </p>
+
         </motion.div>
       </div>
     </div>
+    </>
   );
 }
 

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminRecipients } from '@/features/consolidated/hooks/use-admin-recipients';
+import { SEO } from '@/shared/presentation/SEO';
 import { useExtraRecipients } from '@/features/association/hooks/use-extra-recipients';
 import { useSendReport } from '@/features/consolidated/hooks/use-send-report';
 import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
@@ -178,6 +179,7 @@ export default function AdminSendReportPage() {
 
   return (
     <div className="max-w-[680px] mx-auto">
+      <SEO title="Enviar Reporte" noIndex />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
         <div>

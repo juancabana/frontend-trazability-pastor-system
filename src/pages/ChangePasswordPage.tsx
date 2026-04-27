@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/context/AuthContext';
 import { useChangeOwnPassword } from '@/features/auth/presentation/hooks/use-auth-mutations';
 import { getRoleRedirect } from '@/components/ProtectedRoute';
+import { SEO } from '@/shared/presentation/SEO';
 
 interface StrengthRule {
   label: string;
@@ -73,6 +74,12 @@ export default function ChangePasswordPage() {
   };
 
   return (
+    <>
+      <SEO
+        title="Cambiar Contraseña"
+        description="Establece tu contraseña personal para acceder al sistema de trazabilidad pastoral."
+        noIndex
+      />
     <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950">
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-[48%] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex-col justify-between p-12 relative overflow-hidden">
@@ -366,5 +373,6 @@ export default function ChangePasswordPage() {
         </motion.div>
       </div>
     </div>
+    </>
   );
 }

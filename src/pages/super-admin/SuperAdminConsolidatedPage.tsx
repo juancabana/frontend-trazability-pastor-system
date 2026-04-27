@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { SEO } from '@/shared/presentation/SEO';
 import { useUnionConsolidated } from '@/features/consolidated/presentation/hooks/use-consolidated-queries';
 import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import { Tooltip } from '@/components/atoms/Tooltip';
@@ -62,6 +63,7 @@ export default function SuperAdminConsolidatedPage() {
 
   return (
     <div className="max-w-[1000px] mx-auto">
+      <SEO title="Consolidado Global" noIndex />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 gap-3">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
+import { SEO } from '@/shared/presentation/SEO';
 import { useReportsByPastorMonth } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { formatMonthYear } from '@/lib/format-date';
 import { startOfCurrentMonthBogota } from '@/lib/bogota-time';
@@ -65,6 +66,7 @@ export default function SuperAdminPastorReportsPage() {
 
   return (
     <div className="max-w-[1000px] mx-auto">
+      <SEO title="Reportes del Pastor" noIndex />
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <button

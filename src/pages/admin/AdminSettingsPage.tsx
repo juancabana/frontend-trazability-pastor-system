@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { SEO } from '@/shared/presentation/SEO';
 import {
   Settings,
   Info,
@@ -124,6 +125,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl mx-auto space-y-6">
+      <SEO title="Configuración" noIndex />
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
