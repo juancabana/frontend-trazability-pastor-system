@@ -102,7 +102,7 @@ export default function PastorReportEditPage() {
         description: '',
         quantity: 1,
         hours: sub.hasHours ? 1 : undefined,
-        amount: isTransport ? 0 : undefined,
+        amount: isTransport ? undefined : undefined,
       },
     ]);
     setNewlyAddedId(subcategoryId);
@@ -446,7 +446,7 @@ export default function PastorReportEditPage() {
                                   type="number"
                                   min="0"
                                   step="100"
-                                  value={act.amount || 0}
+                                  value={act.amount ?? ''}
                                   onChange={(e) =>
                                     updateActivity(
                                       act.subcategoryId,
