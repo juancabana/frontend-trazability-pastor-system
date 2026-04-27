@@ -22,7 +22,7 @@ export const SIDEBAR_NAV = {
     },
   ],
   admin: [
-    { label: 'Dashboard', href: '/admin', icon: 'LayoutDashboard' },
+    { label: 'Panel', href: '/admin', icon: 'LayoutDashboard' },
     { label: 'Pastores', href: '/admin/pastores', icon: 'Users' },
     {
       label: 'Consolidado',

@@ -28,7 +28,7 @@ const ROLE_ACCENT = {
     badge: 'bg-purple-600',
     text: 'text-purple-600 dark:text-purple-400',
     indicator: 'bg-purple-600 dark:bg-purple-400',
-    label: 'Super Admin',
+    label: 'Súper Administrador',
   },
   admin: {
     active: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
@@ -216,7 +216,7 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
         {/* Nav */}
         <nav className="flex-1 min-h-0 overflow-y-auto px-3 space-y-1">
           <p className="text-[10px] font-semibold text-gray-400 dark:text-slate-600 uppercase tracking-wider px-3 mb-2">
-            Menu
+            Menú
           </p>
           {items.map((item) => (
             <Link

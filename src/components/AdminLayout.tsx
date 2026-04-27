@@ -3,7 +3,7 @@ import { SidebarLayout } from './SidebarLayout';
 import { useFeatureFlags } from '@/features/config/hooks/use-business-config';
 
 const ADMIN_NAV = [
-  { label: 'Dashboard', href: '/admin', icon: <LayoutDashboard className="w-4 h-4" /> },
+  { label: 'Panel', href: '/admin', icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: 'Pastores', href: '/admin/pastores', icon: <Users className="w-4 h-4" /> },
   { label: 'Distritos', href: '/admin/distritos', icon: <MapPin className="w-4 h-4" /> },
   {
