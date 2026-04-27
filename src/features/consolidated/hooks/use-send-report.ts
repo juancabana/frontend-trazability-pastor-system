@@ -23,6 +23,8 @@ export const useSendReport = () => {
 
       for (let i = 0; i < recipients.length; i++) {
         const r = recipients[i];
+        // Actualizar antes de enviar para que el dialogo muestre el destinatario activo
+        setProgress({ status: 'sending', current: i, total: recipients.length, failed: [...failed] });
         try {
           await repo.sendReport(token, {
             ...base,
@@ -33,7 +35,6 @@ export const useSendReport = () => {
         } catch {
           failed.push(r.email);
         }
-        setProgress({ status: 'sending', current: i + 1, total: recipients.length, failed: [...failed] });
       }
 
       setProgress({ status: 'done', current: recipients.length - failed.length, total: recipients.length, failed });

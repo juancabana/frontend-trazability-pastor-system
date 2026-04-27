@@ -24,6 +24,11 @@ export function formatDateShort(dateStr: string): string {
   return `${d.getDate()} ${MONTHS_ES[d.getMonth()].substring(0, 3)}`;
 }
 
+function safeDate(year: number, month: number, day: number): Date {
+  const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+  return new Date(year, month, Math.min(day, lastDayOfMonth));
+}
+
 export function getCurrentPeriod(
   deadlineDay: number,
   referenceDate?: Date,
@@ -35,13 +40,13 @@ export function getCurrentPeriod(
 
   if (day <= deadlineDay) {
     return {
-      start: new Date(year, month - 1, deadlineDay + 1),
-      end: new Date(year, month, deadlineDay),
+      start: safeDate(year, month - 1, deadlineDay + 1),
+      end: safeDate(year, month, deadlineDay),
     };
   } else {
     return {
-      start: new Date(year, month, deadlineDay + 1),
-      end: new Date(year, month + 1, deadlineDay),
+      start: safeDate(year, month, deadlineDay + 1),
+      end: safeDate(year, month + 1, deadlineDay),
     };
   }
 }
@@ -57,7 +62,6 @@ export function isDateEditable(date: Date, deadlineDay: number): boolean {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   if (d > today) return false;
-  if (d.getTime() === today.getTime()) return true;
 
   const period = getCurrentPeriod(deadlineDay);
   return d >= period.start && d <= period.end;
