@@ -10,6 +10,10 @@ export const API_ENDPOINTS = {
     LIST: '/associations',
     BY_ID: (id: string) => `/associations/${id}`,
     MY_DEADLINE: '/associations/my/deadline',
+    EXTRA_RECIPIENTS: (assocId: string) =>
+      `/associations/${assocId}/extra-recipients`,
+    EXTRA_RECIPIENT_BY_ID: (assocId: string, rid: string) =>
+      `/associations/${assocId}/extra-recipients/${rid}`,
   },
   DISTRICTS: {
     LIST: '/districts',

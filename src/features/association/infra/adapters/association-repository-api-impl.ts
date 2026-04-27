@@ -1,6 +1,6 @@
 import type { HttpGateway } from '@/shared/domain/gateways/http-gateway';
 import type { AssociationRepository } from '../../domain/gateways/association-repository';
-import type { Association } from '../../domain/entities/association';
+import type { Association, ExtraRecipient, AddExtraRecipientRequest } from '../../domain/entities/association';
 import { API_ENDPOINTS } from '@/constants/api';
 
 export class AssociationRepositoryApiImpl implements AssociationRepository {
@@ -18,6 +18,36 @@ export class AssociationRepositoryApiImpl implements AssociationRepository {
     return this.http.patch<Association>(
       API_ENDPOINTS.ASSOCIATIONS.MY_DEADLINE,
       { reportDeadlineDay: day },
+      token,
+    );
+  }
+
+  getExtraRecipients(token: string, associationId: string): Promise<ExtraRecipient[]> {
+    return this.http.get<ExtraRecipient[]>(
+      API_ENDPOINTS.ASSOCIATIONS.EXTRA_RECIPIENTS(associationId),
+      token,
+    );
+  }
+
+  addExtraRecipient(
+    token: string,
+    associationId: string,
+    data: AddExtraRecipientRequest,
+  ): Promise<ExtraRecipient> {
+    return this.http.post<ExtraRecipient>(
+      API_ENDPOINTS.ASSOCIATIONS.EXTRA_RECIPIENTS(associationId),
+      data,
+      token,
+    );
+  }
+
+  removeExtraRecipient(
+    token: string,
+    associationId: string,
+    recipientId: string,
+  ): Promise<void> {
+    return this.http.delete(
+      API_ENDPOINTS.ASSOCIATIONS.EXTRA_RECIPIENT_BY_ID(associationId, recipientId),
       token,
     );
   }

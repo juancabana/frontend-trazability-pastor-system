@@ -7,3 +7,16 @@ export interface Association {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ExtraRecipient {
+  id: string;
+  associationId: string;
+  email: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface AddExtraRecipientRequest {
+  email: string;
+  name: string;
+}
