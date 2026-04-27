@@ -12,6 +12,13 @@ export const COMPLIANCE_THRESHOLD = 70;
 // del servidor no incluye ese campo.
 export const DEFAULT_REPORT_DEADLINE_DAY = 19;
 
+// Rango permitido para el día de cierre. El máximo es 27: el inicio del
+// periodo es deadlineDay + 1, y el día 28 existe en todos los meses
+// (incluido febrero). Con 28 el inicio sería el 29, que no existe en febrero
+// de años no bisiestos. Debe coincidir con MAX_REPORT_DEADLINE_DAY del backend.
+export const MIN_REPORT_DEADLINE_DAY = 1;
+export const MAX_REPORT_DEADLINE_DAY = 27;
+
 // Etiqueta de posición principal de pastor. Se usa para distinguir visualmente
 // entre "Pastor" titular y otras posiciones (e.g. "Anciano").
 export const PASTOR_POSITION_LABEL = 'Pastor';
