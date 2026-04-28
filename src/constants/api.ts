@@ -52,4 +52,7 @@ export const API_ENDPOINTS = {
     LIST: '/churches',
     BY_ID: (id: string) => `/churches/${id}`,
   },
+  AUDIT_LOGS: {
+    LIST: '/audit-logs',
+  },
 } as const;

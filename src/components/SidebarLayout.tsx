@@ -51,6 +51,13 @@ const ROLE_ACCENT = {
     indicator: 'bg-teal-600 dark:bg-teal-400',
     label: 'Pastor',
   },
+  owner: {
+    active: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    badge: 'bg-amber-600',
+    text: 'text-amber-600 dark:text-amber-400',
+    indicator: 'bg-amber-600 dark:bg-amber-400',
+    label: 'Owner',
+  },
 };
 
 export function SidebarLayout({ items }: SidebarLayoutProps) {
@@ -82,13 +89,16 @@ export function SidebarLayout({ items }: SidebarLayoutProps) {
   const logoSrc = resolvedTheme === 'dark' ? '/iasd-logo-dark.png' : '/iasd-logo-ligth.png';
 
   const isActive = (href: string) => {
-    if (href === '/pastor' || href === '/admin' || href === '/super-admin') return pathname === href;
+    if (href === '/pastor' || href === '/admin' || href === '/super-admin' || href === '/owner') return pathname === href;
     return pathname.startsWith(href);
   };
 
-  const orgName = currentUser?.role === 'super_admin'
-    ? (currentUser?.unionName || 'Unión')
-    : (currentUser?.associationName || 'Asociación');
+  const orgName =
+    currentUser?.role === 'owner'
+      ? 'Sistema'
+      : currentUser?.role === 'super_admin'
+        ? (currentUser?.unionName || 'Unión')
+        : (currentUser?.associationName || 'Asociación');
 
   return (
     <div className="h-lvh flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
