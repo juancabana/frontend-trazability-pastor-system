@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AdminLayout } from '@/components/AdminLayout';
 import { PastorLayout } from '@/components/PastorLayout';
 import { SuperAdminLayout } from '@/components/SuperAdminLayout';
+import { OwnerLayout } from '@/components/OwnerLayout';
 import { PageLoader } from '@/components/atoms/PageLoader';
 
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
@@ -26,6 +27,7 @@ const SuperAdminAssociationsPage = lazy(() => import('@/pages/super-admin/SuperA
 const SuperAdminAssociationDetailPage = lazy(() => import('@/pages/super-admin/SuperAdminAssociationDetailPage'));
 const SuperAdminConsolidatedPage = lazy(() => import('@/pages/super-admin/SuperAdminConsolidatedPage'));
 const SuperAdminPastorReportsPage = lazy(() => import('@/pages/super-admin/SuperAdminPastorReportsPage'));
+const OwnerAuditLogsPage = lazy(() => import('@/pages/owner/OwnerAuditLogsPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 export function AppRoutes() {
@@ -86,6 +88,18 @@ export function AppRoutes() {
         <Route path="consolidated" element={<SuperAdminConsolidatedPage />} />
         <Route path="pastor/:pastorId" element={<SuperAdminPastorReportsPage />} />
         <Route path="pastor/:pastorId/report/:date" element={<AdminReportDetailPage />} />
+      </Route>
+
+      <Route
+        path="/owner"
+        element={
+          <ProtectedRoute roles={['owner']}>
+            <OwnerLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="audit-logs" replace />} />
+        <Route path="audit-logs" element={<OwnerAuditLogsPage />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />

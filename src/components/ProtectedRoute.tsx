@@ -9,6 +9,8 @@ interface ProtectedRouteProps {
 
 export function getRoleRedirect(role: UserRole | null): string {
   switch (role) {
+    case 'owner':
+      return '/owner';
     case 'super_admin':
       return '/super-admin';
     case 'admin':

@@ -1,4 +1,4 @@
-export type UserRole = 'pastor' | 'admin_readonly' | 'admin' | 'super_admin';
+export type UserRole = 'pastor' | 'admin_readonly' | 'admin' | 'super_admin' | 'owner';
 
 export const ROLE_CONFIG: Record<
   UserRole,
@@ -8,6 +8,7 @@ export const ROLE_CONFIG: Record<
   admin_readonly: { label: 'Administrador Lector', color: 'text-sky-700', bg: 'bg-sky-100' },
   admin: { label: 'Administrador', color: 'text-indigo-700', bg: 'bg-indigo-100' },
   super_admin: { label: 'Súper Administrador', color: 'text-purple-700', bg: 'bg-purple-100' },
+  owner: { label: 'Owner', color: 'text-amber-700', bg: 'bg-amber-100' },
 };
 
 export const ROLE_ACCESS: Record<UserRole, string[]> = {
@@ -15,4 +16,5 @@ export const ROLE_ACCESS: Record<UserRole, string[]> = {
   admin_readonly: ['dashboard', 'pastores', 'reports', 'consolidated', 'usuarios', 'distritos'],
   admin: ['dashboard', 'pastores', 'reports', 'consolidated', 'usuarios', 'distritos', 'send_report', 'configuracion'],
   super_admin: ['dashboard', 'associations', 'consolidated', 'pastores', 'reports'],
+  owner: ['audit_logs'],
 };
