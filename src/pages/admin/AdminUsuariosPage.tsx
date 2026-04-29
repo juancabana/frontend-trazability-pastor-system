@@ -83,7 +83,7 @@ export default function AdminUsuariosPage() {
       toast.error('El nombre es requerido');
       return;
     }
-    if (!editingUser && !formEmail.trim()) {
+    if (!formEmail.trim()) {
       toast.error('El email es requerido');
       return;
     }
@@ -98,6 +98,7 @@ export default function AdminUsuariosPage() {
           id: editingUser.id,
           data: {
             name: formName || undefined,
+            email: formEmail !== editingUser.email ? formEmail || undefined : undefined,
             password: formPassword || undefined,
             role: formRole,
             districtId: formDistrictId || undefined,
@@ -289,19 +290,17 @@ export default function AdminUsuariosPage() {
                   className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none dark:text-white"
                 />
               </div>
-              {!editingUser && (
-                <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formEmail}
-                    onChange={(e) => setFormEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none dark:text-white"
-                  />
-                </div>
-              )}
+              <div>
+                <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={formEmail}
+                  onChange={(e) => setFormEmail(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none dark:text-white"
+                />
+              </div>
               <div>
                 <label className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 block">
                   {editingUser ? 'Nueva contraseña (dejar vacío para no cambiar)' : 'Contraseña'}
