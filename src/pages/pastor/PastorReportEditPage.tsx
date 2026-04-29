@@ -141,7 +141,6 @@ export default function PastorReportEditPage() {
       });
       initialSnapshot.current = JSON.stringify({ activities, observations });
       toast.success('Informe guardado correctamente');
-      navigate('/pastor');
     } catch {
       toast.error('Error al guardar el informe');
     }
