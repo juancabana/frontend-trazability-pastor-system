@@ -20,9 +20,14 @@ class FetchHttpAdapter implements HttpGateway {
     url: string,
   ): Promise<T> {
     if (response.status === 401) {
-      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
-      window.location.href = '/login';
+      // Si el 401 viene del endpoint de login, es credenciales incorrectas,
+      // no sesión expirada — dejar que el caller lo maneje sin recargar.
+      const isLoginEndpoint = url.includes('/auth/login');
+      if (!isLoginEndpoint) {
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+        window.location.href = '/login';
+      }
       throw new Error('Sesión expirada');
     }
     if (!response.ok) {
