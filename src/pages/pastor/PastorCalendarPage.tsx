@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { SEO } from '@/shared/presentation/SEO';
@@ -21,6 +21,7 @@ import {
   Plus,
   CalendarX2,
   ShieldCheck,
+  AlertCircle,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Skeleton, StatsGridSkeleton } from '@/components/atoms/Skeleton';
@@ -36,6 +37,22 @@ export default function PastorCalendarPage() {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const deadlineDay = currentUser?.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY;
+
+  // Scan localStorage for pending (unsaved) drafts belonging to this user
+  const [pendingDraftDates, setPendingDraftDates] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    const prefix = `draft:report:${currentUser.id}:`;
+    const dates: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith(prefix)) {
+        dates.push(key.slice(prefix.length));
+      }
+    }
+    setPendingDraftDates(dates);
+  }, [currentUser?.id]);
 
   const { data: monthReports = [], isLoading: loadingMonth } = useReportsByPastorMonth(
     token ?? '',
@@ -148,6 +165,38 @@ export default function PastorCalendarPage() {
   return (
     <div className="max-w-[1100px] mx-auto">
       <SEO title="Mi Calendario" noIndex />
+
+      {/* Pending drafts notification */}
+      {pendingDraftDates.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl p-4 mb-4 flex items-start gap-3 border bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
+        >
+          <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center shrink-0">
+            <AlertCircle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">
+              {pendingDraftDates.length === 1
+                ? 'Tienes 1 informe con cambios sin guardar'
+                : `Tienes ${pendingDraftDates.length} informes con cambios sin guardar`}
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {pendingDraftDates.map((d) => (
+                <button
+                  key={d}
+                  onClick={() => navigate(`/pastor/report/${d}/edit`)}
+                  className="px-2.5 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 rounded-lg text-xs font-medium hover:bg-orange-200 dark:hover:bg-orange-900/60 transition-colors"
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Period banner */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
