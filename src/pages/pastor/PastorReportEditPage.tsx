@@ -19,6 +19,9 @@ import {
   Trash2,
   Save,
   Lock,
+  WifiOff,
+  RotateCcw,
+  X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -56,6 +59,38 @@ export default function PastorReportEditPage() {
   const lastSyncedAt = useRef<string>('');
   const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Draft persistence key — scoped to user + date to avoid cross-user leaks
+  const draftKey =
+    currentUser?.id && date ? `draft:report:${currentUser.id}:${date}` : null;
+
+  // Online / offline detection
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const wasOffline = useRef(false);
+
+  useEffect(() => {
+    const goOnline = () => {
+      setIsOnline(true);
+      if (wasOffline.current) {
+        wasOffline.current = false;
+        toast.info('Conexión restaurada. Recuerda guardar tus cambios.');
+      }
+    };
+    const goOffline = () => {
+      setIsOnline(false);
+      wasOffline.current = true;
+    };
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+  }, []);
+
+  // Draft recovery banner state
+  const [showDraftBanner, setShowDraftBanner] = useState(false);
+  const draftChecked = useRef(false);
+
   useEffect(() => {
     if (existingReport) {
       const updatedAt = existingReport.updatedAt ?? existingReport.createdAt ?? '';
@@ -75,6 +110,63 @@ export default function PastorReportEditPage() {
     const current = JSON.stringify({ activities, observations });
     return current !== initialSnapshot.current;
   }, [activities, observations]);
+
+  // Warn browser before closing/refreshing with unsaved changes
+  useEffect(() => {
+    if (!hasChanges) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [hasChanges]);
+
+  // Auto-save draft to localStorage whenever there are unsaved changes.
+  // Guard: only run after the initial load + draft-check are done (draftChecked.current).
+  // Without this guard the effect fires on the very first render with initialSnapshot=''
+  // which makes hasChanges=true and immediately overwrites any real draft with empty data.
+  useEffect(() => {
+    if (!draftChecked.current || !draftKey || !editable) return;
+    if (hasChanges) {
+      localStorage.setItem(draftKey, JSON.stringify({ activities, observations }));
+    } else {
+      localStorage.removeItem(draftKey);
+    }
+  }, [activities, observations, hasChanges, draftKey, editable]);
+
+  // Restore draft automatically once server data has finished loading.
+  // This effect runs after the existingReport effect (defined above), so the
+  // draft data will overwrite the server data that was just applied to state.
+  useEffect(() => {
+    if (draftChecked.current || !draftKey || !editable || loadingReport) return;
+    draftChecked.current = true;
+
+    const raw = localStorage.getItem(draftKey);
+    if (!raw) return;
+
+    try {
+      const draft = JSON.parse(raw) as { activities: ActivityEntry[]; observations: string };
+      const serverSnapshot = JSON.stringify({
+        activities: existingReport?.activities || [],
+        observations: existingReport?.observations || '',
+      });
+      const draftSnapshot = JSON.stringify({
+        activities: draft.activities,
+        observations: draft.observations,
+      });
+
+      if (draftSnapshot !== serverSnapshot) {
+        // Apply the draft immediately — user gets their work back without any click
+        setActivities(draft.activities);
+        setObservations(draft.observations);
+        setShowDraftBanner(true);
+      } else {
+        localStorage.removeItem(draftKey);
+      }
+    } catch {
+      localStorage.removeItem(draftKey);
+    }
+  }, [loadingReport, draftKey, editable, existingReport]);
 
   useEffect(() => {
     if (isFuture) navigate('/pastor', { replace: true });
@@ -140,11 +232,21 @@ export default function PastorReportEditPage() {
         data: { date, activities, observations: observations || undefined },
       });
       initialSnapshot.current = JSON.stringify({ activities, observations });
+      if (draftKey) localStorage.removeItem(draftKey);
+      setShowDraftBanner(false);
       toast.success('Informe guardado correctamente');
     } catch {
       toast.error('Error al guardar el informe');
     }
     setSaving(false);
+  };
+
+  const discardDraft = () => {
+    if (draftKey) localStorage.removeItem(draftKey);
+    // Reset to whatever the server last returned
+    setActivities(existingReport?.activities || []);
+    setObservations(existingReport?.observations || '');
+    setShowDraftBanner(false);
   };
 
   const handleDelete = async () => {
@@ -212,6 +314,50 @@ export default function PastorReportEditPage() {
             <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Solo lectura</p>
             <p className="text-xs text-amber-600 dark:text-amber-400">Periodo cerrado.</p>
           </div>
+        </div>
+      )}
+
+      {/* Offline banner */}
+      {!isOnline && (
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-2xl p-4 mb-5 flex items-center gap-3">
+          <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center shrink-0">
+            <WifiOff className="w-4 h-4 text-red-600 dark:text-red-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-red-800 dark:text-red-300">Sin conexión a internet</p>
+            <p className="text-xs text-red-600 dark:text-red-400">
+              Tus cambios se guardan localmente. Podrás enviarlos cuando recuperes la conexión.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Restored draft notification */}
+      {showDraftBanner && editable && (
+        <div className="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-4 mb-5 flex items-start gap-3">
+          <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+            <RotateCcw className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-indigo-800 dark:text-indigo-300">
+              Se recuperaron cambios no guardados
+            </p>
+            <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-0.5">
+              El informe muestra la información que ingresaste en tu sesión anterior. Guarda para conservarla.
+            </p>
+            <button
+              onClick={discardDraft}
+              className="mt-2 px-3.5 py-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 rounded-lg text-xs font-medium transition-colors"
+            >
+              Descartar borrador
+            </button>
+          </div>
+          <button
+            onClick={() => setShowDraftBanner(false)}
+            className="text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -525,19 +671,21 @@ export default function PastorReportEditPage() {
             content={
               saving
                 ? 'Guardando...'
-                : !hasChanges
-                  ? 'No hay cambios para guardar'
-                  : false
+                : !isOnline
+                  ? 'Sin conexión — tus cambios están guardados localmente'
+                  : !hasChanges
+                    ? 'No hay cambios para guardar'
+                    : false
             }
             side="top"
           >
           <button
             onClick={handleSave}
-            disabled={saving || !hasChanges}
+            disabled={saving || !hasChanges || !isOnline}
             className="px-6 py-3 bg-linear-to-r from-teal-600 to-teal-700 text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:shadow-lg hover:shadow-teal-600/20 transition-all disabled:opacity-50 active:scale-[0.98]"
           >
-            <Save className="w-4 h-4" />
-            {saving ? 'Guardando...' : 'Guardar Cambios'}
+            {!isOnline ? <WifiOff className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {saving ? 'Guardando...' : !isOnline ? 'Sin conexión' : 'Guardar Cambios'}
           </button>
           </Tooltip>
         </div>
