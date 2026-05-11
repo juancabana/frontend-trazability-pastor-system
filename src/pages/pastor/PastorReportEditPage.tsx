@@ -390,7 +390,7 @@ export default function PastorReportEditPage() {
                         {cat.name}
                       </span>
                       <span className="text-[11px] text-gray-400 dark:text-slate-500">
-                        ({cat.subcategories.length})
+                        ({cat.subcategories.filter((s) => s.isActive !== false).length})
                       </span>
                     </div>
                     {isExpanded ? (
@@ -409,7 +409,7 @@ export default function PastorReportEditPage() {
                         className="overflow-hidden"
                       >
                         <div className="px-5 pb-3 space-y-1">
-                          {cat.subcategories.map((sub) => {
+                          {cat.subcategories.filter((s) => s.isActive !== false).map((sub) => {
                             const isAdded = activities.some(
                               (a) => a.subcategoryId === sub.id,
                             );
