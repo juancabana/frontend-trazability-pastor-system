@@ -18,6 +18,7 @@ const AdminReportDetailPage = lazy(() => import('@/pages/admin/AdminReportDetail
 const AdminDistritosPage = lazy(() => import('@/pages/admin/AdminDistritosPage'));
 const AdminSendReportPage = lazy(() => import('@/pages/admin/AdminSendReportPage'));
 const AdminSettingsPage = lazy(() => import('@/pages/admin/AdminSettingsPage'));
+const AdminPescaRubricasPage = lazy(() => import('@/pages/admin/AdminPescaRubricasPage'));
 const PastorCalendarPage = lazy(() => import('@/pages/pastor/PastorCalendarPage'));
 const PastorConsolidatedPage = lazy(() => import('@/pages/pastor/PastorConsolidatedPage'));
 const PastorReportDetailPage = lazy(() => import('@/pages/pastor/PastorReportDetailPage'));
@@ -53,6 +54,7 @@ export function AppRoutes() {
         <Route path="usuarios" element={<AdminUsuariosPage />} />
         <Route path="send-report" element={<AdminSendReportPage />} />
         <Route path="configuracion" element={<AdminSettingsPage />} />
+        <Route path="rubricas-pescar" element={<AdminPescaRubricasPage />} />
         <Route path="pastor/:pastorId" element={<AdminPastorReportsPage />} />
         <Route
           path="pastor/:pastorId/report/:date"

@@ -1,9 +1,12 @@
+export type SubCategoryUnit = 'cantidad' | 'horas' | 'veces' | 'dias' | 'noches';
+
 export interface SubCategory {
   id: string;
   name: string;
-  unit: string;
+  unit: SubCategoryUnit;
   hasHours: boolean;
   description?: string;
+  isActive: boolean;
 }
 
 export interface ActivityCategory {

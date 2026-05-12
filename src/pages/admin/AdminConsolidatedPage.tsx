@@ -7,7 +7,7 @@ import { useActivityCategories } from '@/features/activity-category/presentation
 import { ConsolidatedRepositoryApiImpl } from '@/features/consolidated/infra/adapters/consolidated-repository-api-impl';
 import { httpAdapter } from '@/shared/infra/adapters/fetch-http-adapter';
 import { exportConsolidatedPDF, exportConsolidatedExcel } from '@/lib/export-utils';
-import { UNIT_LABELS, PASTOR_POSITION_LABEL } from '@/constants/shared';
+import { UNIT_LABELS, PASTOR_POSITION_LABEL, TRANSPORT_CATEGORY_ID, CURRENCY_CONFIG } from '@/constants/shared';
 import { useComplianceThresholds } from '@/features/config/hooks/use-business-config';
 import { Tooltip } from '@/components/atoms/Tooltip';
 import { EmptyState } from '@/components/atoms/EmptyState';
@@ -29,6 +29,7 @@ import {
   X,
   Check,
   Loader2,
+  Truck,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -58,6 +59,29 @@ export default function AdminConsolidatedPage() {
   );
 
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+
+  // Separar transporte del resto para escalar las barras PESCAR correctamente
+  const pescaCats = useMemo(
+    () => (consolidated?.categories ?? []).filter((c) => c.categoryId !== TRANSPORT_CATEGORY_ID),
+    [consolidated],
+  );
+  const transportCat = useMemo(
+    () => (consolidated?.categories ?? []).find((c) => c.categoryId === TRANSPORT_CATEGORY_ID),
+    [consolidated],
+  );
+  const maxPescaQty = useMemo(() => {
+    const qtys = pescaCats.map((c) =>
+      (c.subcategories ?? []).reduce((s, sub) => s + sub.totalQuantity, 0),
+    );
+    return Math.max(...qtys, 1);
+  }, [pescaCats]);
+
+  const formatCOP = (amount: number) =>
+    new Intl.NumberFormat(CURRENCY_CONFIG.LOCALE, {
+      style: 'currency',
+      currency: CURRENCY_CONFIG.CURRENCY,
+      minimumFractionDigits: CURRENCY_CONFIG.MINIMUM_FRACTION_DIGITS,
+    }).format(amount);
 
   // Reset selection when panel closes or period changes
   useEffect(() => {
@@ -375,13 +399,14 @@ export default function AdminConsolidatedPage() {
         </div>
       )}
 
-      {/* Categories breakdown */}
-      {consolidated?.categories?.map((cat) => {
+      {/* Rubros PESCAR (sin transporte) */}
+      {pescaCats.map((cat) => {
         const isExpanded = expandedCategories[cat.categoryId] !== false;
         const subs = Array.isArray(cat.subcategories) ? cat.subcategories : [];
         const totalQty = subs.reduce((s, sub) => s + sub.totalQuantity, 0);
         const totalHrs = subs.reduce((s, sub) => s + sub.totalHours, 0);
         const activeSubs = subs.filter((s) => s.totalQuantity > 0).length;
+        const barPct = Math.min((totalQty / maxPescaQty) * 100, 100);
 
         if (totalQty === 0) return null;
 
@@ -397,16 +422,31 @@ export default function AdminConsolidatedPage() {
                   [cat.categoryId]: p[cat.categoryId] === false,
                 }))
               }
-              className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+              className="w-full px-5 pt-4 pb-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
-                <div className="text-left">
+                <div className="text-left flex-1 min-w-0">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{cat.categoryName}</h3>
-                  <p className="text-[11px] text-gray-400 dark:text-slate-500">{totalQty} total · {activeSubs} activas</p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ backgroundColor: cat.color }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${barPct}%` }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-gray-400 dark:text-slate-500 shrink-0">
+                      {totalQty} · {activeSubs} act.
+                    </span>
+                  </div>
                 </div>
               </div>
-              {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400 dark:text-slate-500" /> : <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-500" />}
+              <div className="ml-3 shrink-0">
+                {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400 dark:text-slate-500" /> : <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-500" />}
+              </div>
             </button>
 
             <AnimatePresence>
@@ -473,6 +513,141 @@ export default function AdminConsolidatedPage() {
           </div>
         );
       })}
+
+      {/* Transporte — tarjeta independiente con métricas monetarias */}
+      {transportCat && (() => {
+        const subs = Array.isArray(transportCat.subcategories) ? transportCat.subcategories : [];
+        const totalQty = subs.reduce((s, sub) => s + sub.totalQuantity, 0);
+        const totalHrs = subs.reduce((s, sub) => s + sub.totalHours, 0);
+        const totalAmt = subs.reduce((s, sub) => s + (sub.totalAmount ?? 0), 0);
+        const isExpanded = expandedCategories[transportCat.categoryId] !== false;
+
+        if (totalQty === 0) return null;
+
+        return (
+          <div className="mb-3 bg-white dark:bg-slate-900 rounded-2xl border border-amber-100 dark:border-amber-900/40 overflow-hidden">
+            <button
+              onClick={() =>
+                setExpandedCategories((p) => ({
+                  ...p,
+                  [transportCat.categoryId]: p[transportCat.categoryId] === false,
+                }))
+              }
+              className="w-full px-5 py-4 flex items-center justify-between hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center shrink-0">
+                  <Truck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{transportCat.categoryName}</h3>
+                  <p className="text-[11px] text-gray-400 dark:text-slate-500">Gastos de movilización</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-xs font-semibold text-gray-900 dark:text-white">{totalQty}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">registros</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-semibold text-gray-900 dark:text-white">{totalHrs > 0 ? `${totalHrs.toFixed(1)}h` : '—'}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">horas</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">{formatCOP(totalAmt)}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">monto</p>
+                  </div>
+                </div>
+                {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400 dark:text-slate-500" /> : <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-500" />}
+              </div>
+            </button>
+
+            {/* Métricas en móvil */}
+            <div className="sm:hidden px-5 pb-3 grid grid-cols-3 gap-2">
+              {[
+                { label: 'Registros', value: String(totalQty) },
+                { label: 'Horas', value: totalHrs > 0 ? `${totalHrs.toFixed(1)}h` : '—' },
+                { label: 'Monto', value: formatCOP(totalAmt), accent: true },
+              ].map(({ label, value, accent }) => (
+                <div key={label} className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-2 text-center">
+                  <p className={`text-xs font-semibold ${accent ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-white'}`}>{value}</p>
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: 'auto' }}
+                  exit={{ height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="border-t border-amber-100 dark:border-amber-900/30">
+                    <div
+                      className="hidden sm:grid px-5 py-2 bg-amber-50/60 dark:bg-amber-950/30 text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider"
+                      style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr' }}
+                    >
+                      <span>Subcategoría</span>
+                      <span className="text-right">Cantidad</span>
+                      <span className="text-right">Horas</span>
+                      <span className="text-right">Monto</span>
+                    </div>
+
+                    {subs.map((sub) => {
+                      if (sub.totalQuantity === 0) return null;
+                      const amt = sub.totalAmount ?? 0;
+                      return (
+                        <div key={sub.subcategoryId} className="px-5 py-3 border-t border-amber-50 dark:border-amber-900/20">
+                          <div className="hidden sm:grid items-center" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr' }}>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">{sub.subcategoryName}</p>
+                              <p className="text-[10px] text-gray-400 dark:text-slate-500 italic">{sub.unit}</p>
+                            </div>
+                            <p className="text-sm text-right text-gray-900 dark:text-white font-medium">
+                              {sub.totalQuantity} <span className="text-[10px] text-gray-400 dark:text-slate-500 font-normal">{UNIT_LABELS[sub.unit] || sub.unit}</span>
+                            </p>
+                            <p className="text-sm text-right text-gray-400 dark:text-slate-500">
+                              {sub.totalHours > 0 ? `${sub.totalHours.toFixed(1)}h` : '\u2014'}
+                            </p>
+                            <p className="text-sm text-right font-medium text-amber-600 dark:text-amber-400">
+                              {amt > 0 ? formatCOP(amt) : '\u2014'}
+                            </p>
+                          </div>
+                          <div className="sm:hidden">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">{sub.subcategoryName}</p>
+                            <div className="flex flex-wrap gap-2">
+                              <span className="text-xs bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white font-medium px-2 py-0.5 rounded-md">{sub.totalQuantity} {UNIT_LABELS[sub.unit] || sub.unit}</span>
+                              {sub.totalHours > 0 && <span className="text-xs bg-orange-50 dark:bg-orange-900/30 text-orange-600 px-2 py-0.5 rounded-md">{sub.totalHours.toFixed(1)}h</span>}
+                              {amt > 0 && <span className="text-xs bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 font-medium px-2 py-0.5 rounded-md">{formatCOP(amt)}</span>}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    <div className="px-5 py-3 border-t-2 border-amber-100 dark:border-amber-800/40 bg-amber-50/40 dark:bg-amber-950/20">
+                      <div className="hidden sm:grid items-center" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr' }}>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">Total</p>
+                        <p className="text-sm text-right font-semibold text-gray-900 dark:text-white">{totalQty}</p>
+                        <p className="text-sm text-right text-gray-500 dark:text-slate-400">{totalHrs > 0 ? `${totalHrs.toFixed(1)}h` : '\u2014'}</p>
+                        <p className="text-sm text-right font-semibold text-amber-600 dark:text-amber-400">{formatCOP(totalAmt)}</p>
+                      </div>
+                      <div className="sm:hidden flex items-center justify-between">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">Total</p>
+                        <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded-md">{formatCOP(totalAmt)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })()}
 
       {/* Pastor summaries */}
       <div className="mt-5 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">

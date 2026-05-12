@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BarChart3, UserCog, MapPin, Mail, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart3, UserCog, MapPin, Mail, Settings, BookOpen } from 'lucide-react';
 import { SidebarLayout } from './SidebarLayout';
 import { useFeatureFlags } from '@/features/config/hooks/use-business-config';
 
@@ -17,6 +17,11 @@ const ADMIN_NAV = [
     href: '/admin/send-report',
     icon: <Mail className="w-4 h-4" />,
     feature: 'emailEnabled' as const,
+  },
+  {
+    label: 'Rúbricas PESCAR',
+    href: '/admin/rubricas-pescar',
+    icon: <BookOpen className="w-4 h-4" />,
   },
   {
     label: 'Configuración',

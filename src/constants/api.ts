@@ -22,6 +22,14 @@ export const API_ENDPOINTS = {
   },
   ACTIVITY_CATEGORIES: {
     LIST: '/activity-categories',
+    CREATE_SUBCATEGORY: (categoryId: string) =>
+      `/activity-categories/${categoryId}/subcategories`,
+    UPDATE_SUBCATEGORY: (categoryId: string, subcategoryId: string) =>
+      `/activity-categories/${categoryId}/subcategories/${subcategoryId}`,
+    DELETE_SUBCATEGORY: (categoryId: string, subcategoryId: string) =>
+      `/activity-categories/${categoryId}/subcategories/${subcategoryId}`,
+    RESTORE_SUBCATEGORY: (categoryId: string, subcategoryId: string) =>
+      `/activity-categories/${categoryId}/subcategories/${subcategoryId}/restore`,
   },
   DAILY_REPORTS: {
     CREATE: '/daily-reports',
