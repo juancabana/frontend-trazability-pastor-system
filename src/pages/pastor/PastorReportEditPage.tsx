@@ -52,7 +52,6 @@ export default function PastorReportEditPage() {
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [observations, setObservations] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
   const initialSnapshot = useRef<string>('');
@@ -225,7 +224,6 @@ export default function PastorReportEditPage() {
 
   const handleSave = async () => {
     if (!date || !token) return;
-    setSaving(true);
     try {
       await saveReport.mutateAsync({
         token,
@@ -238,7 +236,6 @@ export default function PastorReportEditPage() {
     } catch {
       toast.error('Error al guardar el informe');
     }
-    setSaving(false);
   };
 
   const discardDraft = () => {
@@ -669,23 +666,21 @@ export default function PastorReportEditPage() {
           </button>
           <Tooltip
             content={
-              saving
-                ? 'Guardando...'
-                : !isOnline
-                  ? 'Sin conexión — tus cambios están guardados localmente'
-                  : !hasChanges
-                    ? 'No hay cambios para guardar'
-                    : false
+              !isOnline
+                ? 'Sin conexión — tus cambios están guardados localmente'
+                : !hasChanges
+                  ? 'No hay cambios para guardar'
+                  : false
             }
             side="top"
           >
           <button
             onClick={handleSave}
-            disabled={saving || !hasChanges || !isOnline}
+            disabled={saveReport.isPending || !hasChanges || !isOnline}
             className="px-6 py-3 bg-linear-to-r from-teal-600 to-teal-700 text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:shadow-lg hover:shadow-teal-600/20 transition-all disabled:opacity-50 active:scale-[0.98]"
           >
             {!isOnline ? <WifiOff className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-            {saving ? 'Guardando...' : !isOnline ? 'Sin conexión' : 'Guardar Cambios'}
+            {!isOnline ? 'Sin conexión' : 'Guardar Cambios'}
           </button>
           </Tooltip>
         </div>

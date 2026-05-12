@@ -9,18 +9,19 @@ import { useComplianceThresholds } from '@/features/config/hooks/use-business-co
 import { StatsGridSkeleton, ListSkeleton, BarChartSkeleton } from '@/components/atoms/Skeleton';
 import { StatCard } from '@/components/atoms/StatCard';
 import { Tooltip } from '@/components/atoms/Tooltip';
+import { TRANSPORT_CATEGORY_ID, CURRENCY_CONFIG } from '@/constants/shared';
 import { motion } from 'motion/react';
 import {
   Users,
   FileText,
   Activity,
   Clock,
-  DollarSign,
   ChevronLeft,
   ChevronRight,
   CheckCircle,
   AlertCircle,
   ChevronRight as GoIcon,
+  Truck,
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -92,17 +93,29 @@ export default function AdminDashboardPage() {
     },
   ];
 
-  // Category breakdown from consolidated
-  const categoryBreakdown = useMemo(() => {
-    if (!consolidated?.categories) return [];
-    return consolidated.categories.map((c) => ({
+  // Category breakdown from consolidated — transporte separado para no distorsionar escala
+  const { pescaBreakdown, transportEntry } = useMemo(() => {
+    if (!consolidated?.categories) return { pescaBreakdown: [], transportEntry: null };
+    const all = consolidated.categories.map((c) => ({
       id: c.categoryId,
       name: c.categoryName,
       color: c.color,
       value: (Array.isArray(c.subcategories) ? c.subcategories : []).reduce((s, sub) => s + sub.totalQuantity, 0),
+      amount: (Array.isArray(c.subcategories) ? c.subcategories : []).reduce((s, sub) => s + (sub.totalAmount ?? 0), 0),
     }));
+    return {
+      pescaBreakdown: all.filter((c) => c.id !== TRANSPORT_CATEGORY_ID),
+      transportEntry: all.find((c) => c.id === TRANSPORT_CATEGORY_ID) ?? null,
+    };
   }, [consolidated]);
-  const maxVal = Math.max(...categoryBreakdown.map((c) => c.value), 1);
+  const maxVal = Math.max(...pescaBreakdown.map((c) => c.value), 1);
+
+  const formatCOP = (amount: number) =>
+    new Intl.NumberFormat(CURRENCY_CONFIG.LOCALE, {
+      style: 'currency',
+      currency: CURRENCY_CONFIG.CURRENCY,
+      minimumFractionDigits: CURRENCY_CONFIG.MINIMUM_FRACTION_DIGITS,
+    }).format(amount);
 
   return (
     <div className="max-w-[1100px] mx-auto">
@@ -222,7 +235,7 @@ export default function AdminDashboardPage() {
             </h3>
           </div>
           <div className="p-5 space-y-4">
-            {categoryBreakdown.map((cat) => {
+            {pescaBreakdown.map((cat) => {
               const pct = (cat.value / maxVal) * 100;
               return (
                 <div key={cat.id}>
@@ -252,12 +265,28 @@ export default function AdminDashboardPage() {
                 </div>
               );
             })}
-            {categoryBreakdown.length === 0 && (
+            {pescaBreakdown.length === 0 && (
               <p className="text-sm text-gray-400 dark:text-slate-500 text-center py-4">
                 Sin datos
               </p>
             )}
           </div>
+
+          {/* Transporte separado — no distorsiona la escala de barras PESCAR */}
+          {transportEntry && transportEntry.value > 0 && (
+            <div className="mx-5 mb-5 rounded-xl border border-amber-100 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 px-4 py-3 flex items-center gap-3">
+              <div className="w-7 h-7 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center shrink-0">
+                <Truck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-gray-700 dark:text-slate-300">{transportEntry.name}</p>
+                <p className="text-[10px] text-gray-400 dark:text-slate-500">{transportEntry.value} registros</p>
+              </div>
+              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 shrink-0">
+                {formatCOP(transportEntry.amount)}
+              </span>
+            </div>
+          )}
         </div>
         )}
       </div>

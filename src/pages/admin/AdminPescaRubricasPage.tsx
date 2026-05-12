@@ -11,6 +11,7 @@ import {
   BookOpen,
   Loader2,
 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/atoms/ConfirmDialog';
 import { toast } from 'sonner';
 import { SEO } from '@/shared/presentation/SEO';
 import { useAuth } from '@/context/AuthContext';
@@ -201,6 +202,7 @@ interface SubcategoryRowProps {
 
 function SubcategoryRow({ categoryId, sub, token }: SubcategoryRowProps) {
   const [editing, setEditing] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const isActive = sub.isActive !== false;
 
   const updateMutation = useUpdateSubcategory(categoryId);
@@ -230,7 +232,10 @@ function SubcategoryRow({ categoryId, sub, token }: SubcategoryRowProps) {
     deleteMutation.mutate(
       { subcategoryId: sub.id, token },
       {
-        onSuccess: () => toast.success(`"${sub.name}" desactivada`),
+        onSuccess: () => {
+          toast.success(`"${sub.name}" desactivada`);
+          setConfirmingDelete(false);
+        },
         onError: () => toast.error('No se pudo desactivar la sección'),
       },
     );
@@ -308,16 +313,12 @@ function SubcategoryRow({ categoryId, sub, token }: SubcategoryRowProps) {
               <Pencil className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={handleDelete}
+              onClick={() => setConfirmingDelete(true)}
               disabled={anyPending}
               title="Desactivar sección"
               className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-40 transition-colors"
             >
-              {deleteMutation.isPending ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Trash2 className="w-3.5 h-3.5" />
-              )}
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           </>
         ) : (
@@ -327,14 +328,19 @@ function SubcategoryRow({ categoryId, sub, token }: SubcategoryRowProps) {
             title="Reactivar sección"
             className="p-1.5 rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 disabled:opacity-40 transition-colors"
           >
-            {restoreMutation.isPending ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <RotateCcw className="w-3.5 h-3.5" />
-            )}
+            <RotateCcw className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmingDelete}
+        title="Desactivar sección"
+        message={`¿Desactivar "${sub.name}"? Quedará oculta en nuevos reportes, pero los reportes históricos seguirán mostrándola correctamente.`}
+        confirmLabel="Desactivar"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </div>
   );
 }
