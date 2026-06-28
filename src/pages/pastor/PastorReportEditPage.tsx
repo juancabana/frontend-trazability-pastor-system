@@ -207,6 +207,7 @@ export default function PastorReportEditPage() {
         amount: isTransport ? undefined : undefined,
         churchName: isVisitation ? '' : undefined,
         visitedName: isVisitation ? '' : undefined,
+        whatsappPhone: isVisitation ? '' : undefined,
         visitReason: isVisitation ? '' : undefined,
       },
     ]);
@@ -635,6 +636,25 @@ export default function PastorReportEditPage() {
                               </div>
                               <div>
                                 <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
+                                  WhatsApp
+                                </label>
+                                <input
+                                  type="tel"
+                                  value={act.whatsappPhone ?? ''}
+                                  onChange={(e) =>
+                                    updateActivity(
+                                      act.subcategoryId,
+                                      'whatsappPhone',
+                                      e.target.value,
+                                    )
+                                  }
+                                  placeholder="Opcional — Ej. +57 300 123 4567"
+                                  maxLength={30}
+                                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
                                   Motivo de la visita <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
@@ -703,7 +723,7 @@ export default function PastorReportEditPage() {
                             </span>
                           )}
                           {isVisitation &&
-                            (act.churchName || act.visitedName || act.visitReason) && (
+                            (act.churchName || act.visitedName || act.whatsappPhone || act.visitReason) && (
                               <div className="w-full mt-2 pt-2 border-t border-gray-100 dark:border-slate-800 space-y-1">
                                 {act.churchName && (
                                   <p className="text-xs text-gray-600 dark:text-slate-400">
@@ -713,6 +733,11 @@ export default function PastorReportEditPage() {
                                 {act.visitedName && (
                                   <p className="text-xs text-gray-600 dark:text-slate-400">
                                     <span className="font-semibold">Persona:</span> {act.visitedName}
+                                  </p>
+                                )}
+                                {act.whatsappPhone && (
+                                  <p className="text-xs text-gray-600 dark:text-slate-400">
+                                    <span className="font-semibold">WhatsApp:</span> {act.whatsappPhone}
                                   </p>
                                 )}
                                 {act.visitReason && (

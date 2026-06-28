@@ -110,7 +110,7 @@ export default function AdminReportDetailPage() {
                             <span className="text-xs font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-lg">${act.amount.toLocaleString('es-CO')}</span>
                           )}
                         </div>
-                        {isVisitation && (act.churchName || act.visitedName || act.visitReason) && (
+                        {isVisitation && (act.churchName || act.visitedName || act.whatsappPhone || act.visitReason) && (
                           <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-800 space-y-1">
                             {act.churchName && (
                               <p className="text-xs text-gray-600 dark:text-slate-400">
@@ -120,6 +120,11 @@ export default function AdminReportDetailPage() {
                             {act.visitedName && (
                               <p className="text-xs text-gray-600 dark:text-slate-400">
                                 <span className="font-semibold">Persona:</span> {act.visitedName}
+                              </p>
+                            )}
+                            {act.whatsappPhone && (
+                              <p className="text-xs text-gray-600 dark:text-slate-400">
+                                <span className="font-semibold">WhatsApp:</span> {act.whatsappPhone}
                               </p>
                             )}
                             {act.visitReason && (
