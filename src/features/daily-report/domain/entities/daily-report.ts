@@ -6,6 +6,9 @@ export interface ActivityEntry {
   hours?: number;
   amount?: number;
   evidenceUrls?: string[];
+  churchName?: string;
+  visitedName?: string;
+  visitReason?: string;
 }
 
 export interface DailyReport {
