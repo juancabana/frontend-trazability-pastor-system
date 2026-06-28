@@ -2,6 +2,11 @@
 // Si el backend cambia este identificador, actualizar aquí también.
 export const TRANSPORT_CATEGORY_ID = 'transporte';
 
+// Slug de la subcategoría "Visitación" (dentro de la categoría Confraternidad).
+// Cuando una actividad usa este subcategoryId, el formulario solicita
+// además nombre del visitado, teléfono y motivo de la visita.
+export const VISITATION_SUBCATEGORY_ID = 'visitacion';
+
 // Umbral de cumplimiento mensual (porcentaje) usado para colorear indicadores:
 // verde (>= umbral) o ámbar (< umbral). Si el negocio cambia el criterio,
 // solo hay que modificar este valor.

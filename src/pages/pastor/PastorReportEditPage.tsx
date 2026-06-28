@@ -7,7 +7,7 @@ import { useSaveReport, useDeleteReport } from '@/features/daily-report/presenta
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import type { ActivityEntry } from '@/features/daily-report/domain/entities/daily-report';
 import { formatDate, isDateEditable } from '@/lib/format-date';
-import { UNIT_LABELS, TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
+import { UNIT_LABELS, TRANSPORT_CATEGORY_ID, VISITATION_SUBCATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import { EmptyState } from '@/components/atoms/EmptyState';
 import { DetailSkeleton } from '@/components/atoms/Skeleton';
 import { Tooltip } from '@/components/atoms/Tooltip';
@@ -110,6 +110,16 @@ export default function PastorReportEditPage() {
     return current !== initialSnapshot.current;
   }, [activities, observations]);
 
+  const incompleteVisitations = useMemo(
+    () =>
+      activities.filter(
+        (a) =>
+          a.subcategoryId === VISITATION_SUBCATEGORY_ID &&
+          (!a.visitedName?.trim() || !a.visitReason?.trim()),
+      ),
+    [activities],
+  );
+
   // Warn browser before closing/refreshing with unsaved changes
   useEffect(() => {
     if (!hasChanges) return;
@@ -185,6 +195,7 @@ export default function PastorReportEditPage() {
     const sub = cat?.subcategories.find((s) => s.id === subcategoryId);
     if (!sub || activities.some((a) => a.subcategoryId === subcategoryId)) return;
     const isTransport = categoryId === TRANSPORT_CATEGORY_ID;
+    const isVisitation = subcategoryId === VISITATION_SUBCATEGORY_ID;
     setActivities((prev) => [
       ...prev,
       {
@@ -194,6 +205,9 @@ export default function PastorReportEditPage() {
         quantity: 1,
         hours: sub.hasHours ? 1 : undefined,
         amount: isTransport ? undefined : undefined,
+        churchName: isVisitation ? '' : undefined,
+        visitedName: isVisitation ? '' : undefined,
+        visitReason: isVisitation ? '' : undefined,
       },
     ]);
     setNewlyAddedId(subcategoryId);
@@ -488,6 +502,7 @@ export default function PastorReportEditPage() {
                   );
                   if (!sub) return null;
                   const isTransport = act.categoryId === TRANSPORT_CATEGORY_ID;
+                  const isVisitation = act.subcategoryId === VISITATION_SUBCATEGORY_ID;
                   const isNew = newlyAddedId === act.subcategoryId;
 
                   return (
@@ -575,6 +590,71 @@ export default function PastorReportEditPage() {
                             )}
                           </div>
 
+                          {isVisitation && (
+                            <div className="space-y-3 pt-1 border-t border-gray-100 dark:border-slate-800">
+                              <p className="text-[11px] font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wide pt-2">
+                                Detalle de la visita
+                              </p>
+                              <div>
+                                <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
+                                  Nombre de la iglesia
+                                </label>
+                                <input
+                                  type="text"
+                                  value={act.churchName ?? ''}
+                                  onChange={(e) =>
+                                    updateActivity(
+                                      act.subcategoryId,
+                                      'churchName',
+                                      e.target.value,
+                                    )
+                                  }
+                                  placeholder="Opcional — Ej. Iglesia Central"
+                                  maxLength={200}
+                                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
+                                  Nombre persona <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={act.visitedName ?? ''}
+                                  onChange={(e) =>
+                                    updateActivity(
+                                      act.subcategoryId,
+                                      'visitedName',
+                                      e.target.value,
+                                    )
+                                  }
+                                  placeholder="Ej. María Pérez"
+                                  maxLength={200}
+                                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
+                                  Motivo de la visita <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                  value={act.visitReason ?? ''}
+                                  onChange={(e) =>
+                                    updateActivity(
+                                      act.subcategoryId,
+                                      'visitReason',
+                                      e.target.value,
+                                    )
+                                  }
+                                  placeholder="Ej. Acompañamiento espiritual..."
+                                  rows={2}
+                                  maxLength={1000}
+                                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none resize-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
+                                />
+                              </div>
+                            </div>
+                          )}
+
                           {isTransport && (
                             <div>
                               <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
@@ -622,6 +702,26 @@ export default function PastorReportEditPage() {
                               ${act.amount.toLocaleString('es-CO')}
                             </span>
                           )}
+                          {isVisitation &&
+                            (act.churchName || act.visitedName || act.visitReason) && (
+                              <div className="w-full mt-2 pt-2 border-t border-gray-100 dark:border-slate-800 space-y-1">
+                                {act.churchName && (
+                                  <p className="text-xs text-gray-600 dark:text-slate-400">
+                                    <span className="font-semibold">Iglesia:</span> {act.churchName}
+                                  </p>
+                                )}
+                                {act.visitedName && (
+                                  <p className="text-xs text-gray-600 dark:text-slate-400">
+                                    <span className="font-semibold">Persona:</span> {act.visitedName}
+                                  </p>
+                                )}
+                                {act.visitReason && (
+                                  <p className="text-xs text-gray-600 dark:text-slate-400">
+                                    <span className="font-semibold">Motivo:</span> {act.visitReason}
+                                  </p>
+                                )}
+                              </div>
+                            )}
                         </div>
                       )}
                     </div>
@@ -668,15 +768,17 @@ export default function PastorReportEditPage() {
             content={
               !isOnline
                 ? 'Sin conexión — tus cambios están guardados localmente'
-                : !hasChanges
-                  ? 'No hay cambios para guardar'
-                  : false
+                : incompleteVisitations.length > 0
+                  ? 'Completa el nombre y el motivo de cada visitación antes de guardar'
+                  : !hasChanges
+                    ? 'No hay cambios para guardar'
+                    : false
             }
             side="top"
           >
           <button
             onClick={handleSave}
-            disabled={saveReport.isPending || !hasChanges || !isOnline}
+            disabled={saveReport.isPending || !hasChanges || !isOnline || incompleteVisitations.length > 0}
             className="px-6 py-3 bg-linear-to-r from-teal-600 to-teal-700 text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:shadow-lg hover:shadow-teal-600/20 transition-all disabled:opacity-50 active:scale-[0.98]"
           >
             {!isOnline ? <WifiOff className="w-4 h-4" /> : <Save className="w-4 h-4" />}

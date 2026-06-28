@@ -5,7 +5,7 @@ import { SEO } from '@/shared/presentation/SEO';
 import { useReportByDate } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatDate, isDateEditable } from '@/lib/format-date';
-import { TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
+import { TRANSPORT_CATEGORY_ID, VISITATION_SUBCATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import { EmptyState } from '@/components/atoms/EmptyState';
 import { DetailSkeleton } from '@/components/atoms/Skeleton';
 import { ArrowLeft, Edit3, FileText, Activity } from 'lucide-react';
@@ -141,6 +141,7 @@ export default function PastorReportDetailPage() {
                     );
                     if (!sub) return null;
                     const isTransport = act.categoryId === TRANSPORT_CATEGORY_ID;
+                    const isVisitation = act.subcategoryId === VISITATION_SUBCATEGORY_ID;
                     return (
                       <div key={act.subcategoryId} className="px-5 py-4">
                         <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
@@ -168,6 +169,26 @@ export default function PastorReportDetailPage() {
                               </span>
                             )}
                         </div>
+                        {isVisitation &&
+                          (act.churchName || act.visitedName || act.visitReason) && (
+                            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-800 space-y-1">
+                              {act.churchName && (
+                                <p className="text-xs text-gray-600 dark:text-slate-400">
+                                  <span className="font-semibold">Iglesia:</span> {act.churchName}
+                                </p>
+                              )}
+                              {act.visitedName && (
+                                <p className="text-xs text-gray-600 dark:text-slate-400">
+                                  <span className="font-semibold">Persona:</span> {act.visitedName}
+                                </p>
+                              )}
+                              {act.visitReason && (
+                                <p className="text-xs text-gray-600 dark:text-slate-400">
+                                  <span className="font-semibold">Motivo:</span> {act.visitReason}
+                                </p>
+                              )}
+                            </div>
+                          )}
                       </div>
                     );
                   })}
