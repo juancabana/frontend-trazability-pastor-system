@@ -3,9 +3,13 @@
 export const TRANSPORT_CATEGORY_ID = 'transporte';
 
 // Slug de la subcategoría "Visitación" (dentro de la categoría Confraternidad).
-// Cuando una actividad usa este subcategoryId, el formulario solicita
-// además nombre del visitado, teléfono y motivo de la visita.
+// Cuando una actividad usa este subcategoryId, el formulario permite registrar
+// una o varias visitas, cada una con nombre del visitado, teléfono y motivo.
 export const VISITATION_SUBCATEGORY_ID = 'visitacion';
+
+// Máximo de visitas por actividad de visitación en un informe diario.
+// Debe coincidir con MAX_VISITS_PER_ACTIVITY del backend (config/constants.ts).
+export const MAX_VISITS_PER_ACTIVITY = 50;
 
 // Umbral de cumplimiento mensual (porcentaje) usado para colorear indicadores:
 // verde (>= umbral) o ámbar (< umbral). Si el negocio cambia el criterio,

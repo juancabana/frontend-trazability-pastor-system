@@ -6,7 +6,9 @@ import { useUsers } from '@/features/auth/presentation/hooks/use-auth-queries';
 import { useReportByDate } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
 import { formatDate } from '@/lib/format-date';
-import { TRANSPORT_CATEGORY_ID, VISITATION_SUBCATEGORY_ID } from '@/constants/shared';
+import { TRANSPORT_CATEGORY_ID } from '@/constants/shared';
+import { getActivityVisits, isVisitationActivity } from '@/lib/visitation-utils';
+import { VisitListView } from '@/features/daily-report/presentation/components/VisitListView';
 import { ArrowLeft, Shield } from 'lucide-react';
 import { motion } from 'motion/react';
 import { DetailSkeleton } from '@/components/atoms/Skeleton';
@@ -98,7 +100,7 @@ export default function AdminReportDetailPage() {
                     const sub = cat.subcategories.find((s) => s.id === act.subcategoryId);
                     if (!sub) return null;
                     const isTransport = act.categoryId === TRANSPORT_CATEGORY_ID;
-                    const isVisitation = act.subcategoryId === VISITATION_SUBCATEGORY_ID;
+                    const isVisitation = isVisitationActivity(act);
                     return (
                       <div key={act.subcategoryId} className="px-5 py-4">
                         <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">{sub.name}</p>
@@ -110,30 +112,7 @@ export default function AdminReportDetailPage() {
                             <span className="text-xs font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-lg">${act.amount.toLocaleString('es-CO')}</span>
                           )}
                         </div>
-                        {isVisitation && (act.churchName || act.visitedName || act.whatsappPhone || act.visitReason) && (
-                          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-800 space-y-1">
-                            {act.churchName && (
-                              <p className="text-xs text-gray-600 dark:text-slate-400">
-                                <span className="font-semibold">Iglesia:</span> {act.churchName}
-                              </p>
-                            )}
-                            {act.visitedName && (
-                              <p className="text-xs text-gray-600 dark:text-slate-400">
-                                <span className="font-semibold">Persona:</span> {act.visitedName}
-                              </p>
-                            )}
-                            {act.whatsappPhone && (
-                              <p className="text-xs text-gray-600 dark:text-slate-400">
-                                <span className="font-semibold">WhatsApp:</span> {act.whatsappPhone}
-                              </p>
-                            )}
-                            {act.visitReason && (
-                              <p className="text-xs text-gray-600 dark:text-slate-400">
-                                <span className="font-semibold">Motivo:</span> {act.visitReason}
-                              </p>
-                            )}
-                          </div>
-                        )}
+                        {isVisitation && <VisitListView visits={getActivityVisits(act)} />}
                       </div>
                     );
                   })}

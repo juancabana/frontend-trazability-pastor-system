@@ -5,9 +5,18 @@ import { SEO } from '@/shared/presentation/SEO';
 import { useReportByDate } from '@/features/daily-report/presentation/hooks/use-daily-report-queries';
 import { useSaveReport, useDeleteReport } from '@/features/daily-report/presentation/hooks/use-daily-report-mutations';
 import { useActivityCategories } from '@/features/activity-category/presentation/hooks/use-activity-category-queries';
-import type { ActivityEntry } from '@/features/daily-report/domain/entities/daily-report';
+import type { ActivityEntry, VisitDetail } from '@/features/daily-report/domain/entities/daily-report';
+import { VisitListEditor } from '@/features/daily-report/presentation/components/VisitListEditor';
+import { VisitListView } from '@/features/daily-report/presentation/components/VisitListView';
 import { formatDate, isDateEditable } from '@/lib/format-date';
-import { UNIT_LABELS, TRANSPORT_CATEGORY_ID, VISITATION_SUBCATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
+import {
+  createEmptyVisit,
+  getActivityVisits,
+  hasIncompleteVisits,
+  isVisitationActivity,
+  normalizeVisitationActivities,
+} from '@/lib/visitation-utils';
+import { UNIT_LABELS, TRANSPORT_CATEGORY_ID, DEFAULT_REPORT_DEADLINE_DAY } from '@/constants/shared';
 import { EmptyState } from '@/components/atoms/EmptyState';
 import { DetailSkeleton } from '@/components/atoms/Skeleton';
 import { Tooltip } from '@/components/atoms/Tooltip';
@@ -90,20 +99,25 @@ export default function PastorReportEditPage() {
   const [showDraftBanner, setShowDraftBanner] = useState(false);
   const draftChecked = useRef(false);
 
+  const serverActivities = useMemo(
+    () => normalizeVisitationActivities(existingReport?.activities ?? []),
+    [existingReport],
+  );
+
   useEffect(() => {
     if (existingReport) {
       const updatedAt = existingReport.updatedAt ?? existingReport.createdAt ?? '';
       if (updatedAt !== lastSyncedAt.current) {
-        setActivities(existingReport.activities || []);
+        setActivities(serverActivities);
         setObservations(existingReport.observations || '');
         initialSnapshot.current = JSON.stringify({
-          activities: existingReport.activities || [],
+          activities: serverActivities,
           observations: existingReport.observations || '',
         });
         lastSyncedAt.current = updatedAt;
       }
     }
-  }, [existingReport]);
+  }, [existingReport, serverActivities]);
 
   const hasChanges = useMemo(() => {
     const current = JSON.stringify({ activities, observations });
@@ -111,12 +125,7 @@ export default function PastorReportEditPage() {
   }, [activities, observations]);
 
   const incompleteVisitations = useMemo(
-    () =>
-      activities.filter(
-        (a) =>
-          a.subcategoryId === VISITATION_SUBCATEGORY_ID &&
-          (!a.visitedName?.trim() || !a.visitReason?.trim()),
-      ),
+    () => activities.filter(hasIncompleteVisits),
     [activities],
   );
 
@@ -155,18 +164,20 @@ export default function PastorReportEditPage() {
 
     try {
       const draft = JSON.parse(raw) as { activities: ActivityEntry[]; observations: string };
+      // Los borradores guardados antes de soportar varias visitas usan el formato legado
+      const draftActivities = normalizeVisitationActivities(draft.activities ?? []);
       const serverSnapshot = JSON.stringify({
-        activities: existingReport?.activities || [],
+        activities: serverActivities,
         observations: existingReport?.observations || '',
       });
       const draftSnapshot = JSON.stringify({
-        activities: draft.activities,
+        activities: draftActivities,
         observations: draft.observations,
       });
 
       if (draftSnapshot !== serverSnapshot) {
         // Apply the draft immediately — user gets their work back without any click
-        setActivities(draft.activities);
+        setActivities(draftActivities);
         setObservations(draft.observations);
         setShowDraftBanner(true);
       } else {
@@ -175,7 +186,7 @@ export default function PastorReportEditPage() {
     } catch {
       localStorage.removeItem(draftKey);
     }
-  }, [loadingReport, draftKey, editable, existingReport]);
+  }, [loadingReport, draftKey, editable, existingReport, serverActivities]);
 
   useEffect(() => {
     if (isFuture) navigate('/pastor', { replace: true });
@@ -195,7 +206,7 @@ export default function PastorReportEditPage() {
     const sub = cat?.subcategories.find((s) => s.id === subcategoryId);
     if (!sub || activities.some((a) => a.subcategoryId === subcategoryId)) return;
     const isTransport = categoryId === TRANSPORT_CATEGORY_ID;
-    const isVisitation = subcategoryId === VISITATION_SUBCATEGORY_ID;
+    const isVisitation = isVisitationActivity({ subcategoryId });
     setActivities((prev) => [
       ...prev,
       {
@@ -205,10 +216,7 @@ export default function PastorReportEditPage() {
         quantity: 1,
         hours: sub.hasHours ? 1 : undefined,
         amount: isTransport ? undefined : undefined,
-        churchName: isVisitation ? '' : undefined,
-        visitedName: isVisitation ? '' : undefined,
-        whatsappPhone: isVisitation ? '' : undefined,
-        visitReason: isVisitation ? '' : undefined,
+        visits: isVisitation ? [createEmptyVisit()] : undefined,
       },
     ]);
     setNewlyAddedId(subcategoryId);
@@ -237,6 +245,12 @@ export default function PastorReportEditPage() {
     );
   };
 
+  const updateVisits = (subcategoryId: string, visits: VisitDetail[]) => {
+    setActivities((prev) =>
+      prev.map((a) => (a.subcategoryId === subcategoryId ? { ...a, visits } : a)),
+    );
+  };
+
   const handleSave = async () => {
     if (!date || !token) return;
     try {
@@ -256,7 +270,7 @@ export default function PastorReportEditPage() {
   const discardDraft = () => {
     if (draftKey) localStorage.removeItem(draftKey);
     // Reset to whatever the server last returned
-    setActivities(existingReport?.activities || []);
+    setActivities(serverActivities);
     setObservations(existingReport?.observations || '');
     setShowDraftBanner(false);
   };
@@ -503,7 +517,7 @@ export default function PastorReportEditPage() {
                   );
                   if (!sub) return null;
                   const isTransport = act.categoryId === TRANSPORT_CATEGORY_ID;
-                  const isVisitation = act.subcategoryId === VISITATION_SUBCATEGORY_ID;
+                  const isVisitation = isVisitationActivity(act);
                   const isNew = newlyAddedId === act.subcategoryId;
 
                   return (
@@ -592,87 +606,10 @@ export default function PastorReportEditPage() {
                           </div>
 
                           {isVisitation && (
-                            <div className="space-y-3 pt-1 border-t border-gray-100 dark:border-slate-800">
-                              <p className="text-[11px] font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wide pt-2">
-                                Detalle de la visita
-                              </p>
-                              <div>
-                                <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
-                                  Nombre de la iglesia
-                                </label>
-                                <input
-                                  type="text"
-                                  value={act.churchName ?? ''}
-                                  onChange={(e) =>
-                                    updateActivity(
-                                      act.subcategoryId,
-                                      'churchName',
-                                      e.target.value,
-                                    )
-                                  }
-                                  placeholder="Opcional — Ej. Iglesia Central"
-                                  maxLength={200}
-                                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
-                                  Nombre persona <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={act.visitedName ?? ''}
-                                  onChange={(e) =>
-                                    updateActivity(
-                                      act.subcategoryId,
-                                      'visitedName',
-                                      e.target.value,
-                                    )
-                                  }
-                                  placeholder="Ej. María Pérez"
-                                  maxLength={200}
-                                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
-                                  WhatsApp
-                                </label>
-                                <input
-                                  type="tel"
-                                  value={act.whatsappPhone ?? ''}
-                                  onChange={(e) =>
-                                    updateActivity(
-                                      act.subcategoryId,
-                                      'whatsappPhone',
-                                      e.target.value,
-                                    )
-                                  }
-                                  placeholder="Opcional — Ej. +57 300 123 4567"
-                                  maxLength={30}
-                                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-[11px] font-medium text-gray-400 dark:text-slate-500 mb-1 block uppercase tracking-wide">
-                                  Motivo de la visita <span className="text-red-500">*</span>
-                                </label>
-                                <textarea
-                                  value={act.visitReason ?? ''}
-                                  onChange={(e) =>
-                                    updateActivity(
-                                      act.subcategoryId,
-                                      'visitReason',
-                                      e.target.value,
-                                    )
-                                  }
-                                  placeholder="Ej. Acompañamiento espiritual..."
-                                  rows={2}
-                                  maxLength={1000}
-                                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-950 rounded-xl text-sm border border-transparent focus:border-teal-500 outline-none resize-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 transition-colors"
-                                />
-                              </div>
-                            </div>
+                            <VisitListEditor
+                              visits={act.visits ?? []}
+                              onChange={(visits) => updateVisits(act.subcategoryId, visits)}
+                            />
                           )}
 
                           {isTransport && (
@@ -722,31 +659,7 @@ export default function PastorReportEditPage() {
                               ${act.amount.toLocaleString('es-CO')}
                             </span>
                           )}
-                          {isVisitation &&
-                            (act.churchName || act.visitedName || act.whatsappPhone || act.visitReason) && (
-                              <div className="w-full mt-2 pt-2 border-t border-gray-100 dark:border-slate-800 space-y-1">
-                                {act.churchName && (
-                                  <p className="text-xs text-gray-600 dark:text-slate-400">
-                                    <span className="font-semibold">Iglesia:</span> {act.churchName}
-                                  </p>
-                                )}
-                                {act.visitedName && (
-                                  <p className="text-xs text-gray-600 dark:text-slate-400">
-                                    <span className="font-semibold">Persona:</span> {act.visitedName}
-                                  </p>
-                                )}
-                                {act.whatsappPhone && (
-                                  <p className="text-xs text-gray-600 dark:text-slate-400">
-                                    <span className="font-semibold">WhatsApp:</span> {act.whatsappPhone}
-                                  </p>
-                                )}
-                                {act.visitReason && (
-                                  <p className="text-xs text-gray-600 dark:text-slate-400">
-                                    <span className="font-semibold">Motivo:</span> {act.visitReason}
-                                  </p>
-                                )}
-                              </div>
-                            )}
+                          {isVisitation && <VisitListView visits={getActivityVisits(act)} />}
                         </div>
                       )}
                     </div>
@@ -794,7 +707,7 @@ export default function PastorReportEditPage() {
               !isOnline
                 ? 'Sin conexión — tus cambios están guardados localmente'
                 : incompleteVisitations.length > 0
-                  ? 'Completa el nombre y el motivo de cada visitación antes de guardar'
+                  ? 'Completa el nombre y el motivo de cada visita antes de guardar'
                   : !hasChanges
                     ? 'No hay cambios para guardar'
                     : false
